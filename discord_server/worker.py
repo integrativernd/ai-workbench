@@ -5,7 +5,8 @@ from llm.respond import get_response
 from config.settings import SYSTEM_PROMPT, AI_CHANNEL_ID
 import django_rq
 from rq.job import Job
-from channels.models import Channel
+import json
+from channels.models import Channel, Message
 from asgiref.sync import sync_to_async
 
 description = '''
@@ -23,6 +24,16 @@ BOT_ID = os.getenv('BOT_ID')
 
 AI_CHANNELS = ['ai-workbench']
 
+def run_message_creation(message_data):
+    message_data = json.loads(message_data)
+    channel = Channel.objects.get(channel_name=message_data['channel'])
+    message = Message(
+        channel=channel,
+        content=message_data['content'],
+        author=message_data['author']
+    )
+    message.save()
+
 # This loop will run in the background and send messages to the AI channel.
 @tasks.loop(seconds=5.0)
 async def background_loop():
@@ -33,6 +44,8 @@ async def background_loop():
         message_queue.finished_job_registry.remove(job.id)
         result = job.latest_result()
         await channel.send(result.return_value)
+        # queue = django_rq.get_queue('low')
+        # queue.enqueue(run_message_creation, data)
 
 @commands.has_permissions(manage_messages=True)
 @bot.command()
@@ -79,6 +92,14 @@ async def on_message(message):
     else:
         response_text = get_response(message.content)
         await message.channel.send(response_text)
+
+    data = json.dumps({
+        "content": message.content,
+        "author": str(message.author),
+        "channel": str(message.channel)
+    })
+    queue = django_rq.get_queue('low')
+    queue.enqueue(run_message_creation, data)
 
 def run_discord_bot():
     bot.run(os.getenv("BOT_RUN_TOKEN"))

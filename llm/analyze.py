@@ -33,22 +33,6 @@ def summarize_content(content):
 def get_search_results(query):
     search_text = summarize_content(get_search_data(query))
     return search_text[:2000]
-    # try:
-    #     if query:
-    #         return summarize_content(get_search_data(query))                
-    #     else:
-    #         return "No query provided for web search"
-    # except Exception as e:
-    #     return f"An error occurred during web search: {str(e)}"
-
-# def get_web_page_summary(tool_call):
-#     url = tool_call.input.get("url")
-#     try:
-#         if url:
-#             content = get_web_page_content(url)
-#             return summarize_content(content)
-#     except Exception as e:
-#             return f"Error in web page summarization: {str(e)}"
 
 def analyze_user_input(user_input):
     print(f"Analyzing request: {user_input}")

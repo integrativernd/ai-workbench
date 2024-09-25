@@ -1,4 +1,6 @@
 from django.db import models
+from django.utils import timezone
+import uuid
 
 
 class Channel(models.Model):
@@ -8,3 +10,20 @@ class Channel(models.Model):
 
     def __str__(self):
         return self.channel_name
+
+class Message(models.Model):
+    channel = models.ForeignKey(Channel, on_delete=models.CASCADE, related_name='messages')
+    content = models.TextField()
+    timestamp = models.DateTimeField(default=timezone.now)
+    author = models.CharField(max_length=100)  # You might want to link this to a User model if you have one
+    token = models.UUIDField(default=uuid.uuid4, editable=False, unique=True)  # If you need to store a unique ID for each message
+
+    def __str__(self):
+        return f"{self.author}: {self.content[:50]}..."  # Returns first 50 characters of the message
+
+    class Meta:
+        ordering = ['-timestamp']  # Orders messages by most recent first
+
+    @property
+    def token(self):
+        return self.token.hex
