@@ -30,10 +30,10 @@ def run_setup():
             flow = InstalledAppFlow.from_client_secrets_file(
                 secrets_file_path, SCOPES
             )
-            # port = int(os.getenv('PORT', 8080))
+            port = int(os.getenv('PORT', 8080))
             # creds = flow.run_local_server(port=port)
             if IS_HEROKU_APP:
-                creds = flow.run_local_server(port=443, host="ai-workbench-c743dbb30500.herokuapp.com")
+                creds = flow.run_local_server(port=port, host="ai-workbench-c743dbb30500.herokuapp.com")
             else:
                 creds = flow.run_local_server(port=8080)
             # auth_url, _ = flow.authorization_url(prompt='consent')
