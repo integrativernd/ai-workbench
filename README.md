@@ -15,6 +15,10 @@ Django is used for managing the Database and admin interface. rq is used for man
 - Redis
 - Heroku CLI
 
+## Software Architecture
+
+Core modules are implemented as Django apps. Each app is responsible for a specific aspect of the system, such as managing agents, tasks, or datasets. The core modules are designed to be extensible, allowing developers to easily add new capabilities to their agents.
+
 ## Getting Started
 
 python3 -m venv --upgrade-deps .venv

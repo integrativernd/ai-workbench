@@ -10,17 +10,28 @@ import pytz
 #   get_web_page_summary,
 # )
 from llm.anthropic_integration import get_message
-from config.settings import SYSTEM_PROMPT, TOOL_DEFINITIONS
+from config.settings import SYSTEM_PROMPT, TOOL_DEFINITIONS, IS_HEROKU_APP
 
 def ping():
     return 'Pong!'
 
+def get_current_time():
+    est = pytz.timezone('US/Eastern')
+    est_time = datetime.now(est)
+    return est_time.strftime('%B %d, %Y, %I:%M %p')
+
+def get_runtime_environment():
+    if IS_HEROKU_APP:
+        return 'PRODUCTION'
+    else:
+        return 'DEVELOPMENT'
+
 def handle_tool_use(tool_call, user_input):
     print(f"Handling tool use: {tool_call.name}")
     if tool_call.name == "get_time":
-        est = pytz.timezone('US/Eastern')
-        est_time = datetime.now(est)
-        return est_time.strftime('%B %d, %Y, %I:%M %p')
+        return get_current_time()
+    elif tool_call.name == "get_runtime_environment":
+        return get_runtime_environment()
     # elif tool_call.name == "start_background_processing":
     #     message_queue.enqueue(analyze_request, tool_call.input.get("task"))
     #     return "Background processing started"

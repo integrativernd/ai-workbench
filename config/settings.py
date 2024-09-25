@@ -266,4 +266,13 @@ TOOL_DEFINITIONS = [
             "required": []
         }
     },
+    {
+        "name": "get_runtime_environment",
+        "description": "Return the current runtime environment (e.g production, staging, development)",
+        "input_schema": {
+            "type": "object",
+            "properties": {},
+            "required": []
+        }
+    },
 ]
