@@ -247,4 +247,4 @@ RQ_QUEUES = {
 
 RQ_SHOW_ADMIN_LINK = True
 
-SESSION_COOKIE_NAME = "ai-workbench-sessionid"
+SESSION_COOKIE_NAME = "tokenname_sessionid"
