@@ -20,6 +20,10 @@ import dj_database_url
 BASE_DIR = Path(__file__).resolve().parent.parent
 
 
+# Sets the SYSTEM_PROMPT variable to the value of config/SYSTEM_PROMPT.txt
+with open(BASE_DIR / "config" / "SYSTEM_PROMPT.txt", "r") as f:
+    SYSTEM_PROMPT = f.read().strip()
+
 # Before using your Heroku app in production, make sure to review Django's deployment checklist:
 # See https://docs.djangoproject.com/en/5.1/howto/deployment/checklist/
 
@@ -71,6 +75,7 @@ INSTALLED_APPS = [
     "django.contrib.staticfiles",
     "web",
     "django_rq",
+    "llm",
 ]
 
 MIDDLEWARE = [

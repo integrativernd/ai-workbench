@@ -1,6 +1,8 @@
 import os
 import discord
 from discord.ext import commands, tasks
+from llm.anthropic_integration import get_message
+from config.settings import SYSTEM_PROMPT
 # import django_rq
 
 # print(os.environ.get("ANTHROPIC_API_KEY"))
@@ -79,6 +81,13 @@ async def on_message(message):
         await bot.process_commands(message)
     else:
         # response = respond_to_user(message.content)
-        await message.channel.send("Hello!")
+        response = get_message(SYSTEM_PROMPT, [
+            {
+                "role": "user",
+                "content": message.content,
+            }
+        ])
+        await message.channel.send(response.content[0].text)
 
-bot.run(os.getenv("BOT_RUN_TOKEN"))
+def run_discord_bot():
+    bot.run(os.getenv("BOT_RUN_TOKEN"))
