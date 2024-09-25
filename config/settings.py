@@ -70,6 +70,7 @@ INSTALLED_APPS = [
     "django.contrib.messages",
     "django.contrib.staticfiles",
     "web",
+    "django_rq",
 ]
 
 MIDDLEWARE = [
@@ -190,3 +191,56 @@ WHITENOISE_KEEP_ONLY_HASHED_FILES = True
 # https://docs.djangoproject.com/en/5.1/ref/settings/#default-auto-field
 
 DEFAULT_AUTO_FIELD = "django.db.models.BigAutoField"
+
+RQ_QUEUES = {
+    'default': {
+        'URL': os.getenv('REDIS_URL', 'redis://localhost:6379/0'), # If you're on Heroku
+        'DEFAULT_TIMEOUT': 500,
+        # 'HOST': 'localhost',
+        # 'PORT': 6379,
+        # 'DB': 0,
+        # 'USERNAME': 'some-user',
+        # 'PASSWORD': 'some-password',
+        # 'DEFAULT_TIMEOUT': 360,
+        # 'REDIS_CLIENT_KWARGS': {    # Eventual additional Redis connection arguments
+        #     'ssl_cert_reqs': None,
+        # },
+    },
+    'high': {
+        'URL': os.getenv('REDIS_URL', 'redis://localhost:6379/0'), # If you're on Heroku
+        'DEFAULT_TIMEOUT': 500,
+    },
+    'medium': {
+        'URL': os.getenv('REDIS_URL', 'redis://localhost:6379/0'), # If you're on Heroku
+        'DEFAULT_TIMEOUT': 500,
+    },
+    'low': {
+        'URL': os.getenv('REDIS_URL', 'redis://localhost:6379/0'), # If you're on Heroku
+        'DEFAULT_TIMEOUT': 500,
+    }
+}
+
+# LOGGING = {
+#     "version": 1,
+#     "disable_existing_loggers": False,
+#     "formatters": {
+#         "rq_console": {
+#             "format": "%(asctime)s %(message)s",
+#             "datefmt": "%H:%M:%S",
+#         },
+#     },
+#     "handlers": {
+#         "rq_console": {
+#             "level": "DEBUG",
+#             "class": "rq.logutils.ColorizingStreamHandler",
+#             "formatter": "rq_console",
+#             "exclude": ["%(asctime)s"],
+#         },
+#     },
+#     'loggers': {
+#         "rq.worker": {
+#             "handlers": ["rq_console", "sentry"],
+#             "level": "DEBUG"
+#         },
+#     }
+# }

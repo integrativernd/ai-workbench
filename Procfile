@@ -9,3 +9,5 @@ web: gunicorn config.wsgi
 # https://devcenter.heroku.com/articles/release-phase
 
 release: ./manage.py migrate --no-input
+
+worker: python manage.py rqworker high default low
