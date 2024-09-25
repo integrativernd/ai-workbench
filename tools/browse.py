@@ -17,7 +17,7 @@ def get_web_page_content(url, wait_time=10):
 
     # Set up the Chrome driver
     service = Service(ChromeDriverManager().install())
-    driver = webdriver.Chrome(service=service, options=chrome_options)
+    driver = webdriver.Chrome(service=service, options=chrome_options, version_main=120)
 
     try:
         # Navigate to the URL
