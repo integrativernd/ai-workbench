@@ -46,8 +46,9 @@ def handle_tool_use(tool_call, user_input):
             return summary
     elif tool_call.name == "get_search_results":
         print(f"query: {tool_call.input.get("query")}")
-        # django_rq.enqueue(get_search_results, tool_call.input.get("query"))
-        return get_search_results(tool_call.input.get("query"))
+        django_rq.enqueue(get_search_results, tool_call.input.get("query"))
+        # return get_search_results(tool_call.input.get("query"))
+        return "Searching the web..."
     elif tool_call.name == "get_web_page_summary":
         django_rq.enqueue(analyze_user_input, tool_call.input.get("url"))
         return "Visting web page."

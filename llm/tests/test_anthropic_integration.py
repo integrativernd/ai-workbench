@@ -9,6 +9,8 @@ search_file_path = 'llm/tests/fixtures/serper_result.json'
 with open(os.path.join(BASE_DIR, search_file_path), 'r') as file:
     search_results_fixture = json.load(file)
 
+RECORD_FIXTURES = False
+
 class AnthropicIntegrationTest(TestCase):
     def setUp(self):
         self.fixtures_dir = os.path.join(BASE_DIR, 'llm/tests/fixtures')
@@ -20,7 +22,7 @@ class AnthropicIntegrationTest(TestCase):
     def get_or_record_basic_message(self, system_prompt, messages, fixture_name):
         fixture_path = os.path.join(self.fixtures_dir, f"{fixture_name}.pickle")
 
-        if os.environ.get('RECORD_FIXTURES').lower() == 'true':
+        if RECORD_FIXTURES:
             message = get_basic_message(system_prompt, messages)
             with open(fixture_path, 'wb') as f:
                 pickle.dump(message, f)

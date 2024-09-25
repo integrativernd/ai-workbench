@@ -43,13 +43,13 @@ def get_web_page_content(url, wait_time=10):
         # Close the browser
         driver.quit()
 
-# Example usage
-if __name__ == "__main__":
-    url = "https://example.com"  # Replace with the URL you want to scrape
-    page_source, text_content = read_webpage_content(url)
+# # Example usage
+# if __name__ == "__main__":
+#     url = "https://example.com"  # Replace with the URL you want to scrape
+#     page_source, text_content = get_web_page_content(url)
 
-    print("Page Source:")
-    print(page_source[:500] + "...")  # Print first 500 characters of page source
+#     print("Page Source:")
+#     print(page_source[:500] + "...")  # Print first 500 characters of page source
 
-    print("\nText Content:")
-    print(text_content[:500] + "...")  # Print first 500 characters of text content
+#     print("\nText Content:")
+#     print(text_content[:500] + "...")  # Print first 500 characters of text content
