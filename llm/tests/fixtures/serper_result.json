@@ -1,0 +1,263 @@
+{
+  "searchParameters": {
+    "q": "George Washington",
+    "type": "search",
+    "engine": "google"
+  },
+  "knowledgeGraph": {
+    "title": "George Washington",
+    "type": "1st U.S. President",
+    "imageUrl": "https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcTQNiParDg00K4bN348MHMnD8cCgWwZgAlIlJlZnV6ep3k5v2XNMeU8-w&s=0",
+    "description": "George Washington was an American Founding Father, politician, military officer, and farmer who served as the first president of the United States from 1789 to 1797.",
+    "descriptionSource": "Wikipedia",
+    "descriptionLink": "https://en.wikipedia.org/wiki/George_Washington",
+    "attributes": {
+      "Born": "February 22, 1732, Westmoreland County, VA",
+      "Died": "December 14, 1799 (age 67 years), George Washington's Mount Vernon, Mount Vernon, VA",
+      "Presidential term": "April 30, 1789 – March 4, 1797",
+      "Height": "6′ 2″",
+      "Spouse": "Martha Washington (m. 1759–1799)",
+      "Buried": "December 18, 1799, George Washington's Mount Vernon, Mount Vernon, VA",
+      "Parents": "Mary Ball Washington and Augustine Washington"
+    }
+  },
+  "organic": [
+    {
+      "title": "George Washington - Wikipedia",
+      "link": "https://en.wikipedia.org/wiki/George_Washington",
+      "snippet": "George Washington (February 22, 1732 – December 14, 1799) was an American Founding Father, politician, military officer, and farmer",
+      "sitelinks": [
+        {
+          "title": "Presidency of George",
+          "link": "https://en.wikipedia.org/wiki/Presidency_of_George_Washington"
+        },
+        {
+          "title": "Washington family",
+          "link": "https://en.wikipedia.org/wiki/Washington_family"
+        },
+        {
+          "title": "Military career of George",
+          "link": "https://en.wikipedia.org/wiki/Military_career_of_George_Washington"
+        },
+        {
+          "title": "Legacy",
+          "link": "https://en.wikipedia.org/wiki/Legacy_of_George_Washington"
+        }
+      ],
+      "position": 1
+    },
+    {
+      "title": "The George Washington University",
+      "link": "https://www.gwu.edu/",
+      "snippet": "A Diverse Community is a Strong Community. Collaboration, Respect, Openness and Diversity are core values that define the George Washington University (GW).",
+      "position": 2
+    },
+    {
+      "title": "George Washington | The White House",
+      "link": "https://www.whitehouse.gov/about-the-white-house/presidents/george-washington/",
+      "snippet": "George Washington, standing on the balcony of Federal Hall on Wall Street in New York, took his oath of office as the first President of the United States.",
+      "position": 3
+    },
+    {
+      "title": "George Washington - Mount Vernon",
+      "link": "https://www.mountvernon.org/george-washington",
+      "snippet": "Victorious general of the American Revolution, the first President of the United States, successful planter and entrepreneur.",
+      "sitelinks": [
+        {
+          "title": "Learn More",
+          "link": "https://www.mountvernon.org/george-washington/biography"
+        },
+        {
+          "title": "Revolutionary War",
+          "link": "https://www.mountvernon.org/george-washington/the-revolutionary-war"
+        },
+        {
+          "title": "First President",
+          "link": "https://www.mountvernon.org/george-washington/the-first-president"
+        },
+        {
+          "title": "French & Indian War",
+          "link": "https://www.mountvernon.org/george-washington/french-indian-war"
+        }
+      ],
+      "position": 4
+    },
+    {
+      "title": "George Washington | Life, Presidency, Accomplishments, & Facts",
+      "link": "https://www.britannica.com/biography/George-Washington",
+      "snippet": "George Washington was an American general and commander-in-chief of the colonial armies in the American Revolution (1775–83) and ...",
+      "date": "6 days ago",
+      "sitelinks": [
+        {
+          "title": "Revolutionary leadership",
+          "link": "https://www.britannica.com/biography/George-Washington/Revolutionary-leadership"
+        },
+        {
+          "title": "Postrevolutionary politics",
+          "link": "https://www.britannica.com/biography/George-Washington/Presidency"
+        },
+        {
+          "title": "Marriage and plantation life",
+          "link": "https://www.britannica.com/biography/George-Washington/Marriage-and-plantation-life"
+        }
+      ],
+      "position": 5
+    },
+    {
+      "title": "George Washington's Mount Vernon",
+      "link": "https://www.mountvernon.org/",
+      "snippet": "The Estate, Mansion, Historic Area, Gardens, Tombs, Farm, Distillery & Gristmill, Museums, Virtual Tour, George Washington Youth, French & Indian War, ...",
+      "sitelinks": [
+        {
+          "title": "George Washington",
+          "link": "https://www.mountvernon.org/george-washington"
+        },
+        {
+          "title": "Plan Your Visit",
+          "link": "https://www.mountvernon.org/plan-your-visit"
+        },
+        {
+          "title": "Hours & Directions",
+          "link": "https://www.mountvernon.org/plan-your-visit/directions-parking-transportation"
+        },
+        {
+          "title": "Mansion",
+          "link": "https://www.mountvernon.org/the-estate-gardens/the-mansion"
+        }
+      ],
+      "position": 6
+    },
+    {
+      "title": "George Washington University Athletics - Official Athletics Website",
+      "link": "https://gwsports.com/",
+      "snippet": "The official athletics website for the George Washington University Revolutionaries.",
+      "position": 7
+    },
+    {
+      "title": "George Washington Carver National Monument (U.S. National Park ...",
+      "link": "https://www.nps.gov/gwca/",
+      "snippet": "You are encouraged to visit the park and experience the many excellent programs and activities that are available.",
+      "sitelinks": [
+        {
+          "title": "Plan Your Visit",
+          "link": "https://www.nps.gov/gwca/planyourvisit/index.htm"
+        },
+        {
+          "title": "Operating Hours & Seasons",
+          "link": "https://www.nps.gov/gwca/planyourvisit/hours.htm"
+        },
+        {
+          "title": "History & Culture",
+          "link": "https://www.nps.gov/gwca/learn/historyculture/index.htm"
+        },
+        {
+          "title": "Fees & Passes",
+          "link": "https://www.nps.gov/gwca/planyourvisit/fees.htm"
+        }
+      ],
+      "position": 8
+    },
+    {
+      "title": "GW Law | The George Washington University",
+      "link": "https://www.law.gwu.edu/",
+      "snippet": "GW Law is a global law school that exists to impact the law through our diverse faculty and staff, preeminent alumni, and engaged students.",
+      "sitelinks": [
+        {
+          "title": "JD Admissions",
+          "link": "https://www.law.gwu.edu/jd-admissions"
+        },
+        {
+          "title": "Admissions",
+          "link": "https://www.law.gwu.edu/admissions"
+        },
+        {
+          "title": "Academics",
+          "link": "https://www.law.gwu.edu/academics"
+        },
+        {
+          "title": "Faculty",
+          "link": "https://www.law.gwu.edu/faculty"
+        }
+      ],
+      "position": 9
+    },
+    {
+      "title": "George Washington | Miller Center",
+      "link": "https://millercenter.org/president/washington",
+      "snippet": "Scholarly essays, speeches, photos, and other resources on George Washington, the first US president (1789-1797), the father of our country, and commander ...",
+      "sitelinks": [
+        {
+          "title": "Key Events",
+          "link": "https://millercenter.org/president/george-washington/key-events"
+        },
+        {
+          "title": "Impact and Legacy",
+          "link": "https://millercenter.org/president/washington/impact-and-legacy"
+        },
+        {
+          "title": "Foreign Affairs",
+          "link": "https://millercenter.org/president/washington/foreign-affairs"
+        },
+        {
+          "title": "Life in Brief",
+          "link": "https://millercenter.org/president/washington/life-in-brief"
+        }
+      ],
+      "position": 10
+    }
+  ],
+  "peopleAlsoAsk": [
+    {
+      "question": "What are 5 facts about George Washington?",
+      "snippet": "10 THINGS YOU REALLY OUGHT TO KNOW ABOUT GEORGE WASHINGTON\nWashington was mostly self-educated. ...\nHe was fearless in battle. ...\nWashington's bold actions saved the American Revolution, twice. ...\nHe never abused power. ...\nWashington owned more than 50,000 acres and was an ardent promoter of westward expansion.",
+      "title": "10 Things You Really Ought to Know about George Washington",
+      "link": "https://www.mountvernon.org/george-washington/10-things-you-really-ought-to-know-about-george-washington"
+    },
+    {
+      "question": "Why is George Washington important?",
+      "snippet": "In many ways, he is viewed almost as a mythical figure and is typically remembered for his momentous achievements. He led the Continental Army to victory in the Revolutionary War, helped create the U.S. Constitution, and served as the first president of the United States.",
+      "title": "George Washington - National Museum of the United States Army",
+      "link": "https://www.thenmusa.org/biographies/george-washington/"
+    },
+    {
+      "question": "What was George Washington's cause of death?",
+      "snippet": "Epiglottitis\nOn the evening of December 14, 1799, at Mount Vernon, George Washington passed away of a throat infection. He was buried four days later in the family vault at Mount Vernon.",
+      "title": "death of George Washington - Mount Vernon",
+      "link": "https://www.mountvernon.org/george-washington/death"
+    },
+    {
+      "question": "Did George Washington have 15 children?",
+      "snippet": "George Washington did not have any children. Despite that fact, there were always children at Mount Vernon. They raised Martha Washington's two children from a previous marriage, as well as her four grandchildren, and several nieces and nephews.",
+      "title": "Did George Washington Have Children? - Mount Vernon",
+      "link": "https://www.mountvernon.org/george-washington/family/did-george-washington-have-kids"
+    }
+  ],
+  "relatedSearches": [
+    {
+      "query": "George Washington death"
+    },
+    {
+      "query": "George Washington born"
+    },
+    {
+      "query": "George Washington children"
+    },
+    {
+      "query": "George Washington political party"
+    },
+    {
+      "query": "George Washington presidency"
+    },
+    {
+      "query": "George Washington accomplishments"
+    },
+    {
+      "query": "George Washington University"
+    },
+    {
+      "query": "What did George Washington do"
+    }
+  ],
+  "credits": 1,
+  "secretName": "Waldo"
+}

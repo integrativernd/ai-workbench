@@ -19,6 +19,7 @@ import dj_database_url
 # Build paths inside the project like this: BASE_DIR / 'subdir'.
 BASE_DIR = Path(__file__).resolve().parent.parent
 
+# PROJECT_ROOT = root_dir = os.path.dirname(os.path.abspath(__file__))
 
 # Sets the SYSTEM_PROMPT variable to the value of config/SYSTEM_PROMPT.txt
 with open(BASE_DIR / "config" / "SYSTEM_PROMPT.txt", "r") as f:
