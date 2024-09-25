@@ -76,6 +76,8 @@ INSTALLED_APPS = [
     "web",
     "django_rq",
     "llm",
+    "tools",
+    "channels",
 ]
 
 MIDDLEWARE = [
@@ -259,7 +261,7 @@ AI_CHANNEL_ID = 1286389011144773632
 TOOL_DEFINITIONS = [
     {
         "name": "get_time",
-        "description": "Get the current time when the user specifically asks for it",
+        "description": "Get the current time when the user specifically asks for it. Only used when requesting the current time.",
         "input_schema": {
             "type": "object",
             "properties": {},
@@ -268,7 +270,61 @@ TOOL_DEFINITIONS = [
     },
     {
         "name": "get_runtime_environment",
-        "description": "Return the current runtime environment (e.g production, staging, development)",
+        "description": """
+          Return the current runtime environment (e.g production, staging, development).
+          Only used when requesting explicity about the runtime environment.
+        """,
+        "input_schema": {
+            "type": "object",
+            "properties": {},
+            "required": []
+        }
+    },
+        {
+        "name": "get_web_page_summary",
+        "description": "Use this tool to browse a web page for a URL provided by the user and summarize the content of the page",
+        "input_schema": {
+            "type": "object",
+            "properties": {
+                "url": {
+                    "type": "string",
+                    "description": "The url of the web page to be summarized"
+                }
+            },
+            "required": ["url"]
+        }
+    },
+    {
+        "name": "get_search_results",
+        "description": "Get search results from the serper API for a given query",
+        "input_schema": {
+            "type": "object",
+            "properties": {
+                "query": {
+                    "type": "string",
+                    "description": "The search query to be used"
+                }
+            },
+            "required": ["query"]
+        }
+    },
+    {
+        "name": "create_background_job",
+        "description": "Create a background job to handle a long-running task. Only trigger this job if you require multiple API calls or tool executions to be able to respond correctly.",
+        "input_schema": {
+            "type": "object",
+            "properties": {
+                "task": {
+                    "type": "string",
+                    "description": "The task to be executed in the background"
+                }
+            },
+            "required": ["task"]
+        }
+    },
+    {
+        "name": "get_background_jobs",
+        "description": "Call this tool if the user asks you what you are working on or doing in general. Background jobs are the only thing you could be doing besides responding synchronously in the thread.",
         "input_schema": {
             "type": "object",
             "properties": {},
