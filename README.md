@@ -23,3 +23,9 @@ For more information about using Python on Heroku, see these Dev Center articles
 python3 -m venv --upgrade-deps .venv
 
 heroku local --port 5001
+
+### Create a Super User
+
+```bash
+python manage.py createsuperuser
+```
