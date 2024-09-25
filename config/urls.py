@@ -18,6 +18,7 @@ Including another URLconf
 from django.contrib import admin
 from django.urls import include, path
 from web import views
+from tools.views import setup_google
 
 def trigger_error(request):
     division_by_zero = 1 / 0
@@ -28,4 +29,5 @@ urlpatterns = [
     path("admin/", admin.site.urls),
     path('django-rq/', include('django_rq.urls')),
     path('sentry-debug/', trigger_error),
+    path('tools/google/setup/', setup_google, name="setup_google"),
 ]

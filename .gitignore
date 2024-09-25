@@ -11,3 +11,5 @@ db.sqlite3
 .DS_Store
 
 .env
+google-credentials.json
+credentials.json

@@ -259,6 +259,8 @@ SESSION_COOKIE_NAME = "tokenname_sessionid"
 
 AI_CHANNEL_ID = 1286389011144773632
 
+DOCUMENT_ID = "1jHYLQRL0CAolpTHTMm-7Jy-a9XcrZsw868ArZ1IHfHs"
+
 TOOL_DEFINITIONS = [
     {
         "name": "get_time",
@@ -330,6 +332,20 @@ TOOL_DEFINITIONS = [
             "type": "object",
             "properties": {},
             "required": []
+        }
+    },
+    {
+        "name": "update_google_document",
+        "description": "Call this tool if you are asked to update a google document.",
+        "input_schema": {
+            "type": "object",
+            "properties": {
+                "google_doc_id": {
+                    "type": "string",
+                    "description": f"ID of google document to be updated and shared by the user. If not URL is provided the default document ID will be used: {DOCUMENT_ID}"
+                }
+            },
+            "required": ["google_doc_id"]
         }
     },
 ]

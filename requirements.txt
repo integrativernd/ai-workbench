@@ -26,3 +26,11 @@ requests==2.32.3
 selenium==4.25.0
 webdriver-manager==4.0.2
 sentry-sdk[django]==2.14.0
+
+google-api-python-client==2.147.0
+
+google-auth-httplib2==0.2.0
+
+google-auth-oauthlib==1.2.1
+
+google-auth==2.35.0
