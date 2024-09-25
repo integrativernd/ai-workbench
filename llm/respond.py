@@ -51,11 +51,10 @@ def handle_tool_use(tool_call, user_input):
     elif tool_call.name == "get_search_results":
         print(f"query: {tool_call.input.get("query")}")
         django_rq.enqueue(get_search_results, tool_call.input.get("query"))
-        # return get_search_results(tool_call.input.get("query"))
         return "Searching the web..."
     elif tool_call.name == "get_web_page_summary":
         django_rq.enqueue(get_browse_results, tool_call.input.get("url"))
-        return "Review web page."
+        return "Reviewing the web page."
     else:
         return f"Unknown tool: {tool_call.name}"
 

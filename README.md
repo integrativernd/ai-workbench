@@ -30,3 +30,7 @@ heroku local --port 5001
 ```bash
 python manage.py createsuperuser
 ```
+
+## Heroku Apps
+
+heroku buildpacks:add -i 1 heroku-community/chrome-for-testing
