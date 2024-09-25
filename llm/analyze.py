@@ -8,6 +8,7 @@ from config.settings import SYSTEM_PROMPT, TOOL_DEFINITIONS
 # from app.llm.ollama_response import get_message, get_basic_message
 from llm.anthropic_integration import get_message, get_basic_message
 from tools.search import get_search_data
+from tools.browse import get_web_page_content
 import time
 import json
 
@@ -33,6 +34,10 @@ def summarize_content(content):
 def get_search_results(query):
     search_text = summarize_content(get_search_data(query))
     return search_text[:2000]
+
+def get_browse_results(url):
+    browse_text = summarize_content(get_web_page_content(url))
+    return browse_text[:2000]
 
 def analyze_user_input(user_input):
     print(f"Analyzing request: {user_input}")

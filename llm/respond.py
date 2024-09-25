@@ -4,7 +4,11 @@ from rq import Queue
 import pytz
 from rq.job import Job
 
-from llm.analyze import analyze_user_input, get_search_results
+from llm.analyze import (
+  analyze_user_input,
+  get_search_results,
+  get_browse_results,
+)
 # from tools.browse import get_web_page_summary
 import django_rq
 from llm.anthropic_integration import get_message
@@ -50,8 +54,8 @@ def handle_tool_use(tool_call, user_input):
         # return get_search_results(tool_call.input.get("query"))
         return "Searching the web..."
     elif tool_call.name == "get_web_page_summary":
-        django_rq.enqueue(analyze_user_input, tool_call.input.get("url"))
-        return "Visting web page."
+        django_rq.enqueue(get_browse_results, tool_call.input.get("url"))
+        return "Review web page."
     else:
         return f"Unknown tool: {tool_call.name}"
 
