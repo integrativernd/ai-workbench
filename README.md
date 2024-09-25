@@ -6,7 +6,7 @@ The AI Workbench is a framework for building semi-autonomous AI agents that can 
 
 The AI Workbench is built on top of the [Django](https://www.djangoproject.com/) web framework and uses [rq](https://python-rq.org/) for task scheduling. The AI Workbench provides a web-based interface for managing agents, tasks, and datasets, as well as a REST API for interacting with agents programmatically.
 
-Django is used for managing the Database and admin interface, while rq is used for managing the task queue. The AI Workbench provides a chat-base interface for managing agents, tasks, and datasets, as well as a REST API for interacting with agents programmatically.
+Django is used for managing the Database and admin interface. rq is used for managing the task queue. The AI Workbench provides a chat-base interface for managing agents, tasks, and datasets, as well as a REST API for interacting with agents programmatically.
 
 ## System Requirements for Development
 
