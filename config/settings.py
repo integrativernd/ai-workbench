@@ -225,31 +225,45 @@ RQ_QUEUES = {
     }
 }
 
-# LOGGING = {
-#     "version": 1,
-#     "disable_existing_loggers": False,
-#     "formatters": {
-#         "rq_console": {
-#             "format": "%(asctime)s %(message)s",
-#             "datefmt": "%H:%M:%S",
-#         },
-#     },
-#     "handlers": {
-#         "rq_console": {
-#             "level": "DEBUG",
-#             "class": "rq.logutils.ColorizingStreamHandler",
-#             "formatter": "rq_console",
-#             "exclude": ["%(asctime)s"],
-#         },
-#     },
-#     'loggers': {
-#         "rq.worker": {
-#             "handlers": ["rq_console", "sentry"],
-#             "level": "DEBUG"
-#         },
-#     }
-# }
+LOGGING = {
+    "version": 1,
+    "disable_existing_loggers": False,
+    "formatters": {
+        "rq_console": {
+            "format": "%(asctime)s %(message)s",
+            "datefmt": "%H:%M:%S",
+        },
+    },
+    "handlers": {
+        "rq_console": {
+            "level": "DEBUG",
+            "class": "rq.logutils.ColorizingStreamHandler",
+            "formatter": "rq_console",
+            "exclude": ["%(asctime)s"],
+        },
+    },
+    # 'loggers': {
+    #     "rq.worker": {
+    #         "handlers": ["rq_console", "sentry"],
+    #         "level": "DEBUG"
+    #     },
+    # }
+}
 
 RQ_SHOW_ADMIN_LINK = True
 
 SESSION_COOKIE_NAME = "tokenname_sessionid"
+
+AI_CHANNEL_ID = 1286389011144773632
+
+TOOL_DEFINITIONS = [
+    {
+        "name": "get_time",
+        "description": "Get the current time when the user specifically asks for it",
+        "input_schema": {
+            "type": "object",
+            "properties": {},
+            "required": []
+        }
+    },
+]
