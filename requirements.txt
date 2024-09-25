@@ -19,3 +19,5 @@ discord.py==2.4.0
 anthropic==0.34.2
 
 django-rq==2.10.1
+
+pytz==2024.2
