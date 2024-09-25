@@ -18,7 +18,10 @@ def get_web_page_content(url):
     # Replace with your chromedriver path
     options = Options()
     # Run in headless mode (optional)
-    options.add_argument("--headless")  
+    options.add_argument("--headless")  # Run in headless mode (no GUI)
+    options.add_argument("--disable-gpu")
+    options.add_argument("--no-sandbox")
+    options.add_argument("--disable-dev-shm-usage")
     driver = webdriver.Chrome(service=service, options=options)
 
     try:
