@@ -61,11 +61,12 @@ async def background_loop():
         result = job.latest_result()
         await channel.send(result.return_value)
 
-
 @bot.event
 async def on_ready():
     print(f'Logged in as {bot.user} (ID: {bot.user.id})')
     print('------')
+    channel = bot.get_channel(AI_CHANNEL_ID)
+    await channel.send("I'm back!")
     background_loop.start()
 
 def run_ai_response(content):
