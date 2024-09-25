@@ -5,7 +5,7 @@ from google.oauth2.credentials import Credentials
 from google_auth_oauthlib.flow import InstalledAppFlow
 from googleapiclient.discovery import build
 from googleapiclient.errors import HttpError
-from config.settings import BASE_DIR, DOCUMENT_ID
+from config.settings import BASE_DIR, DOCUMENT_ID, IS_HEROKU_APP
 
 # If modifying these scopes, delete the file token.json.
 SCOPES = ["https://www.googleapis.com/auth/documents"]  # Changed to allow writing
@@ -30,7 +30,13 @@ def run_setup():
             flow = InstalledAppFlow.from_client_secrets_file(
                 secrets_file_path, SCOPES
             )
-            creds = flow.run_local_server(port=0)
+            # port = int(os.getenv('PORT', 8080))
+            # creds = flow.run_local_server(port=port)
+            if IS_HEROKU_APP:
+                creds = flow.run_local_server(port=443, host="ai-workbench-c743dbb30500.herokuapp.com")
+            else:
+                creds = flow.run_local_server(port=8080)
+            # auth_url, _ = flow.authorization_url(prompt='consent')
         # Save the credentials for the next run
         with open(credential_path, "w") as token:
             token.write(creds.to_json())
