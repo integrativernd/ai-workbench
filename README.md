@@ -1,6 +1,6 @@
-# Python: Getting Started
+# AI Workbench
 
-A barebones Django app, which can easily be deployed to Heroku.
+The AI Workbench is a framework for building semi-autonomous AI agents that can be used to automate tasks in a variety of domains. The AI Workbench is designed to be modular and extensible, allowing developers to easily add new capabilities to their agents.
 
 ## Deploying to Heroku
 
