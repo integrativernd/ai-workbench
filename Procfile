@@ -10,6 +10,6 @@ web: gunicorn config.wsgi
 
 release: ./manage.py migrate --no-input
 
-worker: python manage.py rqworker high default low
+worker: python manage.py rqworker default low
 
 discord: python discord_server.py
