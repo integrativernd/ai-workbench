@@ -7,6 +7,7 @@ from tools.google.docs import get_google_auth_url, handle_oauth2_callback
 def start_google_auth(request):
     authorization_url, state = get_google_auth_url()
     request.session['google_auth_state'] = state
+    print(authorization_url)
     return redirect(authorization_url)
 
 def google_auth_callback(request):

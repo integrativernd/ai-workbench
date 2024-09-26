@@ -16,7 +16,7 @@ def get_google_auth_url():
     secrets_file_path = os.path.join(BASE_DIR, "credentials.json")
     flow = google_auth_oauthlib.flow.Flow.from_client_secrets_file(
         secrets_file_path,
-        scopes=SCOPES
+        scopes=SCOPES,
     )
     flow.redirect_uri = f"{BASE_URL}/auth/google/callback/"
     authorization_url, state = flow.authorization_url(
@@ -28,7 +28,6 @@ def get_google_auth_url():
     # Store the state so you can verify it in the callback route
     # You might want to use a session or database to store this securely
     # session['state'] = state
-    
     return authorization_url, state
 
 def handle_oauth2_callback(code, state):
