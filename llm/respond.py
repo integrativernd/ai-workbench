@@ -59,10 +59,8 @@ def handle_tool_use(tool_call, request_data):
     elif tool_name == "get_runtime_environment":
         return get_runtime_environment()
     elif tool_name == "create_background_job":
-        django_rq.enqueue(analyze_user_input, {
-            "task": tool_call.input.get("task"),
-            "channel_id": channel_id,
-        })
+        request_data['task'] = tool_call.input.get("task")
+        django_rq.enqueue(analyze_user_input, request_data)
         return "Background processing started"
     elif tool_name == "get_background_jobs":
         return get_background_jobs()
