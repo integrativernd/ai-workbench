@@ -61,6 +61,11 @@ else:
     ALLOWED_HOSTS = [".localhost", "127.0.0.1", "[::1]", "0.0.0.0"]
 
 
+if IS_HEROKU_APP:
+    BASE_URL = "https://ai-workbench-c743dbb30500.herokuapp.com"
+else:
+    BASE_URL = "http://localhost:8000"
+
 # Application definition
 
 INSTALLED_APPS = [

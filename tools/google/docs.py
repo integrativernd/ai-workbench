@@ -4,7 +4,7 @@ from google.oauth2.credentials import Credentials
 import google_auth_oauthlib.flow
 from googleapiclient.discovery import build
 from googleapiclient.errors import HttpError
-from config.settings import BASE_DIR, DOCUMENT_ID, IS_HEROKU_APP
+from config.settings import BASE_DIR, DOCUMENT_ID, IS_HEROKU_APP, BASE_URL
 
 # If modifying these scopes, delete the file token.json.
 SCOPES = ["https://www.googleapis.com/auth/documents"]
@@ -18,12 +18,7 @@ def get_google_auth_url():
         secrets_file_path,
         scopes=SCOPES
     )
-    
-    if IS_HEROKU_APP:
-        flow.redirect_uri = "https://ai-workbench.herokuapp.com/auth/google/callback/"
-    else:
-        flow.redirect_uri = "http://localhost:8000/auth/google/callback/"
-    
+    flow.redirect_uri = f"{BASE_URL}/auth/google/callback/"
     authorization_url, state = flow.authorization_url(
         access_type='offline',
         include_granted_scopes='true',
@@ -43,7 +38,6 @@ def handle_oauth2_callback(code, state):
     # Verify that the state matches the one you stored earlier
     # if state != session['state']:
     #     return None  # Invalid state, potential CSRF attack
-    
     secrets_file_path = os.path.join(BASE_DIR, "credentials.json")
     flow = google_auth_oauthlib.flow.Flow.from_client_secrets_file(
         secrets_file_path,
@@ -51,11 +45,7 @@ def handle_oauth2_callback(code, state):
         state=state
     )
 
-    if IS_HEROKU_APP:
-        flow.redirect_uri = "https://ai-workbench.herokuapp.com/auth/google/callback/"
-    else:
-        flow.redirect_uri = "http://localhost:8000/auth/google/callback/"
-    
+    flow.redirect_uri = f"{BASE_URL}/auth/google/callback/"
     flow.fetch_token(code=code)
     credentials = flow.credentials
     
