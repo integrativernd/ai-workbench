@@ -84,6 +84,7 @@ INSTALLED_APPS = [
     "llm",
     "tools",
     "channels",
+    "ai_agents",
 ]
 
 MIDDLEWARE = [

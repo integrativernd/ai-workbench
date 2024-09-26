@@ -14,17 +14,14 @@ def superuser_required(view_func):
 def start_google_auth(request):
     authorization_url, state = get_google_auth_url()
     request.session['google_auth_state'] = state
-    print(authorization_url)
     return redirect(authorization_url)
 
 @superuser_required
 def google_auth_callback(request):
     state = request.GET.get('state')
     code = request.GET.get('code')
-
-    # import pdb; pdb.set_trace()
-
     stored_state = request.session.get('google_auth_state')
+
     if state != stored_state:
         return HttpResponse('Invalid state parameter. Authorization failed.', status=400)
     
