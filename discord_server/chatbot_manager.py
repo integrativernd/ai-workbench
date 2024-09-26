@@ -88,22 +88,21 @@ class ChatBotManager:
         This method runs until a shutdown is requested.
         """
         while not self.shutdown_event.is_set():
-            for agent_id in list(self.bots.keys()):
-                ai_agent = await self.get_ai_agent(agent_id)
-                if not ai_agent.is_active:
-                    await self.stop_bot(agent_id)
-                else:
-                    # Update the bot's ai_agent reference with the latest data
-                    self.bots[agent_id].ai_agent = ai_agent
+            ai_agents = await sync_to_async(list)(AIAgent.objects.all())
+            for ai_agent in ai_agents:
+                bot = self.bots.get(ai_agent.id)
+                if bot:
+                    if ai_agent.is_active and not bot.is_active:
+                        await self.start_bot(ai_agent)
+                    elif not ai_agent.is_active and bot.is_active:
+                        await self.stop_bot(ai_agent.id)
+                elif ai_agent.is_active:
+                    await self.stop_bot(ai_agent.id)
             
-            # Check for new active agents
-            active_agents = await sync_to_async(list)(AIAgent.objects.filter(is_active=True))
-            for agent in active_agents:
-                if agent.id not in self.bots:
-                    await self.start_bot(agent)
-            
+            # This is a blocking call that waits for the shutdown event to be set
+            # or until the timeout of 30 seconds is reached.
             try:
-                await asyncio.wait_for(self.shutdown_event.wait(), timeout=60)
+                await asyncio.wait_for(self.shutdown_event.wait(), timeout=5)
             except asyncio.TimeoutError:
                 continue  # Continue to next iteration if no shutdown event
 
@@ -126,7 +125,11 @@ async def manage_bot_lifecycle():
     bot_tasks = [asyncio.create_task(bot_manager.start_bot(agent)) for agent in ai_agents]
     status_task = asyncio.create_task(bot_manager.check_bot_status())
 
+    # This section is fully document explaining the try finally block line by line
+
+    # The try block is used to execute the code that may raise an exception.
     try:
+        # The yield statement is used to pause the execution of the code and return a value to the caller.
         yield bot_manager
     finally:
         print("Shutting down all bots...")
