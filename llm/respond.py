@@ -51,7 +51,7 @@ def get_background_jobs():
             summary += f"Job ID: {job.id}, Status: {job.args[0]}"
     return summary
 
-def handle_tool_use(tool_call, user_input, channel_id=AI_CHANNEL_ID):
+def handle_tool_use(tool_call, request_data):
     print(f"Handling tool use: {tool_call.name}")
     tool_name = tool_call.name
     if tool_name == "get_time":
@@ -67,33 +67,30 @@ def handle_tool_use(tool_call, user_input, channel_id=AI_CHANNEL_ID):
     elif tool_name == "get_background_jobs":
         return get_background_jobs()
     elif tool_name == "get_search_results":
-        django_rq.enqueue(get_search_results, {
-            "query": tool_call.input.get("query"),
-            "channel_id": channel_id
-        })
+        request_data['query'] = tool_call.input.get("query")
+        django_rq.enqueue(get_search_results, request_data)
         return "Searching the web..."
     elif tool_name == "get_web_page_summary":
-        django_rq.enqueue(get_browse_results, {
-            "url": tool_call.input.get("url"),
-            "channel_id": channel_id,
-        })
+        request_data['url'] = tool_call.input.get("url")
+        django_rq.enqueue(get_browse_results, request_data)
         return "Reviewing the web page."
     elif tool_name == "update_google_document":
-        enqueue_update_google_document(tool_call, user_input)
+        request_data['google_doc_id'] = tool_call.input.get("google_doc_id")
+        django_rq.enqueue(update_google_document, request_data)
         return "Updating document."
     else:
         return f"Unknown tool: {tool_name}"
 
-def respond_to_channel(user_input, channel_id):
+def respond_to_channel(request_data):
     message_history = []
-    message_history.append({ "role": "user", "content": user_input })
+    message_history.append({ "role": "user", "content": request_data['content'] })
     response_message = get_message(SYSTEM_PROMPT, TOOL_DEFINITIONS, message_history)
     full_response = ""
     for content in response_message.content:
         if content.type == "text":
             full_response += content.text
         elif content.type == "tool_use":
-            tool_result = handle_tool_use(content, user_input, channel_id)
+            tool_result = handle_tool_use(content, request_data)
             full_response += tool_result
     # message_history.append({ "role": "assistant", "content": full_response })
     # message_history = []

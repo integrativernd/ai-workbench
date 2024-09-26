@@ -60,9 +60,10 @@ class DiscordBot(commands.Bot):
             job = Job.fetch(job_id, connection=message_queue.connection)
             message_queue.finished_job_registry.remove(job.id)
             result_data = job.latest_result().return_value
-            print(result_data)
             channel = self.get_channel(int(result_data['channel_id']))
-            if channel:
+            print(self.ai_agent.name)
+            print(result_data['ai_agent_name'])
+            if channel and self.ai_agent.name == result_data['ai_agent_name']:
                 await channel.send(result_data['content'])
     
     async def on_ready(self):
@@ -83,18 +84,20 @@ class DiscordBot(commands.Bot):
 
         print(f'{message.author}: {message.content} {message.channel}')
 
+        ai_agent_name = self.ai_agent.name.lower()
         if message.author.bot:
             print(f'Bot {message.author.bot}')
             return
         elif message.content.startswith('$'):
             await self.process_commands(message)
             return
-        elif message.content.startswith(f"@{self.ai_agent.name.lower()}"):
+        elif message.content.startswith(f"@{ai_agent_name}"):
             await message.channel.send('Ok.')
             queue = django_rq.get_queue('default')
             queue.enqueue(
                 handle_message,
                 {
+                    "ai_agent_name": ai_agent_name,
                     "content": message.content,
                     "author": str(message.author),
                     "channel": str(message.channel)
@@ -110,11 +113,17 @@ def handle_message(message_data):
     """
     channel = Channel.objects.get(channel_name=message_data['channel'])
     print(f"Handling message: {message_data['content']} in channel {channel}")
-    response_text = respond_to_channel(message_data['content'], channel.channel_id)
+    immediate_response_content = respond_to_channel({
+        "channel_id": channel.channel_id,
+        "ai_agent_name": message_data['ai_agent_name'],
+        "channel": message_data['channel'],
+        "content": message_data['content'],
+    })
     return {
+        "ai_agent_name": message_data['ai_agent_name'],
         "channel": message_data['channel'],
         "channel_id": channel.channel_id,
-        "content": response_text,
+        "content": immediate_response_content,
     }
 
 class BotManager:
@@ -181,6 +190,16 @@ class BotManager:
         :return: The AIAgent object
         """
         return AIAgent.objects.get(id=agent_id)
+  
+    @sync_to_async
+    def get_ai_agent_by_name(self, agent_name):
+        """
+        Asynchronously get the AIAgent object for the given agent ID.
+
+        :param agent_id: The ID of the AI agent to retrieve
+        :return: The AIAgent object
+        """
+        return AIAgent.objects.get(name=agent_name)
 
     async def check_bot_status(self):
         """

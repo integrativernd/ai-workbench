@@ -49,6 +49,7 @@ def get_search_results(request_data):
     return {
         "content": search_text[:2000],
         "channel_id": request_data['channel_id'],
+        "ai_agent_name": request_data['ai_agent_name'],
     }
 
 def get_browse_results(request_data):
@@ -56,6 +57,7 @@ def get_browse_results(request_data):
     return {
         "content": browse_text[:2000],
         "channel_id": request_data['channel_id'],
+        "ai_agent_name": request_data['ai_agent_name'],
     }
 
 def update_google_document(reuqest_data):
