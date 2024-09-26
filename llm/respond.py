@@ -84,7 +84,7 @@ def handle_tool_use(tool_call, request_data):
 def respond_to_channel(request_data):
     message_history = []
     message_history.append({ "role": "user", "content": request_data['content'] })
-    response_message = get_message(SYSTEM_PROMPT, TOOL_DEFINITIONS, message_history)
+    response_message = get_message(request_data['system'], TOOL_DEFINITIONS, message_history)
     full_response = ""
     for content in response_message.content:
         if content.type == "text":

@@ -11,7 +11,6 @@ from tools.search import get_search_data
 from tools.browse import get_web_page_content
 from tools.google.docs import append_text, DOCUMENT_ID
 import time
-import json
 
 def approximate_token_count(text):
     words = text.split()
@@ -53,7 +52,7 @@ def get_search_results(request_data):
     }
 
 def get_browse_results(request_data):
-    browse_text = summarize_content(get_search_data(request_data['url']))
+    browse_text = summarize_content(get_web_page_content(request_data['url']))
     return {
         "content": browse_text[:2000],
         "channel_id": request_data['channel_id'],

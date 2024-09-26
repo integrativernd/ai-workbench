@@ -19,6 +19,18 @@ Django is used for managing the Database and admin interface. rq is used for man
 
 Core modules are implemented as Django apps. Each app is responsible for a specific aspect of the system, such as managing agents, tasks, or datasets. The core modules are designed to be extensible, allowing developers to easily add new capabilities to their agents.
 
+## Data Model
+
+### AI Agent
+
+An AI agent is a software program that can perform tasks autonomously. An AI agent is composed of one or more modules, each of which is responsible for a specific aspect of the agent's functionality. An AI agent can be trained on a dataset to improve its performance.
+
+#### Properties
+
+- Name
+- Description
+- Application ID
+
 ## Folder Structure
 
 ```
