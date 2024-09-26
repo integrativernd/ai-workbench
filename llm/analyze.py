@@ -44,18 +44,23 @@ def document_content_for_user_input(user_input):
     )
     return message.content[0].text
 
-def get_search_results(query):
-    search_text = summarize_content(get_search_data(query))
-    return search_text[:2000]
+def get_search_results(request_data):
+    search_text = summarize_content(get_search_data(request_data['query']))
+    return {
+        "content": search_text[:2000],
+        "channel_id": request_data['channel_id'],
+    }
 
-def get_browse_results(url):
-    browse_text = summarize_content(get_web_page_content(url))
-    return browse_text[:2000]
+def get_browse_results(request_data):
+    browse_text = summarize_content(get_search_data(request_data['url']))
+    return {
+        "content": browse_text[:2000],
+        "channel_id": request_data['channel_id'],
+    }
 
-def update_google_document(data_string):
-    data = json.loads(data_string)
-    document_content_text = document_content_for_user_input(data['user_input'])
-    append_text(data['google_doc_id'], document_content_text)
+def update_google_document(reuqest_data):
+    document_content_text = document_content_for_user_input(reuqest_data['user_input'])
+    append_text(reuqest_data['google_doc_id'], document_content_text)
     return "Document updated"
 
 def analyze_user_input(user_input):

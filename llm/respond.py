@@ -14,7 +14,7 @@ from llm.analyze import (
 # from tools.browse import get_web_page_summary
 import django_rq
 from llm.anthropic_integration import get_message
-from config.settings import SYSTEM_PROMPT, TOOL_DEFINITIONS, IS_HEROKU_APP
+from config.settings import SYSTEM_PROMPT, TOOL_DEFINITIONS, IS_HEROKU_APP, AI_CHANNEL_ID
 
 def ping():
     return 'Pong!'
@@ -33,10 +33,10 @@ def get_runtime_environment():
 def enqueue_update_google_document(tool_call, user_input):
     django_rq.enqueue(
         update_google_document,
-        json.dumps({
+        {
             "google_doc_id": tool_call.input.get("google_doc_id"),
             "user_input": user_input,
-        })
+        }
     )
 
 def get_background_jobs():
@@ -51,7 +51,7 @@ def get_background_jobs():
             summary += f"Job ID: {job.id}, Status: {job.args[0]}"
     return summary
 
-def handle_tool_use(tool_call, user_input):
+def handle_tool_use(tool_call, user_input, channel_id=AI_CHANNEL_ID):
     print(f"Handling tool use: {tool_call.name}")
     tool_name = tool_call.name
     if tool_name == "get_time":
@@ -59,15 +59,24 @@ def handle_tool_use(tool_call, user_input):
     elif tool_name == "get_runtime_environment":
         return get_runtime_environment()
     elif tool_name == "create_background_job":
-        django_rq.enqueue(analyze_user_input, tool_call.input.get("task"))
+        django_rq.enqueue(analyze_user_input, {
+            "task": tool_call.input.get("task"),
+            "channel_id": channel_id,
+        })
         return "Background processing started"
     elif tool_name == "get_background_jobs":
         return get_background_jobs()
     elif tool_name == "get_search_results":
-        django_rq.enqueue(get_search_results, tool_call.input.get("query"))
+        django_rq.enqueue(get_search_results, {
+            "query": tool_call.input.get("query"),
+            "channel_id": channel_id
+        })
         return "Searching the web..."
     elif tool_name == "get_web_page_summary":
-        django_rq.enqueue(get_browse_results, tool_call.input.get("url"))
+        django_rq.enqueue(get_browse_results, {
+            "url": tool_call.input.get("url"),
+            "channel_id": channel_id,
+        })
         return "Reviewing the web page."
     elif tool_name == "update_google_document":
         enqueue_update_google_document(tool_call, user_input)
@@ -75,7 +84,7 @@ def handle_tool_use(tool_call, user_input):
     else:
         return f"Unknown tool: {tool_name}"
 
-def get_response(user_input):
+def respond_to_channel(user_input, channel_id):
     message_history = []
     message_history.append({ "role": "user", "content": user_input })
     response_message = get_message(SYSTEM_PROMPT, TOOL_DEFINITIONS, message_history)
@@ -84,10 +93,10 @@ def get_response(user_input):
         if content.type == "text":
             full_response += content.text
         elif content.type == "tool_use":
-            tool_result = handle_tool_use(content, user_input)
+            tool_result = handle_tool_use(content, user_input, channel_id)
             full_response += tool_result
     # message_history.append({ "role": "assistant", "content": full_response })
-    message_history = []
+    # message_history = []
     # Shorten the response to 2000 characters to avoid Discord message length limits.
     # TODO: Implement a more sophisticated way to handle long responses.
     return full_response

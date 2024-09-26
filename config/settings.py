@@ -219,6 +219,7 @@ RQ_QUEUES = {
         # 'REDIS_CLIENT_KWARGS': {    # Eventual additional Redis connection arguments
         #     'ssl_cert_reqs': None,
         # },
+        # 'SERIALIZER': 'rq.serializers.JSONSerializer',
     },
     'high': {
         'URL': os.getenv('REDIS_URL', 'redis://localhost:6379/0'), # If you're on Heroku
@@ -231,6 +232,7 @@ RQ_QUEUES = {
     'low': {
         'URL': os.getenv('REDIS_URL', 'redis://localhost:6379/0'), # If you're on Heroku
         'DEFAULT_TIMEOUT': 500,
+        # 'SERIALIZER': 'rq.serializers.JSONSerializer',
     }
 }
 

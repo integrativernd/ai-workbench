@@ -8,7 +8,7 @@ os.environ.setdefault("DJANGO_SETTINGS_MODULE", "config.settings")
 django.setup()
 
 # Now you can import your Discord bot code
-from discord_server.worker import run_discord_bot
+from discord_server.worker2 import run_discord_bot
 
 if __name__ == "__main__":
     run_discord_bot()
