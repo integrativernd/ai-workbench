@@ -157,3 +157,9 @@ python manage.py createsuperuser
 ## Heroku App Dependencies
 
 heroku buildpacks:add -i 1 heroku-community/chrome-for-testing
+
+## Testing
+
+```
+python manage.py test
+```
