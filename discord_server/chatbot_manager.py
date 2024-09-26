@@ -125,8 +125,6 @@ async def manage_bot_lifecycle():
     bot_tasks = [asyncio.create_task(bot_manager.start_bot(agent)) for agent in ai_agents]
     status_task = asyncio.create_task(bot_manager.check_bot_status())
 
-    # This section is fully document explaining the try finally block line by line
-
     # The try block is used to execute the code that may raise an exception.
     try:
         # The yield statement is used to pause the execution of the code and return a value to the caller.

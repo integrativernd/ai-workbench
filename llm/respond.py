@@ -11,6 +11,7 @@ from llm.analyze import (
   get_browse_results,
   update_google_document,
 )
+from channels.models import Message 
 # from tools.browse import get_web_page_summary
 import django_rq
 from llm.anthropic_integration import get_message
@@ -80,6 +81,11 @@ def handle_tool_use(tool_call, request_data):
         return f"Unknown tool: {tool_name}"
 
 def respond_to_channel(request_data):
+    request_message = Message.objects.create(
+        channel_id=request_data['channel_id'],
+        author=request_data['channel_id'],
+        content=request_data['content'],
+    )
     message_history = []
     message_history.append({ "role": "user", "content": request_data['content'] })
     response_message = get_message(request_data['system'], TOOL_DEFINITIONS, message_history)

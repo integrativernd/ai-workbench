@@ -99,10 +99,11 @@ class ChatBot(commands.Bot):
         
         :param message: The message object representing the received message
         """
+        # Ignore messages from the bot itself
         if not self.is_active:
             return
 
-        print(f'{message.author}: {message.content} {message.channel}')
+        # print(f'{message.author}: {message.content} {message.channel}')
 
         ai_agent_name = self.ai_agent.name.lower()
         if message.author.bot:

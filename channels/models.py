@@ -24,6 +24,6 @@ class Message(models.Model):
     class Meta:
         ordering = ['-timestamp']  # Orders messages by most recent first
 
-    @property
-    def token(self):
-        return self.token.hex
+    # @property
+    # def token(self):
+    #     return self.token.hex
