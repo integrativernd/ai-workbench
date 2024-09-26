@@ -1,49 +1,97 @@
 import os.path
-
 from google.auth.transport.requests import Request
 from google.oauth2.credentials import Credentials
-from google_auth_oauthlib.flow import InstalledAppFlow
+import google_auth_oauthlib.flow
 from googleapiclient.discovery import build
 from googleapiclient.errors import HttpError
 from config.settings import BASE_DIR, DOCUMENT_ID, IS_HEROKU_APP
 
 # If modifying these scopes, delete the file token.json.
-SCOPES = ["https://www.googleapis.com/auth/documents"]  # Changed to allow writing
+SCOPES = ["https://www.googleapis.com/auth/documents"]
 
-def run_setup():
-    """Shows basic usage of the Docs API.
-    Prints the title of a sample document and appends a line to it.
+def get_google_auth_url():
     """
-    creds = None
-    # The file token.json stores the user's access and refresh tokens, and is
-    # created automatically when the authorization flow completes for the first
-    # time.
-    credential_path = os.path.join(BASE_DIR, "google-credentials.json")
+    Generate the Google OAuth 2.0 authorization URL for the web auth flow.
+    """
     secrets_file_path = os.path.join(BASE_DIR, "credentials.json")
+    flow = google_auth_oauthlib.flow.Flow.from_client_secrets_file(
+        secrets_file_path,
+        scopes=SCOPES
+    )
+    
+    if IS_HEROKU_APP:
+        flow.redirect_uri = "https://ai-workbench.herokuapp.com/auth/google/callback/"
+    else:
+        flow.redirect_uri = "http://localhost:8000/auth/google/callback/"
+    
+    authorization_url, state = flow.authorization_url(
+        access_type='offline',
+        include_granted_scopes='true',
+        prompt='consent'
+    )
+    
+    # Store the state so you can verify it in the callback route
+    # You might want to use a session or database to store this securely
+    # session['state'] = state
+    
+    return authorization_url, state
+
+def handle_oauth2_callback(code, state):
+    """
+    Handle the OAuth 2.0 server's response and obtain credentials.
+    """
+    # Verify that the state matches the one you stored earlier
+    # if state != session['state']:
+    #     return None  # Invalid state, potential CSRF attack
+    
+    secrets_file_path = os.path.join(BASE_DIR, "credentials.json")
+    flow = google_auth_oauthlib.flow.Flow.from_client_secrets_file(
+        secrets_file_path,
+        scopes=SCOPES,
+        state=state
+    )
+
+    if IS_HEROKU_APP:
+        flow.redirect_uri = "https://ai-workbench.herokuapp.com/auth/google/callback/"
+    else:
+        flow.redirect_uri = "http://localhost:8000/auth/google/callback/"
+    
+    flow.fetch_token(code=code)
+    credentials = flow.credentials
+    
+    # Save the credentials for future use
+    credential_path = os.path.join(BASE_DIR, "google-credentials.json")
+    with open(credential_path, "w") as token:
+        token.write(credentials.to_json())
+    
+    return credentials
+
+def get_credentials():
+    """
+    Get valid credentials, either from saved file or through the web auth flow.
+    """
+    credential_path = os.path.join(BASE_DIR, "google-credentials.json")
     if os.path.exists(credential_path):
         creds = Credentials.from_authorized_user_file(credential_path, SCOPES)
-    # If there are no (valid) credentials available, let the user log in.
-    if not creds or not creds.valid:
+        if creds and creds.valid:
+            return creds
         if creds and creds.expired and creds.refresh_token:
             creds.refresh(Request())
-        else:
-            flow = InstalledAppFlow.from_client_secrets_file(
-                secrets_file_path, SCOPES
-            )
-            port = int(os.getenv('PORT', 8080))
-            # creds = flow.run_local_server(port=port)
-            if IS_HEROKU_APP:
-                creds = flow.run_local_server(port=8080, host="ai-workbench-c743dbb30500.herokuapp.com")
-            else:
-                creds = flow.run_local_server(port=8080)
-            # auth_url, _ = flow.authorization_url(prompt='consent')
-        # Save the credentials for the next run
-        with open(credential_path, "w") as token:
-            token.write(creds.to_json())
-    return creds
+            return creds
+    
+    # If no valid credentials are available, start the web auth flow
+    auth_url, state = get_google_auth_url()
+    print(f"Please visit this URL to authorize the application: {auth_url}")
+    
+    # In a web application, you would redirect the user to auth_url here
+    # and handle the callback in a separate route
+    
+    # For demonstration purposes, we'll use input() to simulate the callback
+    code = input("Enter the authorization code: ")
+    return handle_oauth2_callback(code, state)
 
 def append_text(document_id, text):
-    creds = run_setup()
+    creds = get_credentials()
     service = build("docs", "v1", credentials=creds)
 
     # Retrieve the documents contents from the Docs service.

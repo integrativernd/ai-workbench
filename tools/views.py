@@ -1,18 +1,28 @@
-from django.shortcuts import render
-
-from django.http import HttpResponse
-# from django.views.decorators.http import require_http_methods
-from tools.google.docs import run_setup
 from django.shortcuts import redirect
+from django.http import HttpResponse
+from django.conf import settings
+from django.urls import reverse
+from tools.google.docs import get_google_auth_url, handle_oauth2_callback
 
-# @require_http_methods(["GET"])
-def setup_google(request):
-    try:
-        creds = run_setup()
-        # print(f"Auth URL: {auth_url}")
-        return redirect("/")
-        # return HttpResponse("Document updated successfully", status=200)
-        # Redirect to the Google consent page
-        # return redirect(auth_url)
-    except Exception as e:
-        return HttpResponse(f"Error updating document: {str(e)}", status=500)
+def start_google_auth(request):
+    authorization_url, state = get_google_auth_url()
+    request.session['google_auth_state'] = state
+    return redirect(authorization_url)
+
+def google_auth_callback(request):
+    state = request.GET.get('state')
+    code = request.GET.get('code')
+
+    # import pdb; pdb.set_trace()
+
+    stored_state = request.session.get('google_auth_state')
+    if state != stored_state:
+        return HttpResponse('Invalid state parameter. Authorization failed.', status=400)
+    
+    credentials = handle_oauth2_callback(code, state)
+    if credentials:
+        # Store the credentials in the session or database
+        request.session['google_credentials'] = credentials.to_json()
+        return redirect('/')  # Redirect to your home page or dashboard
+    else:
+        return HttpResponse('Failed to obtain credentials.', status=400)
