@@ -1,15 +1,8 @@
-import os
-from config.settings import SYSTEM_PROMPT, TOOL_DEFINITIONS
-# from app.config import OLLAMA_MODEL, BACKGROUND_PROMPT_PATH, SYSTEM_PROMPT_PATH
-# from app.tools.search import get_search_data
-# from app.tools.browse import get_web_page_content
-# from app.utilities import read_file_as_string
-# from app.llm.anthropic_response import get_message, get_basic_message
-# from app.llm.ollama_response import get_message, get_basic_message
-from llm.anthropic_integration import get_message, get_basic_message
+from config.settings import SYSTEM_PROMPT
+from llm.anthropic_integration import get_basic_message
 from tools.search import get_search_data
 from tools.browse import get_web_page_content
-from tools.google.docs import append_text, DOCUMENT_ID
+from tools.google.docs import append_text
 import time
 
 def approximate_token_count(text):
@@ -62,9 +55,17 @@ def get_browse_results(request_data):
 def update_google_document(reuqest_data):
     document_content_text = document_content_for_user_input(reuqest_data['user_input'])
     append_text(reuqest_data['google_doc_id'], document_content_text)
-    return "Document updated"
+    return {
+        "content": 'Document updated',
+        "channel_id": reuqest_data['channel_id'],
+        "ai_agent_name": reuqest_data['ai_agent_name'],
+    }
 
-def analyze_user_input(user_input):
-    print(f"Analyzing request: {user_input}")
+def analyze_user_input(reuqest_data):
+    print(f"Analyzing request: {reuqest_data}")
     time.sleep(20)
-    return 'Background processing finished'
+    return {
+        "ai_agent_name": reuqest_data['ai_agent_name'],
+        "channel_id": reuqest_data['channel_id'],
+        "content": 'Background job finished',
+    }
