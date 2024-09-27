@@ -90,7 +90,7 @@ def respond_to_channel(request_data):
     try:
         channel = Channel.objects.get(channel_id=request_data['channel_id'])
         request_message = Message.objects.create(
-            channel=request_data['channel_id'],
+            channel=channel,
             author=request_data['author'],
             content=request_data['content'],
         )
