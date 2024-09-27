@@ -18,6 +18,7 @@ from config.settings import BASE_DIR, DOCUMENT_ID, IS_HEROKU_APP, BASE_URL, SYST
 from tools.models import IntegrationCredential
 from django.contrib.auth.models import User
 
+SCOPES = ["https://www.googleapis.com/auth/documents"]
 
 def credentials_to_dict(credentials):
     return {

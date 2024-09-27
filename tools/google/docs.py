@@ -12,9 +12,6 @@ from tools.models import IntegrationCredential
 from django.contrib.auth.models import User
 from tools.google.auth import get_credentials
 
-# If modifying these scopes, delete the file token.json.
-SCOPES = ["https://www.googleapis.com/auth/documents"]
-
 ToolFunction = Callable[[Dict[str, Any]], Any]
 
 TOOL_DEFINITIONS = [
