@@ -5,6 +5,7 @@ import google_auth_oauthlib.flow
 from googleapiclient.discovery import build
 from googleapiclient.errors import HttpError
 from config.settings import BASE_DIR, DOCUMENT_ID, IS_HEROKU_APP, BASE_URL
+import json
 
 # If modifying these scopes, delete the file token.json.
 SCOPES = ["https://www.googleapis.com/auth/documents"]
@@ -103,3 +104,17 @@ def append_text(document_id, text):
     result = service.documents().batchUpdate(
         documentId=document_id, body={'requests': requests}).execute()
     return result
+
+def read_document(document_id):
+    creds = get_credentials()
+    service = build("docs", "v1", credentials=creds)
+
+    # Retrieve the documents contents from the Docs service.
+    document = service.documents().get(documentId=document_id).execute()
+
+    print(f"The title of the document is: {document.get('title')}")
+    
+    # Get all text from the document
+    doc_content = service.documents().get(documentId=document_id).execute().get('body').get('content')
+    print(doc_content)
+    return json.dumps(doc_content)

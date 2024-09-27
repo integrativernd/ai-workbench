@@ -356,6 +356,20 @@ TOOL_DEFINITIONS = [
             "required": ["google_doc_id"]
         }
     },
+    {
+        "name": "read_google_document",
+        "description": "Read the contents of a Google Document to respod to the user's request.",
+        "input_schema": {
+            "type": "object",
+            "properties": {
+                "google_doc_id": {
+                    "type": "string",
+                    "description": f"ID of google document to be updated and shared by the user. If not URL is provided the default document ID will be used: {DOCUMENT_ID}"
+                }
+            },
+            "required": ["google_doc_id"]
+        }
+    },
 ]
 
 if os.getenv('SENTRY_DSN') != '':

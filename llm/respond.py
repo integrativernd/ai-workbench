@@ -4,13 +4,16 @@ from rq import Queue
 import pytz
 import json
 from rq.job import Job
-
+from typing import Dict, Callable, Any, List
 from llm.analyze import (
   analyze_user_input,
   get_search_results,
   get_browse_results,
-  update_google_document,
   get_basic_response,
+  get_current_time,
+  get_runtime_environment,
+  update_google_document,
+  read_google_document,
 )
 from channels.models import Message, Channel
 # from tools.browse import get_web_page_summary
@@ -18,28 +21,12 @@ import django_rq
 from llm.anthropic_integration import get_message
 from config.settings import SYSTEM_PROMPT, TOOL_DEFINITIONS, IS_HEROKU_APP, AI_CHANNEL_ID
 
+
+# Define a type for our tool functions
+ToolFunction = Callable[[Dict[str, Any]], Any]
+
 def ping():
     return 'Pong!'
-
-def get_current_time():
-    est = pytz.timezone('US/Eastern')
-    est_time = datetime.now(est)
-    return est_time.strftime('%B %d, %Y, %I:%M %p')
-
-def get_runtime_environment():
-    if IS_HEROKU_APP:
-        return 'PRODUCTION'
-    else:
-        return 'DEVELOPMENT'
-    
-def enqueue_update_google_document(tool_call, user_input):
-    django_rq.enqueue(
-        update_google_document,
-        {
-            "google_doc_id": tool_call.input.get("google_doc_id"),
-            "user_input": user_input,
-        }
-    )
 
 def get_background_jobs():
     """
@@ -56,40 +43,82 @@ def get_background_jobs():
             summary += f"Job ID: {job.id}, Status: {job.args[0]}"
     return summary
 
+# def handle_tool_use(tool_call, request_data):
+#     print(f"Handling tool use: {tool_call.name}")
+#     tool_name = tool_call.name
+#     if tool_name == "get_time":
+#         return get_current_time()
+#     elif tool_name == "get_runtime_environment":
+#         return get_runtime_environment()
+#     elif tool_name == "create_background_job":
+#         request_data['task'] = tool_call.input.get("task")
+#         django_rq.enqueue(analyze_user_input, request_data)
+#         return "Background processing started"
+#     elif tool_name == "get_background_jobs":
+#         return get_background_jobs()
+#     elif tool_name == "get_search_results":
+#         request_data['query'] = tool_call.input.get("query")
+#         django_rq.enqueue(get_search_results, request_data)
+#         return "Searching the web..."
+#     elif tool_name == "get_web_page_summary":
+#         request_data['url'] = tool_call.input.get("url")
+#         django_rq.enqueue(get_browse_results, request_data)
+#         return "Reviewing the web page."
+#     elif tool_name == "update_google_document":
+#         request_data['google_doc_id'] = tool_call.input.get("google_doc_id")
+#         django_rq.enqueue(update_google_document, request_data)
+#         return "Updating document."
+#     elif tool_name == "get_basic_response":
+#         request_data['prompt'] = tool_call.input.get("prompt")
+#         django_rq.enqueue(get_basic_response, request_data)
+#         return "Processing request..."
+#     else:
+#         return f"Unknown tool: {tool_name}"
+
+# Mapping of tool names to their respective functions
+TOOL_MAP: Dict[str, ToolFunction] = {
+    "get_time": lambda _: get_current_time(),
+    "get_runtime_environment": lambda _: get_runtime_environment(),
+    "create_background_job": lambda data: django_rq.enqueue(analyze_user_input, data),
+    "get_background_jobs": lambda _: get_background_jobs(),
+    "get_search_results": lambda data: django_rq.enqueue(get_search_results, data),
+    "get_web_page_summary": lambda data: django_rq.enqueue(get_browse_results, data),
+    "update_google_document": lambda data: django_rq.enqueue(update_google_document, data),
+    "get_basic_response": lambda data: django_rq.enqueue(get_basic_response, data),
+    "read_google_document": lambda data: django_rq.enqueue(read_google_document, data),
+}
+
+# Mapping of tool names to their input keys
+TOOL_INPUT_MAP: Dict[str, List[str]] = {
+    "create_background_job": ["task"],
+    "get_search_results": ["query"],
+    "get_web_page_summary": ["url"],
+    "update_google_document": ["google_doc_id"],
+    "get_basic_response": ["prompt", "max_tokens"],
+    "read_google_document": ["google_doc_id"],
+}
+
 def handle_tool_use(tool_call, request_data):
     print(f"Handling tool use: {tool_call.name}")
-    tool_name = tool_call.name
-    if tool_name == "get_time":
-        return get_current_time()
-    elif tool_name == "get_runtime_environment":
-        return get_runtime_environment()
-    elif tool_name == "create_background_job":
-        request_data['task'] = tool_call.input.get("task")
-        django_rq.enqueue(analyze_user_input, request_data)
-        return "Background processing started"
-    elif tool_name == "get_background_jobs":
-        return get_background_jobs()
-    elif tool_name == "get_search_results":
-        request_data['query'] = tool_call.input.get("query")
-        django_rq.enqueue(get_search_results, request_data)
-        return "Searching the web..."
-    elif tool_name == "get_web_page_summary":
-        request_data['url'] = tool_call.input.get("url")
-        django_rq.enqueue(get_browse_results, request_data)
-        return "Reviewing the web page."
-    elif tool_name == "update_google_document":
-        request_data['google_doc_id'] = tool_call.input.get("google_doc_id")
-        django_rq.enqueue(update_google_document, request_data)
-        return "Updating document."
-    elif tool_name == "get_basic_response":
-        request_data['prompt'] = tool_call.input.get("prompt")
-        django_rq.enqueue(get_basic_response, request_data)
-        return "Processing request..."
+    
+    tool_function = TOOL_MAP.get(tool_call.name)
+    if not tool_function:
+        return f"Unknown tool: {tool_call.name}"
+    
+    input_keys = TOOL_INPUT_MAP.get(tool_call.name, [])
+    for key in input_keys:
+        if key in tool_call.input:
+            request_data[key] = tool_call.input[key]
+    
+    result = tool_function(request_data)
+    if isinstance(result, str):
+        return result
+    elif hasattr(result, 'id'):  # Check if it's a job object
+        return f" Job started with ID: {result.id}"
     else:
-        return f"Unknown tool: {tool_name}"
+        return "Processing started"
 
-def respond_to_channel(request_data):
-    print(f"Responding to channel: {request_data}")
+def persist_message(request_data):
     try:
         channel = Channel.objects.get(channel_id=request_data['channel_id'])
         request_message = Message.objects.create(
@@ -100,9 +129,18 @@ def respond_to_channel(request_data):
     except Exception as e:
         print(f"Error saving message: {e}")
 
+def respond_to_channel(request_data):
+    persist_message(request_data)
+
     message_history = []
     message_history.append({ "role": "user", "content": request_data['content'] })
-    response_message = get_message(request_data['system'], TOOL_DEFINITIONS, message_history)
+    
+    response_message = get_message(
+        request_data['ai_agent_system_prompt'],
+        TOOL_DEFINITIONS,
+        message_history
+    )
+    
     full_response = ""
     for content in response_message.content:
         if content.type == "text":

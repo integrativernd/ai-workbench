@@ -1,9 +1,23 @@
-from config.settings import SYSTEM_PROMPT
+from config.settings import SYSTEM_PROMPT, IS_HEROKU_APP
 from llm.anthropic_integration import get_basic_message
 from tools.search import get_search_data
 from tools.browse import get_web_page_content
-from tools.google.docs import append_text
+from tools.google.docs import append_text, read_document
 import time
+import pytz
+from datetime import datetime
+
+
+def get_current_time():
+    est = pytz.timezone('US/Eastern')
+    est_time = datetime.now(est)
+    return est_time.strftime('%B %d, %Y, %I:%M %p')
+
+def get_runtime_environment():
+    if IS_HEROKU_APP:
+        return 'PRODUCTION'
+    else:
+        return 'DEVELOPMENT'
 
 def approximate_token_count(text):
     words = text.split()
@@ -24,9 +38,9 @@ def summarize_content(content):
     )
     return message.content[0].text
 
-def document_content_for_user_input(user_input):
+def document_content_for_user_input(system_prompt, user_input):
     message = get_basic_message(
-        "Respond to user's request with a useful and accurate response given your current knowledge.",
+        system_prompt,
         [
             {
                 "role": "user",
@@ -52,8 +66,37 @@ def get_browse_results(request_data):
         "ai_agent_name": request_data['ai_agent_name'],
     }
 
+def read_google_document(request_data):
+    response_content = document_content_for_user_input(
+        f"""
+        BASE_PROMPT
+        {request_data['ai_agent_system_prompt']}
+        BACKGROUND_PROCESS
+        You are at the point in the response cycle where you need to generate the content
+        to address the user's request. You are in a running background process and 
+        you can respond in a single response in the slack thread with a maximum of 2000 characters.
+        """,
+        read_document(request_data['google_doc_id'])
+    )
+    return {
+        "content": response_content,
+        "channel_id": request_data['channel_id'],
+        "ai_agent_name": request_data['ai_agent_name'],
+    }
+
 def update_google_document(request_data):
-    document_content_text = document_content_for_user_input(request_data['user_input'])
+    document_content_text = document_content_for_user_input(
+        f"""
+        BASE_PROMPT
+        {request_data['ai_agent_system_prompt']}
+        BACKGROUND_PROCESS
+        You are at the point in the response cycle where you need to generate the content
+        to address the user's request. You are in a running background process and 
+        can return as much content as possible to address the user's request. If you
+        think a tool call would be helpful include a note at the end of the document.
+        """,
+        request_data['content']
+    )
     append_text(request_data['google_doc_id'], document_content_text)
     return {
         "content": 'Document updated',

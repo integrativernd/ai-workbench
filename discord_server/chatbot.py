@@ -24,7 +24,7 @@ def handle_message(message_data):
         "ai_agent_name": message_data['ai_agent_name'],
         "channel": message_data['channel'],
         "content": message_data['content'],
-        "system": ai_agent.description,
+        "ai_agent_system_prompt": ai_agent.description,
         "author": message_data['author'],
     })
     return {
@@ -123,6 +123,6 @@ class ChatBot(commands.Bot):
                     "ai_agent_name": ai_agent_name,
                     "content": message.content,
                     "author": str(message.author),
-                    "channel": str(message.channel)
+                    "channel": str(message.channel),
                 },
             )
