@@ -387,3 +387,5 @@ if os.getenv('SENTRY_DSN') != '':
         # We recommend adjusting this value in production.
         profiles_sample_rate=1.0,
     )
+
+CREDENTIALS_ENCRYPTION_KEY = os.getenv('CREDENTIALS_ENCRYPTION_KEY')

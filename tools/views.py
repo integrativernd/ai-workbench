@@ -25,7 +25,7 @@ def google_auth_callback(request):
     if state != stored_state:
         return HttpResponse('Invalid state parameter. Authorization failed.', status=400)
     
-    credentials = handle_oauth2_callback(code, state)
+    credentials = handle_oauth2_callback(request, code, state)
     if credentials:
         # Store the credentials in the session or database
         request.session['google_credentials'] = credentials.to_json()

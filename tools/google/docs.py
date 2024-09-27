@@ -8,6 +8,8 @@ from googleapiclient.errors import HttpError
 from config.settings import BASE_DIR, DOCUMENT_ID, IS_HEROKU_APP, BASE_URL, SYSTEM_PROMPT
 import json
 from llm.anthropic_integration import get_basic_message, anthropic_client
+from tools.models import IntegrationCredential
+from django.contrib.auth.models import User
 
 # If modifying these scopes, delete the file token.json.
 SCOPES = ["https://www.googleapis.com/auth/documents"]
@@ -77,6 +79,81 @@ TOOL_DEFINITIONS = [
         }
     },
 ]
+
+def credentials_to_dict(credentials):
+    return {
+        'token': credentials.token,
+        'refresh_token': credentials.refresh_token,
+        'token_uri': credentials.token_uri,
+        'client_id': credentials.client_id,
+        'client_secret': credentials.client_secret,
+        'scopes': credentials.scopes
+    }
+
+
+def get_google_auth_url():
+    """
+    Generate the Google OAuth 2.0 authorization URL for the web auth flow.
+    """
+    secrets_file_path = os.path.join(BASE_DIR, "credentials.json")
+    flow = google_auth_oauthlib.flow.Flow.from_client_secrets_file(
+        secrets_file_path,
+        scopes=SCOPES,
+    )
+    flow.redirect_uri = f"{BASE_URL}/auth/google/callback/"
+    authorization_url, state = flow.authorization_url(
+        access_type='offline',
+        include_granted_scopes='true',
+        prompt='consent'
+    )
+    
+    # Store the state so you can verify it in the callback route
+    # You might want to use a session or database to store this securely
+    # session['state'] = state
+    return authorization_url, state
+
+def handle_oauth2_callback(request, code, state):
+    """
+    Handle the OAuth 2.0 server's response and obtain credentials.
+    """
+    # Verify that the state matches the one you stored earlier
+    # if state != session['state']:
+    #     return None  # Invalid state, potential CSRF attack
+    secrets_file_path = os.path.join(BASE_DIR, "credentials.json")
+    flow = google_auth_oauthlib.flow.Flow.from_client_secrets_file(
+        secrets_file_path,
+        scopes=SCOPES,
+        state=state
+    )
+
+    flow.redirect_uri = f"{BASE_URL}/auth/google/callback/"
+    flow.fetch_token(code=code)
+    credentials = flow.credentials
+    
+    # Save the credentials in the database
+    IntegrationCredential.objects.update_or_create(
+        user=request.user,
+        provider='google',
+        defaults={'credentials': json.dumps(credentials_to_dict(credentials))}
+    )
+
+    return credentials
+
+def get_credentials(provider='google'):
+    try:
+        user = User.objects.get(username='jtorreggiani')
+        credential = IntegrationCredential.objects.get(user=user, provider=provider)
+        cred_dict = json.loads(credential.get_credentials())
+        return Credentials(
+            token=cred_dict['token'],
+            refresh_token=cred_dict['refresh_token'],
+            token_uri=cred_dict['token_uri'],
+            client_id=cred_dict['client_id'],
+            client_secret=cred_dict['client_secret'],
+            scopes=cred_dict['scopes']
+        )
+    except IntegrationCredential.DoesNotExist:
+        return None
 
 class ClaudeGDocsIntegration:
     def __init__(self, document_id, docs_service):
@@ -227,78 +304,7 @@ class ClaudeGDocsIntegration:
             elif content.type == "tool_use":
                 tool_result = self.handle_tool_use(content)
                 full_response += tool_result
-
         return full_response
-
-
-def get_google_auth_url():
-    """
-    Generate the Google OAuth 2.0 authorization URL for the web auth flow.
-    """
-    secrets_file_path = os.path.join(BASE_DIR, "credentials.json")
-    flow = google_auth_oauthlib.flow.Flow.from_client_secrets_file(
-        secrets_file_path,
-        scopes=SCOPES,
-    )
-    flow.redirect_uri = f"{BASE_URL}/auth/google/callback/"
-    authorization_url, state = flow.authorization_url(
-        access_type='offline',
-        include_granted_scopes='true',
-        prompt='consent'
-    )
-    
-    # Store the state so you can verify it in the callback route
-    # You might want to use a session or database to store this securely
-    # session['state'] = state
-    return authorization_url, state
-
-def handle_oauth2_callback(code, state):
-    """
-    Handle the OAuth 2.0 server's response and obtain credentials.
-    """
-    # Verify that the state matches the one you stored earlier
-    # if state != session['state']:
-    #     return None  # Invalid state, potential CSRF attack
-    secrets_file_path = os.path.join(BASE_DIR, "credentials.json")
-    flow = google_auth_oauthlib.flow.Flow.from_client_secrets_file(
-        secrets_file_path,
-        scopes=SCOPES,
-        state=state
-    )
-
-    flow.redirect_uri = f"{BASE_URL}/auth/google/callback/"
-    flow.fetch_token(code=code)
-    credentials = flow.credentials
-    
-    # Save the credentials for future use
-    credential_path = os.path.join(BASE_DIR, "google-credentials.json")
-    with open(credential_path, "w") as token:
-        token.write(credentials.to_json())
-    
-    return credentials
-
-def get_credentials():
-    """
-    Get valid credentials, either from saved file or through the web auth flow.
-    """
-    credential_path = os.path.join(BASE_DIR, "google-credentials.json")
-    if os.path.exists(credential_path):
-        creds = Credentials.from_authorized_user_file(credential_path, SCOPES)
-        if creds and creds.valid:
-            return creds
-        if creds and creds.expired and creds.refresh_token:
-            creds.refresh(Request())
-            return creds
-    
-    # If no valid credentials are available, start the web auth flow
-    auth_url, state = get_google_auth_url()
-    print(f"Please visit this URL to authorize the application: {auth_url}")
-    # In a web application, you would redirect the user to auth_url here
-    # and handle the callback in a separate route
-
-    # For demonstration purposes, we'll use input() to simulate the callback
-    code = input("Enter the authorization code: ")
-    return handle_oauth2_callback(code, state)
 
 def append_text(document_id, content):
     creds = get_credentials()

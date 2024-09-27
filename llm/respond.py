@@ -77,7 +77,7 @@ def handle_tool_use(tool_call, request_data):
     for key in input_keys:
         if key in tool_call.input:
             request_data[key] = tool_call.input[key]
-    
+
     result = tool_function(request_data)
     if isinstance(result, str):
         return result
