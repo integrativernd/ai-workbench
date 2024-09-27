@@ -1,6 +1,6 @@
 import os
-import discord
 from discord.ext import commands, tasks
+import discord
 from llm.respond import respond_to_channel
 from config.settings import SYSTEM_PROMPT, AI_CHANNEL_ID, IS_HEROKU_APP
 import django_rq
@@ -81,8 +81,6 @@ class ChatBot(commands.Bot):
             job = Job.fetch(job_id, connection=message_queue.connection)
             result_data = job.latest_result().return_value
             channel = self.get_channel(int(result_data['channel_id']))
-            # print(f"{result_data['ai_agent_name']} finished processing.")
-            # print(self.ai_agent.name)
             if channel and self.ai_agent.name == result_data['ai_agent_name']:
                 message_queue.finished_job_registry.remove(job.id)
                 await channel.send(result_data['content'])
@@ -110,11 +108,14 @@ class ChatBot(commands.Bot):
         if message.author.bot:
             print(f'Bot {message.author.bot}')
             return
-        elif message.content.startswith('$'):
-            await self.process_commands(message)
-            return
-        elif message.content.startswith(f"@{ai_agent_name}"):
-            # await message.channel.send('Ok.')
+
+        discord_handle = f"@{ai_agent_name}"
+        if message.content.startswith(discord_handle):
+            if message.content == f"{discord_handle} ping":
+                await message.channel.send('pong')
+                return
+
+            await message.channel.send('Ok.')
             queue = django_rq.get_queue('default')
             queue.enqueue(
                 handle_message,

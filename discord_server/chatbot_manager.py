@@ -3,6 +3,7 @@ import signal
 from contextlib import asynccontextmanager
 from asgiref.sync import sync_to_async
 from discord_server.chatbot import ChatBot
+from discord.ext import commands
 from config.settings import IS_HEROKU_APP
 from ai_agents.models import AIAgent
 
