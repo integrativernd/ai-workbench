@@ -42,6 +42,9 @@ def enqueue_update_google_document(tool_call, user_input):
     )
 
 def get_background_jobs():
+    """
+    Handles summarizing the background jobs that are currently running.
+    """
     message_queue = django_rq.get_queue("default")
     job_ids = message_queue.started_job_registry.get_job_ids()
     if len(job_ids) == 0:
