@@ -43,38 +43,6 @@ def get_background_jobs():
             summary += f"Job ID: {job.id}, Status: {job.args[0]}"
     return summary
 
-# def handle_tool_use(tool_call, request_data):
-#     print(f"Handling tool use: {tool_call.name}")
-#     tool_name = tool_call.name
-#     if tool_name == "get_time":
-#         return get_current_time()
-#     elif tool_name == "get_runtime_environment":
-#         return get_runtime_environment()
-#     elif tool_name == "create_background_job":
-#         request_data['task'] = tool_call.input.get("task")
-#         django_rq.enqueue(analyze_user_input, request_data)
-#         return "Background processing started"
-#     elif tool_name == "get_background_jobs":
-#         return get_background_jobs()
-#     elif tool_name == "get_search_results":
-#         request_data['query'] = tool_call.input.get("query")
-#         django_rq.enqueue(get_search_results, request_data)
-#         return "Searching the web..."
-#     elif tool_name == "get_web_page_summary":
-#         request_data['url'] = tool_call.input.get("url")
-#         django_rq.enqueue(get_browse_results, request_data)
-#         return "Reviewing the web page."
-#     elif tool_name == "update_google_document":
-#         request_data['google_doc_id'] = tool_call.input.get("google_doc_id")
-#         django_rq.enqueue(update_google_document, request_data)
-#         return "Updating document."
-#     elif tool_name == "get_basic_response":
-#         request_data['prompt'] = tool_call.input.get("prompt")
-#         django_rq.enqueue(get_basic_response, request_data)
-#         return "Processing request..."
-#     else:
-#         return f"Unknown tool: {tool_name}"
-
 # Mapping of tool names to their respective functions
 TOOL_MAP: Dict[str, ToolFunction] = {
     "get_time": lambda _: get_current_time(),
@@ -114,7 +82,7 @@ def handle_tool_use(tool_call, request_data):
     if isinstance(result, str):
         return result
     elif hasattr(result, 'id'):  # Check if it's a job object
-        return f" Job started with ID: {result.id}"
+        return f"Starting background process: {result.id}"
     else:
         return "Processing started"
 
@@ -132,13 +100,10 @@ def persist_message(request_data):
 def respond_to_channel(request_data):
     persist_message(request_data)
 
-    message_history = []
-    message_history.append({ "role": "user", "content": request_data['content'] })
-    
     response_message = get_message(
         request_data['ai_agent_system_prompt'],
         TOOL_DEFINITIONS,
-        message_history
+        [{ "role": "user", "content": request_data['content'] }],
     )
     
     full_response = ""
@@ -148,8 +113,11 @@ def respond_to_channel(request_data):
         elif content.type == "tool_use":
             tool_result = handle_tool_use(content, request_data)
             full_response += tool_result
-    # message_history.append({ "role": "assistant", "content": full_response })
-    # message_history = []
-    # Shorten the response to 2000 characters to avoid Discord message length limits.
-    # TODO: Implement a more sophisticated way to handle long responses.
+
+    persist_message({
+        "channel_id": request_data['channel_id'],
+        "author": request_data["ai_agent_name"],
+        "content": full_response,
+    })
+    
     return full_response

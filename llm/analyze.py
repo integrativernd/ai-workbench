@@ -7,7 +7,6 @@ import time
 import pytz
 from datetime import datetime
 
-
 def get_current_time():
     est = pytz.timezone('US/Eastern')
     est_time = datetime.now(est)
@@ -85,19 +84,21 @@ def read_google_document(request_data):
     }
 
 def update_google_document(request_data):
-    document_content_text = document_content_for_user_input(
+    document_content_data = read_document(request_data['google_doc_id'])
+    response_content = document_content_for_user_input(
         f"""
         BASE_PROMPT
         {request_data['ai_agent_system_prompt']}
+        CURRENT DOCUMENT CONTENT JSON DATA
+        {document_content_data}
         BACKGROUND_PROCESS
         You are at the point in the response cycle where you need to generate the content
-        to address the user's request. You are in a running background process and 
-        can return as much content as possible to address the user's request. If you
-        think a tool call would be helpful include a note at the end of the document.
+        to address the user's request. Please return the content to be appended to the document.
+        Only return the text content of your response. The final document will be updated with your response.
         """,
         request_data['content']
     )
-    append_text(request_data['google_doc_id'], document_content_text)
+    append_text(request_data['google_doc_id'], response_content)
     return {
         "content": 'Document updated',
         "channel_id": request_data['channel_id'],

@@ -42,6 +42,10 @@ SECRET_KEY = os.environ.get(
     default=secrets.token_urlsafe(nbytes=64),
 )
 
+GOOGLE_DOC_SYSTEM_PROMPT = """
+You are an AI Agent optimized to update Google Documents based on the users request.
+"""
+
 # The `DYNO` env var is set on Heroku CI, but it's not a real Heroku app, so we have to
 # also explicitly exclude CI:
 # https://devcenter.heroku.com/articles/heroku-ci#immutable-environment-variables
@@ -319,20 +323,20 @@ TOOL_DEFINITIONS = [
             "required": ["query"]
         }
     },
-    {
-        "name": "create_background_job",
-        "description": "Create a background job to handle a long-running task. Only trigger this job if you require multiple API calls or tool executions to be able to respond correctly.",
-        "input_schema": {
-            "type": "object",
-            "properties": {
-                "task": {
-                    "type": "string",
-                    "description": "The task to be executed in the background"
-                }
-            },
-            "required": ["task"]
-        }
-    },
+    # {
+    #     "name": "create_background_job",
+    #     "description": "Create a background job to handle a long-running task. Only trigger this job if you require multiple API calls or tool executions to be able to respond correctly.",
+    #     "input_schema": {
+    #         "type": "object",
+    #         "properties": {
+    #             "task": {
+    #                 "type": "string",
+    #                 "description": "The task to be executed in the background"
+    #             }
+    #         },
+    #         "required": ["task"]
+    #     }
+    # },
     {
         "name": "get_background_jobs",
         "description": "Call this tool if the user asks you what you are working on or doing in general. Background jobs are the only thing you could be doing besides responding synchronously in the thread.",
