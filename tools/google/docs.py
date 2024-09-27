@@ -51,18 +51,6 @@ TOOL_DEFINITIONS = [
             "required": ["old_text", "new_text"]
         }
     },
-    # {
-    #     "name": "create_title",
-    #     "description": "Create a new title (Heading 1) at a specific index.",
-    #     "input_schema": {
-    #         "type": "object",
-    #         "properties": {
-    #             "title": {"type": "string"},
-    #             "index": {"type": "integer"}
-    #         },
-    #         "required": ["title"]
-    #     }
-    # },
     {
         "name": "add_section",
         "description": "Add a new section (Heading 2) with content under a specified existing title.",
@@ -78,7 +66,7 @@ TOOL_DEFINITIONS = [
     },
 ]
 
-class ClaudeGDocsIntegration:
+class GoogleDocsAIAgent:
     def __init__(self, document_id, docs_service):
         self.document_id = document_id
         self.docs_service = docs_service
@@ -232,16 +220,14 @@ class ClaudeGDocsIntegration:
 def append_text(document_id, content):
     creds = get_credentials()
     service = build("docs", "v1", credentials=creds)
-    google_update_agent = ClaudeGDocsIntegration(document_id, service)
+    google_update_agent = GoogleDocsAIAgent(document_id, service)
     google_update_agent.process_user_command(content)
 
 def read_document(document_id):
     creds = get_credentials()
     service = build("docs", "v1", credentials=creds)
-    # Retrieve the documents contents from the Docs service.
     document = service.documents().get(documentId=document_id).execute()
     print(f"The title of the document is: {document.get('title')}")
-    # Get all text from the document
     doc_content = service.documents().get(documentId=document_id).execute().get('body').get('content')
     return json.dumps(doc_content)
 
@@ -249,11 +235,9 @@ def update_doc_with_anthropic(document_id, instructions):
     # Setup for Google Docs and Anthropic APIs
     creds = get_credentials()
     service = build("docs", "v1", credentials=creds)
-
     # Fetch the current document content
     document = service.documents().get(documentId=document_id).execute()
     doc_content = document.get('body').get('content')
-
     # Prepare the prompt for Anthropic
     prompt = f"""
     Here's the current structure of a Google Doc:
