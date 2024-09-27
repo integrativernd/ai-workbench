@@ -293,10 +293,9 @@ def get_credentials():
     # If no valid credentials are available, start the web auth flow
     auth_url, state = get_google_auth_url()
     print(f"Please visit this URL to authorize the application: {auth_url}")
-    
     # In a web application, you would redirect the user to auth_url here
     # and handle the callback in a separate route
-    
+
     # For demonstration purposes, we'll use input() to simulate the callback
     code = input("Enter the authorization code: ")
     return handle_oauth2_callback(code, state)

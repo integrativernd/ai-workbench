@@ -33,4 +33,5 @@ urlpatterns = [
     path('sentry-debug/', trigger_error),
     path('auth/google/start/', tool_views.start_google_auth, name='start_google_auth'),
     path('auth/google/callback/', tool_views.google_auth_callback, name='google_auth_callback'),
+    path('auth/google/check/', tool_views.check_google_auth, name='check_google_auth'),
 ]

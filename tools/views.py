@@ -32,3 +32,10 @@ def google_auth_callback(request):
         return redirect('/')  # Redirect to your home page or dashboard
     else:
         return HttpResponse('Failed to obtain credentials.', status=400)
+    
+@superuser_required
+def check_google_auth(request):
+    if 'google_credentials' in request.session:
+        return HttpResponse('Google credentials are stored.')
+    else:
+        return HttpResponse('Google credentials are not stored.', status=400)
