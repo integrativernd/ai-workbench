@@ -27,7 +27,7 @@ class ChatBotManager:
         :param ai_agent: The AIAgent object for which to start a bot
         """
         if ai_agent.id in self.bots:
-            print(f"Bot for agent {ai_agent.name} is already running.")
+            print(f"Chatbot for AI Agent {ai_agent.name} is already running.")
             return
 
         bot = ChatBot(ai_agent)
@@ -36,7 +36,7 @@ class ChatBotManager:
         try:
             await bot.start(ai_agent.bot_token)
         except asyncio.CancelledError:
-            print(f"Bot {ai_agent.name} was cancelled")
+            print(f"Chatbot for AI Agent {ai_agent.name} was cancelled")
         except Exception as e:
             print(f"Error in bot {ai_agent.name}: {e}")
         finally:

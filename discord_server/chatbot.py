@@ -25,6 +25,7 @@ def handle_message(message_data):
         "channel": message_data['channel'],
         "content": message_data['content'],
         "system": ai_agent.description,
+        "author": message_data['author'],
     })
     return {
         "ai_agent_name": message_data['ai_agent_name'],
@@ -103,7 +104,7 @@ class ChatBot(commands.Bot):
         if not self.is_active:
             return
 
-        # print(f'{message.author}: {message.content} {message.channel}')
+        print(f'{message.author}: {message.content} {message.channel}')
 
         ai_agent_name = self.ai_agent.name.lower()
         if message.author.bot:

@@ -52,20 +52,37 @@ def get_browse_results(request_data):
         "ai_agent_name": request_data['ai_agent_name'],
     }
 
-def update_google_document(reuqest_data):
-    document_content_text = document_content_for_user_input(reuqest_data['user_input'])
-    append_text(reuqest_data['google_doc_id'], document_content_text)
+def update_google_document(request_data):
+    document_content_text = document_content_for_user_input(request_data['user_input'])
+    append_text(request_data['google_doc_id'], document_content_text)
     return {
         "content": 'Document updated',
-        "channel_id": reuqest_data['channel_id'],
-        "ai_agent_name": reuqest_data['ai_agent_name'],
+        "channel_id": request_data['channel_id'],
+        "ai_agent_name": request_data['ai_agent_name'],
     }
 
-def analyze_user_input(reuqest_data):
-    print(f"Analyzing request: {reuqest_data}")
+def analyze_user_input(request_data):
+    print(f"Analyzing request: {request_data}")
     time.sleep(20)
     return {
-        "ai_agent_name": reuqest_data['ai_agent_name'],
-        "channel_id": reuqest_data['channel_id'],
+        "ai_agent_name": request_data['ai_agent_name'],
+        "channel_id": request_data['channel_id'],
         "content": 'Background job finished',
+    }
+
+def get_basic_response(request_data):
+    message = get_basic_message(
+        SYSTEM_PROMPT,
+        [
+            {
+                "role": "user",
+                "content": request_data["prompt"],
+            },
+        ],
+    )
+    response_text = message.content[0].text
+    return {
+        "content": response_text[:2000],
+        "channel_id": request_data['channel_id'],
+        "ai_agent_name": request_data['ai_agent_name'],
     }
