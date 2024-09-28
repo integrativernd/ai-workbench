@@ -8,7 +8,6 @@ from tools.browse import get_web_page_content
 from tools.google.docs import append_text, read_document
 from tools.github.pull_requests import open_pull_request
 from tools.github.issues import create_github_issue, read_github_issue
-import time
 import pytz
 from datetime import datetime
 from rq.job import Job

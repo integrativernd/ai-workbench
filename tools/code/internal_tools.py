@@ -1,13 +1,4 @@
-import os
-import django
-import sys
-
-sys.path.append(os.path.dirname(os.path.abspath(__file__)))
-os.environ.setdefault("DJANGO_SETTINGS_MODULE", "config.settings")
-django.setup()
-
 from llm.anthropic_integration import get_basic_message
-import json
 
 def append_tool_class(file_path, new_tool_class):
     with open(file_path, 'r') as file:

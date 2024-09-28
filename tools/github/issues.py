@@ -1,6 +1,5 @@
 import os
 import requests
-from datetime import datetime
 
 API_URL = "https://api.github.com"
 
