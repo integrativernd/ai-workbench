@@ -1,16 +1,23 @@
-from typing import Dict, List
+from typing import Dict, List, Any, Type
+from abc import ABC, abstractmethod
 import django_rq
 from channels.models import Message
+import pytz
+from datetime import datetime
+from rq.job import Job
+import inspect
+
+from config.settings import SYSTEM_PROMPT, PRODUCTION, BASE_DIR
+
 from llm.anthropic_integration import get_message, get_basic_message
-from config.settings import TOOL_DEFINITIONS, SYSTEM_PROMPT, PRODUCTION, BASE_DIR
+
+from tools.config import TOOL_DEFINITIONS
 from tools.search import get_search_data
 from tools.browse import get_web_page_content
 from tools.google.docs import append_text, read_document
 from tools.github.pull_requests import open_pull_request
 from tools.github.issues import create_github_issue, read_github_issue
-import pytz
-from datetime import datetime
-from rq.job import Job
+
 
 
 def get_current_time():
@@ -50,14 +57,15 @@ def create_system_prompt(base_prompt, additional_context=""):
 
 # These classes are used to define the tools that the AI can use to respond to user requests.
 # Each tool is a class that inherits from BaseTool and implements the execute method.
-class BaseTool:
-    def __init__(self, input_keys: List[str] = None):
+class BaseTool(ABC):
+    def __init__(self, input_keys: List[str] = None, immediate: bool = False):
         self.input_keys = input_keys or []
+        self.immediate = immediate
 
-    def execute(self, request_data):
-        raise NotImplementedError("Subclasses must implement execute method")
-
-class DataTool(BaseTool):
+    @abstractmethod
+    def execute(self, request_data: Dict[str, Any]) -> str:
+        pass
+class GetTimeTool(BaseTool):
     def __init__(self):
         super().__init__()
         self.immediate = True
@@ -65,7 +73,7 @@ class DataTool(BaseTool):
     def execute(self, _):
         return get_current_time()
 
-class RunTimeEnvironmentTool(BaseTool):
+class GetRuntimeEnvironmentTool(BaseTool):
     def __init__(self):
         super().__init__()
         self.immediate = True
@@ -73,7 +81,7 @@ class RunTimeEnvironmentTool(BaseTool):
     def execute(self, request_data):
         return get_runtime_environment()
 
-class SearchTool(BaseTool):
+class GetSearchResultsTool(BaseTool):
     def __init__(self):
         super().__init__(["query"])
 
@@ -81,7 +89,7 @@ class SearchTool(BaseTool):
         request_data['content'] = summarize_content(get_search_data(request_data['query']))
         return request_data
 
-class BrowseTool(BaseTool):
+class GetWebPageSummaryTool(BaseTool):
     def __init__(self):
         super().__init__(["url"])
 
@@ -89,7 +97,7 @@ class BrowseTool(BaseTool):
         request_data['content'] = summarize_content(get_web_page_content(request_data['url']))
         return request_data
 
-class ReadGoogleDocTool(BaseTool):
+class ReadGoogleDocumentTool(BaseTool):
     def __init__(self):
         super().__init__(["google_doc_id"])
 
@@ -120,7 +128,7 @@ class ReadProjectOverviewTool(BaseTool):
         request_data['content'] = message.content[0].text
         return request_data
 
-class UpdateGoogleDocTool(BaseTool):
+class UpdateGoogleDocumentTool(BaseTool):
     def __init__(self):
         super().__init__(["google_doc_id", "content"])
 
@@ -149,7 +157,7 @@ class OpenPullRequestTool(BaseTool):
             request_data['content'] = "Error opening pull request."
         return request_data
     
-class BackgroundJobTool(BaseTool):
+class GetBackgroundJobsTool(BaseTool):
     def __init__(self):
         super().__init__()
         self.immediate = True
@@ -176,7 +184,7 @@ class CreateGithubIssueTool(BaseTool):
         return request_data
     
 
-class AnalyzeGithubIssue(BaseTool):
+class AnalyzeGithubIssueTool(BaseTool):
     def __init__(self):
         super().__init__(["issue_number", "issue_url", "description"])
 
@@ -206,7 +214,14 @@ class AnalyzeGithubIssue(BaseTool):
         return request_data
 
 # AI ADD CLASSES HERE
+
 class ToolRegistry:
+    """
+    The ToolRegistry class is used to register and manage the tools that the AI
+    can use to respond to user requests. It automatically registers all classes
+    that inherit from BaseTool in the current module.
+    """
+    
     def __init__(self):
         self.tools: Dict[str, BaseTool] = {}
 
@@ -216,9 +231,26 @@ class ToolRegistry:
     def get(self, name: str) -> BaseTool:
         return self.tools.get(name)
 
+    def auto_register_tools(self):
+        # Get all classes in the current module that inherit from BaseTool
+        tool_classes = {name: cls for name, cls in globals().items() 
+                        if inspect.isclass(cls) and issubclass(cls, BaseTool) and cls != BaseTool}
+        
+        for tool_def in TOOL_DEFINITIONS:
+            tool_name = tool_def['name']
+            class_name = ''.join(word.capitalize() for word in tool_name.split('_')) + 'Tool'
+
+            print(class_name)
+            
+            if class_name in tool_classes:
+                tool_class = tool_classes[class_name]
+                tool_instance = tool_class()
+                self.register(tool_name, tool_instance)
+            else:
+                print(f"Warning: No matching class found for tool '{tool_name}'")
+
     def handle_tool_use(self, ai_agent, tool_call, request_data):
         print(f"Handling tool use: {tool_call.name}")
-
         tool = self.get(tool_call.name)
         if not tool:
             return f"Unknown tool: {tool_call.name}"
@@ -227,7 +259,7 @@ class ToolRegistry:
             if key in tool_call.input:
                 request_data[key] = tool_call.input[key]
 
-        if hasattr(tool, 'immediate') and tool.immediate:
+        if tool.immediate:
             return tool.execute(request_data)
         
         result = django_rq.enqueue(tool.execute, request_data)
@@ -237,26 +269,14 @@ class ToolRegistry:
         elif hasattr(result, 'id'):
             ai_agent.add_job(result.id)
             ai_agent.save()
-            response = ai_agent.respond_to_user(f"""
-                State that you are using the {tool_call.name} in a concise and natural way.
-            """)
+            response = ai_agent.respond_to_user(f"State that you are using the {tool_call.name} in a concise and natural way.")
             return f"{response}: {result.id}"
         else:
             return "Processing started"
 
 # Initialize the tool registry
 tool_registry = ToolRegistry()
-tool_registry.register("get_time", DataTool())
-tool_registry.register("get_runtime_environment", RunTimeEnvironmentTool())
-tool_registry.register("get_search_results", SearchTool())
-tool_registry.register("get_web_page_summary", BrowseTool())
-tool_registry.register("update_google_document", UpdateGoogleDocTool())
-tool_registry.register("read_google_document", ReadGoogleDocTool())
-tool_registry.register("read_project_overview", ReadProjectOverviewTool())
-tool_registry.register("open_pull_request", OpenPullRequestTool())
-tool_registry.register("get_background_jobs", BackgroundJobTool())
-tool_registry.register("create_github_issue", CreateGithubIssueTool())
-tool_registry.register("analyze_github_issue", AnalyzeGithubIssue())
+tool_registry.auto_register_tools()
 
 def persist_message(channel, request_data):
     try:
@@ -269,8 +289,6 @@ def persist_message(channel, request_data):
         print(f"Error saving message: {e}")
 
 def respond(ai_agent, channel, request_data):
-    persist_message(channel, request_data)
-
     response_message = get_message(
         ai_agent.description,
         TOOL_DEFINITIONS,
@@ -286,5 +304,4 @@ def respond(ai_agent, channel, request_data):
             tool_result = tool_registry.handle_tool_use(ai_agent, content, request_data)
             full_response += tool_result
 
-    persist_message(channel, { "author": ai_agent.name, "content": full_response })
     return full_response
