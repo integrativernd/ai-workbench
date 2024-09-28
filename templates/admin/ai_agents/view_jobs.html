@@ -1,0 +1,21 @@
+{% extends "admin/base_site.html" %} {% block content %}
+<h1>Jobs for {{ agent.name }}</h1>
+<table>
+  <thead>
+    <tr>
+      <th>Job ID</th>
+      <th>Status</th>
+      <th>Created At</th>
+    </tr>
+  </thead>
+  <tbody>
+    {% for job in jobs %}
+    <tr>
+      <td>{{ job.id }}</td>
+      <td>{{ job.get_status() }}</td>
+      <td>{{ job.created_at }}</td>
+    </tr>
+    {% endfor %}
+  </tbody>
+</table>
+{% endblock %}

@@ -20,6 +20,8 @@ from channels.models import Message, Channel
 import django_rq
 from llm.anthropic_integration import get_message
 from config.settings import SYSTEM_PROMPT, TOOL_DEFINITIONS, IS_HEROKU_APP, AI_CHANNEL_ID
+import time
+from termcolor import cprint
 
 
 # Define a type for our tool functions
@@ -66,9 +68,9 @@ TOOL_INPUT_MAP: Dict[str, List[str]] = {
     "read_google_document": ["google_doc_id"],
 }
 
-def handle_tool_use(tool_call, request_data):
-    print(f"Handling tool use: {tool_call.name}")
-    
+def handle_tool_use(ai_agent, tool_call, request_data):
+    cprint(f"Handling tool use: {tool_call.name}", 'cyan')
+
     tool_function = TOOL_MAP.get(tool_call.name)
     if not tool_function:
         return f"Unknown tool: {tool_call.name}"
@@ -81,15 +83,15 @@ def handle_tool_use(tool_call, request_data):
     result = tool_function(request_data)
     if isinstance(result, str):
         return result
-    elif hasattr(result, 'id'):  # Check if it's a job object
+    elif hasattr(result, 'id'):
+        ai_agent.add_job(result.id)
         return f"Starting background process: {result.id}"
     else:
         return "Processing started"
 
-def persist_message(request_data):
+def persist_message(channel, request_data):
     try:
-        channel = Channel.objects.get(channel_id=request_data['channel_id'])
-        request_message = Message.objects.create(
+        Message.objects.create(
             channel=channel,
             author=request_data['author'],
             content=request_data['content'],
@@ -97,11 +99,11 @@ def persist_message(request_data):
     except Exception as e:
         print(f"Error saving message: {e}")
 
-def respond_to_channel(request_data):
-    persist_message(request_data)
+def respond(ai_agent, channel, request_data):
+    persist_message(channel, request_data)
 
     response_message = get_message(
-        request_data['ai_agent_system_prompt'],
+        ai_agent.description,
         TOOL_DEFINITIONS,
         [{ "role": "user", "content": request_data['content'] }],
     )
@@ -111,13 +113,9 @@ def respond_to_channel(request_data):
         if content.type == "text":
             full_response += content.text
         elif content.type == "tool_use":
-            tool_result = handle_tool_use(content, request_data)
+            # NOTE: A tool use content is a dictionary with a name and input keys
+            tool_result = handle_tool_use(ai_agent, content, request_data)
             full_response += tool_result
 
-    persist_message({
-        "channel_id": request_data['channel_id'],
-        "author": request_data["ai_agent_name"],
-        "content": full_response,
-    })
-    
+    persist_message(channel, { "author": ai_agent.name, "content": full_response })
     return full_response

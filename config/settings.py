@@ -269,6 +269,8 @@ RQ_SHOW_ADMIN_LINK = True
 
 SESSION_COOKIE_NAME = "tokenname_sessionid"
 
+SESSION_ENGINE = 'django.contrib.sessions.backends.db'
+
 AI_CHANNEL_ID = 1286389011144773632
 
 DOCUMENT_ID = "1jHYLQRL0CAolpTHTMm-7Jy-a9XcrZsw868ArZ1IHfHs"

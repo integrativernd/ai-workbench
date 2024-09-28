@@ -1,25 +1,52 @@
+# admin.py
+from django import forms
 from django.contrib import admin
-from tools.models import IntegrationCredential
 from django.utils.html import format_html
+from .models import IntegrationCredential
+
+class IntegrationCredentialForm(forms.ModelForm):
+    class Meta:
+        model = IntegrationCredential
+        fields = ['user', 'provider', 'credentials']
+        widgets = {
+            'user': forms.Select(attrs={'disabled': 'disabled'}),
+            'provider': forms.TextInput(attrs={'readonly': 'readonly'}),
+            'credentials': forms.Textarea(attrs={'readonly': 'readonly'}),
+        }
 
 @admin.register(IntegrationCredential)
 class IntegrationCredentialAdmin(admin.ModelAdmin):
-    list_display = ('user', 'provider', 'created_at', 'updated_at', 'view_credentials')
-    list_filter = ('provider', 'created_at', 'updated_at')
-    search_fields = ('user__username', 'provider')
-    readonly_fields = ('created_at', 'updated_at', 'decrypted_credentials')
+    form = IntegrationCredentialForm
+    list_display = ('user', 'provider', 'created_at', 'updated_at')
+    readonly_fields = ('created_at', 'updated_at', 'encrypted_credentials')
 
-    def view_credentials(self, obj):
-        return format_html('<a href="{}">View Credentials</a>', f'/admin/tools/integrationcredential/{obj.id}/change/')
-    
-    view_credentials.short_description = 'View'
+    def get_fieldsets(self, request, obj=None):
+        fieldsets = [
+            (None, {'fields': ['user', 'provider']}),
+            ('Encrypted Credentials', {'fields': ['encrypted_credentials']}),
+            ('Timestamps', {'fields': ['created_at', 'updated_at']}),
+        ]
+        return fieldsets
 
-    def decrypted_credentials(self, obj):
-        return obj.get_credentials()
-    decrypted_credentials.short_description = 'Decrypted Credentials'
+    def encrypted_credentials(self, obj):
+        return obj.credentials
+    encrypted_credentials.short_description = 'Encrypted Credentials'
 
     def has_add_permission(self, request):
-        return False  # Prevent adding credentials through admin
+        return False
 
-    def has_delete_permission(self, request, obj=None):
-        return False  # Prevent deleting credentials through admin
+    def has_change_permission(self, request, obj=None):
+        return True  # Allow viewing the change form, but all fields will be read-only
+
+    # def has_delete_permission(self, request, obj=None):
+    #     return False
+
+    def save_model(self, request, obj, form, change):
+        # Prevent saving changes
+        pass
+
+    def changeform_view(self, request, object_id=None, form_url='', extra_context=None):
+        extra_context = extra_context or {}
+        extra_context['show_save'] = False
+        extra_context['show_save_and_continue'] = False
+        return super().changeform_view(request, object_id, form_url, extra_context)

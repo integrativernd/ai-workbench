@@ -33,4 +33,22 @@ class AIAgent(models.Model):
 
     def get_jobs(self):
         message_queue = django_rq.get_queue('default')
-        return Job.fetch_many([self.job_ids], connection=message_queue.connection)
+        return Job.fetch_many(self.job_ids, connection=message_queue.connection)
+
+    # def get_jobs(self):
+    #     message_queue = django_rq.get_queue('default')
+    #     jobs = []
+    #     for job_id in self.job_ids:
+    #         try:
+    #             job = Job.fetch(job_id, connection=message_queue.connection)
+    #             jobs.append(job)
+    #         except Exception as e:
+    #             print(f"Error fetching job {job_id}: {str(e)}")
+    #     return jobs
+    
+    def job_count(self):
+        return len(self.job_ids)
+
+    def active_job_count(self):
+        jobs = self.get_jobs()
+        return sum(1 for job in jobs if job.is_started)
