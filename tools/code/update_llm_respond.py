@@ -70,11 +70,14 @@ def update_file(file_path, new_import, new_tool_name, new_tool_function, new_too
     with open(file_path, 'w') as file:
         file.writelines(content)
 
-# Example usage
-file_path = 'llm/respond.py'
-new_import = '  example_tool,'
-new_tool_name = 'example_tool'
-new_tool_function = 'lambda data: django_rq.enqueue(example_tool, data)'
-new_tool_inputs = '["example_input"]'
+def main():
+    file_path = 'llm/respond.py'
+    new_import = '    open_pull_request,'
+    new_tool_name = 'open_pull_request'
+    new_tool_function = 'lambda data: django_rq.enqueue(open_pull_request, data)'
+    new_tool_inputs = '["description"]'
 
-update_file(file_path, new_import, new_tool_name, new_tool_function, new_tool_inputs)
+    update_file(file_path, new_import, new_tool_name, new_tool_function, new_tool_inputs)
+
+if __name__ == '__main__':
+    main()

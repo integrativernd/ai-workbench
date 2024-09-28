@@ -378,6 +378,15 @@ TOOL_DEFINITIONS = [
             "required": ["query"]
         }
     },
+    {
+        "name": 'open_pull_request',
+        "description": 'Invoke this tool when asked to make a pull request',
+        "input_schema": {
+            "type": 'object',
+            "properties": {'description': {'type': 'string', 'description': 'Description of the pull request'}},
+            "required": ['description'],
+        },
+    },
 ]
 
 if PRODUCTION and os.getenv('SENTRY_DSN') != '':

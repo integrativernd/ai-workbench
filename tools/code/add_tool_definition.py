@@ -1,6 +1,6 @@
 import re
 
-def append_tool(file_path, new_tool):
+def append_tool(list_variable, file_path, new_tool):
     with open(file_path, 'r') as file:
         content = file.readlines()
 
@@ -10,13 +10,13 @@ def append_tool(file_path, new_tool):
 
     # Find the TOOL_DEFINITIONS list
     for i, line in enumerate(content):
-        if 'TOOL_DEFINITIONS = [' in line:
+        if f'{list_variable} = [' in line:
             tool_definitions_start = i
             indent = re.match(r'\s*', line).group()
             break
 
     if tool_definitions_start is None:
-        raise ValueError("TOOL_DEFINITIONS not found in the file")
+        raise ValueError(f"{list_variable} not found in the file")
 
     # Find the end of the TOOL_DEFINITIONS list
     bracket_count = 1
@@ -27,7 +27,7 @@ def append_tool(file_path, new_tool):
             break
 
     if tool_definitions_end is None:
-        raise ValueError("End of TOOL_DEFINITIONS not found")
+        raise ValueError(f"End of {list_variable} not found")
 
     # Format the new tool
     new_tool_lines = [f"{indent}    {{\n"]
@@ -48,17 +48,21 @@ def append_tool(file_path, new_tool):
     with open(file_path, 'w') as file:
         file.writelines(content)
 
-# Example usage
-new_tool = {
-    "name": "new_tool",
-    "description": "Description of the new tool",
-    "input_schema": {
-        "type": "object",
-        "properties": {
-            "param1": {"type": "string", "description": "Description of param1"}
-        },
-        "required": ["param1"]
+def main():
+    # Example usage
+    new_tool = {
+        "name": "open_pull_request",
+        "description": "Invoke this tool when asked to make a pull request",
+        "input_schema": {
+            "type": "object",
+            "properties": {
+                "description": {"type": "string", "description": "Description of the pull request"},
+            },
+            "required": ["description"]
+        }
     }
-}
 
-append_tool('config/settings.py', new_tool)
+    append_tool('config/settings.py', new_tool)
+
+if __name__ == "__main__":
+    main()

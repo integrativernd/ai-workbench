@@ -4,6 +4,7 @@ from rq import Queue
 from rq.job import Job
 from typing import Dict, Callable, Any, List
 from llm.analyze import (
+    open_pull_request,
     analyze_user_input,
     get_search_results,
     get_browse_results,
@@ -55,6 +56,7 @@ TOOL_MAP: Dict[str, ToolFunction] = {
     "get_basic_response": lambda data: django_rq.enqueue(get_basic_response, data),
     "read_google_document": lambda data: django_rq.enqueue(read_google_document, data),
     "read_project_overview": lambda data: django_rq.enqueue(read_project_overview, data),
+    "open_pull_request": lambda data: django_rq.enqueue(open_pull_request, data),
 }
 
 # Mapping of tool names to their input keys
@@ -66,6 +68,7 @@ TOOL_INPUT_MAP: Dict[str, List[str]] = {
     "get_basic_response": ["prompt", "max_tokens"],
     "read_google_document": ["google_doc_id"],
     "read_project_overview": ["query"],
+    "open_pull_request": ["description"],
 }
 
 def handle_tool_use(ai_agent, tool_call, request_data):
