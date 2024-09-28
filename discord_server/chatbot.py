@@ -2,7 +2,7 @@ import os
 from discord.ext import commands, tasks
 import discord
 from llm.respond import respond
-from config.settings import SYSTEM_PROMPT, AI_CHANNEL_ID, PRODUCTION
+from config.settings import PRODUCTION
 import django_rq
 from rq.job import Job
 from channels.models import Channel
