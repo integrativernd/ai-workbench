@@ -176,6 +176,20 @@ class CreateGithubIssueTool(BaseTool):
         request_data['content'] = create_github_issue(request_data)
         return request_data
     
+
+class AnalyzeGithubIssueForAi(BaseTool):
+    def __init__(self):
+        super().__init__(["issue_url"])
+
+    def execute(self, request_data):
+        # Implement the logic to analyze a GitHub issue here
+        issue_url = request_data['issue_url']
+        # Fetch the issue data from the provided URL
+        # Analyze the issue data
+        # Generate a response based on the analysis
+        response = "Analyzed GitHub issue at: " + issue_url
+        request_data['content'] = response
+        return request_data
 # AI ADD CLASSES HERE
 class ToolRegistry:
     def __init__(self):
@@ -227,6 +241,7 @@ tool_registry.register("read_project_overview", ReadProjectOverviewTool())
 tool_registry.register("open_pull_request", OpenPullRequestTool())
 tool_registry.register("get_background_jobs", BackgroundJobTool())
 tool_registry.register("create_github_issue", CreateGithubIssueTool())
+tool_registry.register("analyze_github_issue_for_ai", AnalyzeGithubIssueForAi())
 
 def persist_message(channel, request_data):
     try:
