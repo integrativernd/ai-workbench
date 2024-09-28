@@ -1,4 +1,4 @@
-summary_project.py|Django project summarizer
+summarize_project.py|Django project summarizer
 I:os;django;sys
 F:fetch_summary():main entry point
 M:Setup Django env>Call fetch_summary()
