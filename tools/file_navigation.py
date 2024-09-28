@@ -2,7 +2,7 @@ import os
 import fnmatch
 from config.settings import BASE_DIR
 import subprocess
-import os
+
 
 def find_project_files(root_dir, file_patterns, exclude_dirs):
     project_files = []
@@ -54,7 +54,8 @@ def list_changed_files(directory='.'):
         changed_files = []
         for line in result.stdout.split('\n'):
             if line.strip():
-                status, file_path = line[:2], line[3:].strip()
+                # _ is the status of the file (A, M, D, etc.)
+                _, file_path = line[:2], line[3:].strip()
                 changed_files.append(file_path)
         
         return changed_files

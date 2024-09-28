@@ -1,6 +1,5 @@
 from django.test import TestCase
 from django.conf import settings
-from unittest.mock import patch
 import os
 import json
 

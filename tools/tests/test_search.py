@@ -34,6 +34,10 @@ class SearchToolTestCase(TestCase):
                 raise FileNotFoundError(f"Fixture {fixture_path} not found. Run tests with RECORD_FIXTURES=true to generate it.")
 
     def test_get_search_data(self):
+        """
+        This test calls get_search_data function with a query and checks the response data.
+        """
+
         query = "What is the capital of France?"
         result = self.get_or_record_search_data(query, "capital_of_france")
 
@@ -48,7 +52,7 @@ class SearchToolTestCase(TestCase):
 
     @patch.dict(os.environ, {'SERPER_API_KEY': ''})
     def test_get_search_data_missing_api_key(self):
-        query = "What is the capital of France?"
+        # query = "What is the capital of France?"
         
         with self.assertRaises(EnvironmentError):
             SearchToolTestCase().setUp()  # This will raise the EnvironmentError

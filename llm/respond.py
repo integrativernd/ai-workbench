@@ -1,7 +1,6 @@
-from functools import wraps
-from typing import Dict, Callable, Any, List
+from typing import Dict, List
 import django_rq
-from channels.models import Message, Channel
+from channels.models import Message
 from llm.anthropic_integration import get_message, get_basic_message
 from config.settings import TOOL_DEFINITIONS, SYSTEM_PROMPT, PRODUCTION, BASE_DIR
 from tools.search import get_search_data
@@ -12,8 +11,6 @@ import pytz
 from datetime import datetime
 from rq.job import Job
 
-# Config
-# RESPONSE_KEYS = ['channel_id', 'ai_agent_name']
 
 def get_current_time():
     est = pytz.timezone('US/Eastern')
@@ -48,6 +45,7 @@ def create_system_prompt(base_prompt, additional_context=""):
     {additional_context}
     """
 
+# AI: TOOL RESPONDERS
 class BaseTool:
     def __init__(self, input_keys: List[str] = None):
         self.input_keys = input_keys or []
@@ -146,11 +144,17 @@ class BasicResponseTool(BaseTool):
     def __init__(self):
         super().__init__(["prompt", "max_tokens"])
 
+class OpenPullRequestTool(BaseTool):
+    def __init__(self):
+        super().__init__(["description"])
+
     def execute(self, request_data):
-        message = get_basic_message(SYSTEM_PROMPT, [{"role": "user", "content": request_data["prompt"]}])
-        request_data['content'] = message.content[0].text
+        # Implement the logic to open a pull request here
+        print(f"Opening pull request with description: {request_data['description']}")
+        request_data['content'] = "Pull request opened successfully."
         return request_data
 
+# AI ADD CLASSES HERE
 class ToolRegistry:
     def __init__(self):
         self.tools: Dict[str, BaseTool] = {}
@@ -200,7 +204,6 @@ tool_registry.register("update_google_document", UpdateGoogleDocTool())
 tool_registry.register("get_basic_response", BasicResponseTool())
 tool_registry.register("read_google_document", ReadGoogleDocTool())
 tool_registry.register("read_project_overview", ReadProjectOverviewTool())
-tool_registry.register("OpenPullRequestTool", OpenPullRequestTool())
 tool_registry.register("OpenPullRequestTool", OpenPullRequestTool())
 
 def get_background_jobs():

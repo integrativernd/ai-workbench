@@ -49,7 +49,7 @@ You are an AI Agent optimized to update Google Documents based on the users requ
 # The `DYNO` env var is set on Heroku CI, but it's not a real Heroku app, so we have to
 # also explicitly exclude CI:
 # https://devcenter.heroku.com/articles/heroku-ci#immutable-environment-variables
-PRODUCTION = "DYNO" in os.environ and not "CI" in os.environ
+PRODUCTION = "DYNO" in os.environ and "CI" not in os.environ
 
 IS_HEROKU_APP = PRODUCTION
 
@@ -372,7 +372,7 @@ TOOL_DEFINITIONS = [
             "properties": {
                 "query": {
                     "type": "string",
-                    "description": f"What the user requested to know about the project."
+                    "description": "What the user requested to know about the project."
                 }
             },
             "required": ["query"]

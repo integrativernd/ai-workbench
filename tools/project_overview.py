@@ -1,6 +1,5 @@
 import os
 from tools.file_navigation import fetch_project_file_paths
-from llm.anthropic_integration import get_basic_message
 from config.settings import BASE_DIR
 
 def create_ai_file_path(python_file_path):

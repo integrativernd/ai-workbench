@@ -1,6 +1,5 @@
 from django.db import models
 
-from django.db import models
 from django.contrib.auth.models import User
 from config.settings import CREDENTIALS_ENCRYPTION_KEY
 from cryptography.fernet import Fernet

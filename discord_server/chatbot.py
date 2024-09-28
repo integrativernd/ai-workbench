@@ -1,4 +1,3 @@
-import os
 from discord.ext import commands, tasks
 import discord
 from llm.respond import respond
@@ -7,7 +6,6 @@ import django_rq
 from rq.job import Job
 from channels.models import Channel
 from ai_agents.models import AIAgent
-import time
 from asgiref.sync import sync_to_async
 
 @sync_to_async

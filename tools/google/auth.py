@@ -1,10 +1,8 @@
 import os.path
 
 import json
-from typing import Dict, List, Any, Callable
 
 # Integrations
-from google.auth.transport.requests import Request
 from google.oauth2.credentials import Credentials
 import google_auth_oauthlib.flow
 # from googleapiclient.errors import HttpError

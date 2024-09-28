@@ -1,7 +1,6 @@
 import os
 import requests
 import base64
-from datetime import datetime
 
 API_URL = "https://api.github.com"
 

@@ -7,6 +7,7 @@ from selenium.webdriver.support import expected_conditions as EC
 from webdriver_manager.chrome import ChromeDriverManager
 import time
 
+
 def get_web_page_content(url, wait_time=10):
     # Set up Chrome options
     chrome_options = Options()
@@ -32,7 +33,7 @@ def get_web_page_content(url, wait_time=10):
         time.sleep(wait_time)
 
         # Get the page source
-        page_source = driver.page_source
+        # page_source = driver.page_source
 
         # Get the text content
         text_content = driver.find_element(By.TAG_NAME, "body").text

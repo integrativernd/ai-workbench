@@ -1,7 +1,5 @@
 from django.shortcuts import redirect
 from django.http import HttpResponse
-from django.conf import settings
-from django.urls import reverse
 from django.contrib.admin.views.decorators import staff_member_required
 from django.contrib.auth.decorators import user_passes_test
 from tools.google.auth import get_google_auth_url, handle_oauth2_callback

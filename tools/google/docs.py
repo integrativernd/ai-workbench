@@ -1,15 +1,8 @@
-import os.path
-from google.auth.transport.requests import Request
 from typing import Dict, List, Any, Callable
-from google.oauth2.credentials import Credentials
-import google_auth_oauthlib.flow
 from googleapiclient.discovery import build
-from googleapiclient.errors import HttpError
-from config.settings import BASE_DIR, DOCUMENT_ID, PRODUCTION, BASE_URL, SYSTEM_PROMPT
+from config.settings import SYSTEM_PROMPT
 import json
 from llm.anthropic_integration import get_basic_message, anthropic_client
-from tools.models import IntegrationCredential
-from django.contrib.auth.models import User
 from tools.google.auth import get_credentials
 
 ToolFunction = Callable[[Dict[str, Any]], Any]

@@ -1,4 +1,3 @@
-import re
 
 def append_tool_class(file_path, new_tool_class):
     with open(file_path, 'r') as file:
