@@ -373,6 +373,15 @@ TOOL_DEFINITIONS = [
             "required": []
         }
     },
+    {
+        "name": 'new_tool',
+        "description": 'Description of the new tool',
+        "input_schema": {
+            "type": 'object',
+            "properties": {'param1': {'type': 'string', 'description': 'Description of param1'}},
+            "required": ['param1'],
+        },
+    },
 ]
 
 if PRODUCTION and os.getenv('SENTRY_DSN') != '':

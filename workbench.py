@@ -1,63 +1,64 @@
-import ast
-import astor
+import re
 
-def update_list_variable(file_path, variable_name, new_item):
-    # Read the file content
+def append_tool(file_path, new_tool):
     with open(file_path, 'r') as file:
-        content = file.read()
+        content = file.readlines()
 
-    # Parse the content into an AST
-    tree = ast.parse(content)
+    tool_definitions_start = None
+    tool_definitions_end = None
+    indent = ''
 
-    # Find the variable assignment
-    for node in ast.walk(tree):
-        if isinstance(node, ast.Assign):
-            for target in node.targets:
-                if isinstance(target, ast.Name) and target.id == variable_name:
-                    # Found the variable assignment
-                    if isinstance(node.value, ast.List):
-                        # Add the new item to the list
-                        node.value.elts.append(ast_from_value(new_item))
-                        break
-                    else:
-                        raise ValueError(f"{variable_name} is not a list")
+    # Find the TOOL_DEFINITIONS list
+    for i, line in enumerate(content):
+        if 'TOOL_DEFINITIONS = [' in line:
+            tool_definitions_start = i
+            indent = re.match(r'\s*', line).group()
+            break
 
-    # Generate the modified code
-    modified_code = astor.to_source(tree)
+    if tool_definitions_start is None:
+        raise ValueError("TOOL_DEFINITIONS not found in the file")
 
-    # Write the modified code back to the file
+    # Find the end of the TOOL_DEFINITIONS list
+    bracket_count = 1
+    for i in range(tool_definitions_start + 1, len(content)):
+        bracket_count += content[i].count('[') - content[i].count(']')
+        if bracket_count == 0:
+            tool_definitions_end = i
+            break
+
+    if tool_definitions_end is None:
+        raise ValueError("End of TOOL_DEFINITIONS not found")
+
+    # Format the new tool
+    new_tool_lines = [f"{indent}    {{\n"]
+    for key, value in new_tool.items():
+        if isinstance(value, dict):
+            new_tool_lines.append(f'{indent}        "{key}": {{\n')
+            for sub_key, sub_value in value.items():
+                new_tool_lines.append(f'{indent}            "{sub_key}": {repr(sub_value)},\n')
+            new_tool_lines.append(f'{indent}        }},\n')
+        else:
+            new_tool_lines.append(f'{indent}        "{key}": {repr(value)},\n')
+    new_tool_lines.append(f"{indent}    }},\n")
+
+    # Insert the new tool
+    content[tool_definitions_end:tool_definitions_end] = new_tool_lines
+
+    # Write the modified content back to the file
     with open(file_path, 'w') as file:
-        file.write(modified_code)
-
-def ast_from_value(value):
-    if isinstance(value, dict):
-        return ast.Dict(
-            keys=[ast_from_value(k) for k in value.keys()],
-            values=[ast_from_value(v) for v in value.values()]
-        )
-    elif isinstance(value, list):
-        return ast.List(elts=[ast_from_value(item) for item in value])
-    elif isinstance(value, str):
-        return ast.Str(s=value)
-    elif isinstance(value, (int, float, bool, type(None))):
-        return ast.Constant(value=value)
-    else:
-        raise ValueError(f"Unsupported type: {type(value)}")
+        file.writelines(content)
 
 # Example usage
 new_tool = {
     "name": "new_tool",
-    "description": "This is a new tool",
+    "description": "Description of the new tool",
     "input_schema": {
         "type": "object",
         "properties": {
-            "param": {
-                "type": "string",
-                "description": "A parameter for the new tool"
-            }
+            "param1": {"type": "string", "description": "Description of param1"}
         },
-        "required": ["param"]
+        "required": ["param1"]
     }
 }
 
-update_list_variable('config/settings.py', 'TOOL_DEFINITIONS', new_tool)
+append_tool('config/settings.py', new_tool)
