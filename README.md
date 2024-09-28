@@ -50,3 +50,6 @@ heroku buildpacks:add -i 1 heroku-community/chrome-for-testing
 ```
 python manage.py test
 ```
+
+## Updated Content
+This is an updated content.
