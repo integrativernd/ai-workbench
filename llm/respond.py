@@ -142,7 +142,6 @@ class AnalyzeUserInputTool(BaseTool):
         time.sleep(20)
         request_data['content'] = "Background job finished"
         return request_data
-
 class BasicResponseTool(BaseTool):
     def __init__(self):
         super().__init__(["prompt", "max_tokens"])
@@ -192,8 +191,6 @@ class ToolRegistry:
 
 # Initialize the tool registry
 tool_registry = ToolRegistry()
-
-# Register tools
 tool_registry.register("get_time", DataTool())
 tool_registry.register("get_runtime_environment", RunTimeEnvironmentTool())
 tool_registry.register("create_background_job", AnalyzeUserInputTool())
@@ -203,6 +200,8 @@ tool_registry.register("update_google_document", UpdateGoogleDocTool())
 tool_registry.register("get_basic_response", BasicResponseTool())
 tool_registry.register("read_google_document", ReadGoogleDocTool())
 tool_registry.register("read_project_overview", ReadProjectOverviewTool())
+tool_registry.register("OpenPullRequestTool", OpenPullRequestTool())
+tool_registry.register("OpenPullRequestTool", OpenPullRequestTool())
 
 def get_background_jobs():
     message_queue = django_rq.get_queue("default")

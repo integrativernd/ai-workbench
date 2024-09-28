@@ -5,12 +5,12 @@ def append_tool_class(file_path, new_tool_class):
         content = file.read()
 
     # Find the position to insert the new tool class
-    last_tool_class_pos = content.rfind('class', 0, content.rfind('class ToolRegistry'))
+    last_tool_class_pos = content.rfind('class', 1, content.rfind('class ToolRegistry')) - 1
     if last_tool_class_pos == -1:
         raise ValueError("Could not find appropriate position to insert new tool class")
 
     # Insert the new tool class
-    content = content[:last_tool_class_pos] + new_tool_class + "\n\n" + content[last_tool_class_pos:]
+    content = content[:last_tool_class_pos] + new_tool_class + "\n" + content[last_tool_class_pos:]
 
     # Write the modified content back to the file
     with open(file_path, 'w') as file:
@@ -50,10 +50,10 @@ def update_tool_registry(file_path, tool_name):
         file.writelines(content)
 
 def main():
-    file_path = 'your_file_path.py'  # Replace with your actual file path
+    file_path = 'llm/respond.py'  # Replace with your actual file path
     
     new_tool_class = """
-class OpenPullRequestTool(BaseTool):
+class OpenDiagnosticTool(BaseTool):
     def __init__(self):
         super().__init__(["description"])
 
