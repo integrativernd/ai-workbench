@@ -62,7 +62,7 @@ def main():
         }
     }
 
-    append_tool('config/settings.py', new_tool)
+    append_tool("TOOL_DEFINITION", 'config/settings.py', new_tool)
 
 if __name__ == "__main__":
     main()
