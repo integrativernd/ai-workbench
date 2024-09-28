@@ -8,7 +8,9 @@ from rq.job import Job
 from channels.models import Channel
 from ai_agents.models import AIAgent
 import time
+from asgiref.sync import sync_to_async
 
+@sync_to_async
 def handle_message(message_data):
     """
     Handle a message by generating a response using an AI model.
@@ -22,7 +24,7 @@ def handle_message(message_data):
     print(f"Handling message: {message_data['content']} in channel {channel}")
     print(f"{ai_agent.name} is processing...")
 
-    immediate_response_content = respond(
+    return respond(
         ai_agent,
         channel,
         {
@@ -33,14 +35,6 @@ def handle_message(message_data):
             "ai_agent_system_prompt": ai_agent.description,
         }
     )
-
-    print(f"{ai_agent.name} my immediate response will be: {immediate_response_content}")
-
-    return {
-        "ai_agent_name": ai_agent.name,
-        "channel_id": channel.channel_id,
-        "content": immediate_response_content,
-    }
 
 class ChatBot(commands.Bot):
     """
@@ -126,11 +120,10 @@ class ChatBot(commands.Bot):
 
     @property
     def discord_handle(self):
+        """
+        We use the bot's name as a handle to trigger commands.
+        """
         return f"@{self.ai_agent.name.lower()}"
-    
-    # async def enqueue_simple_background_process(self, request_data):
-    #     job = self.message_queue.enqueue(simple_background_process, request_data)
-    #     await self.add_job(job.id)
 
     async def enqueue_background_process(self, request_data):
         # print(f"Enqueuing background process: {request_data}")
@@ -160,10 +153,12 @@ class ChatBot(commands.Bot):
 
             await message.channel.send('Ok.')
 
-            await self.enqueue_background_process({
+            response_text = await handle_message({
                 "ai_agent_name": self.ai_agent.name,
                 "channel_name": str(message.channel),
                 "content": message.content,
                 "author": str(message.author),
                 "channel": str(message.channel),
             })
+
+            await message.channel.send(response_text)

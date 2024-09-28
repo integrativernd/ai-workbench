@@ -1,8 +1,0 @@
-analyze.py|AI agent utility functions
-I:pytz;datetime
-F:get_current_time():return current EST time;get_runtime_environment():return env;approximate_token_count(text):estimate tokens;summarize_content(content):summarize text;document_content_for_user_input(prompt,input):generate response;get_search_results(data):summarize search;get_browse_results(data):summarize webpage;read_google_document(data):read doc content;update_google_document(data):append to doc;analyze_user_input(data):process request;get_basic_response(data):generate basic response
-C:
-G:
-M:Define utility functions for AI agent
-D:
-V:3+
