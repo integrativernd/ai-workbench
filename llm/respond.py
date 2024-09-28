@@ -7,7 +7,7 @@ from tools.search import get_search_data
 from tools.browse import get_web_page_content
 from tools.google.docs import append_text, read_document
 from tools.github.pull_requests import open_pull_request
-from tools.github.issues import create_github_issue
+from tools.github.issues import create_github_issue, read_github_issue
 import time
 import pytz
 from datetime import datetime
@@ -177,19 +177,35 @@ class CreateGithubIssueTool(BaseTool):
         return request_data
     
 
-class AnalyzeGithubIssueForAi(BaseTool):
+class AnalyzeGithubIssue(BaseTool):
     def __init__(self):
-        super().__init__(["issue_url"])
+        super().__init__(["issue_number", "issue_url", "description"])
 
     def execute(self, request_data):
-        # Implement the logic to analyze a GitHub issue here
-        issue_url = request_data['issue_url']
-        # Fetch the issue data from the provided URL
-        # Analyze the issue data
-        # Generate a response based on the analysis
-        response = "Analyzed GitHub issue at: " + issue_url
-        request_data['content'] = response
+        title, body = read_github_issue(request_data)
+        prompt = create_system_prompt(
+            request_data['ai_agent_system_prompt'],
+            """
+            Acknowledged the user's request to address the GitHub issue.
+            Respond with your current understanding of the issue.
+            """
+        )
+        message = get_basic_message(
+            prompt,
+            [
+                {
+                    "role": "user",
+                    "content": f"""
+                    User request: {request_data['description']}
+                    Title: {title}
+                    Description: {body}
+                    """
+                }
+            ]
+        )
+        request_data['content'] = message.content[0].text
         return request_data
+
 # AI ADD CLASSES HERE
 class ToolRegistry:
     def __init__(self):
@@ -241,7 +257,7 @@ tool_registry.register("read_project_overview", ReadProjectOverviewTool())
 tool_registry.register("open_pull_request", OpenPullRequestTool())
 tool_registry.register("get_background_jobs", BackgroundJobTool())
 tool_registry.register("create_github_issue", CreateGithubIssueTool())
-tool_registry.register("analyze_github_issue_for_ai", AnalyzeGithubIssueForAi())
+tool_registry.register("analyze_github_issue", AnalyzeGithubIssue())
 
 def persist_message(channel, request_data):
     try:

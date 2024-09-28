@@ -411,19 +411,22 @@ TOOL_DEFINITIONS = [
         },
     },
     {
-        "name": 'address_github_issue',
+        "name": 'analyze_github_issue',
         "description": 'Invoke this tool when asked to address a github issue.',
         "input_schema": {
             "type": 'object',
             "properties": {
-                'title': {
-                    'type': 'string', 'description': 'A logic title of the request'
+                'issue_url': {
+                    'type': 'string', 'description': 'url of the github issue'
+                },
+                'issue_number': {
+                    'type': 'integer', 'description': 'The issue number'
                 },
                 'description': {
-                    'type': 'string', 'title': 'Details of the user request.'
+                    'type': 'string', 'description': 'Details of the user request.'
                 }
             },
-            "required": ['title', 'description'],
+            "required": ['issue_url', 'issue_number', 'description'],
         },
     },
 ]

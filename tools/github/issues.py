@@ -47,7 +47,7 @@ def create_github_issue(request_data):
         print(f"Error creating issue: {e}")
         return f"Error creating issue: {str(e)}"
 
-def read_github_issue(owner, repo, token, issue_number):
+def read_default_github_issue(owner, repo, token, issue_number):
     headers = {
         'Authorization': f'token {token}',
         'Accept': 'application/vnd.github.v3+json'
@@ -62,6 +62,27 @@ def read_github_issue(owner, repo, token, issue_number):
     body = issue_data['body']
 
     return title, body
+
+def read_github_issue(request_data):
+    # Get configuration from environment variables
+    owner = os.environ.get("GITHUB_OWNER")
+    repo = os.environ.get("GITHUB_REPO")
+    token = os.environ.get("GITHUB_TOKEN")
+
+    if not all([owner, repo, token]):
+        raise ValueError("Missing required environment variables. Please set GITHUB_OWNER, GITHUB_REPO, and GITHUB_TOKEN.")
+
+    try:
+        title, body = read_default_github_issue(
+            owner,
+            repo,
+            token,
+            request_data["issue_number"],
+        )
+        return title, body
+    except requests.RequestException as e:
+        print(f"Error analyzing issue: {e}")
+        return f"Error analyzing issue: {str(e)}"
 
 
 
