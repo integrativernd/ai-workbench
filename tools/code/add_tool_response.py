@@ -4,13 +4,17 @@ def append_tool_class(file_path, new_tool_class):
     with open(file_path, 'r') as file:
         content = file.read()
 
-    # Find the position to insert the new tool class
-    last_tool_class_pos = content.rfind('class', 1, content.rfind('class ToolRegistry')) - 1
-    if last_tool_class_pos == -1:
-        raise ValueError("Could not find appropriate position to insert new tool class")
+    # Find the position of the comment
+    comment_pos = content.find("# AI ADD CLASSES HERE")
+    if comment_pos == -1:
+        raise ValueError("Could not find the END TOOL RESPONDERS comment")
 
-    # Insert the new tool class
-    content = content[:last_tool_class_pos] + new_tool_class + "\n" + content[last_tool_class_pos:]
+    # Find the start of the line where the comment begins
+    line_start = content.rfind('\n', 0, comment_pos) + 1
+
+    # Insert the new tool class with appropriate spacing
+    insert_content = f"\n{new_tool_class}\n"
+    content = content[:line_start] + insert_content + content[line_start:]
 
     # Write the modified content back to the file
     with open(file_path, 'w') as file:
@@ -52,8 +56,7 @@ def update_tool_registry(file_path, tool_name):
 def main():
     file_path = 'llm/respond.py'  # Replace with your actual file path
     
-    new_tool_class = """
-class OpenDiagnosticTool(BaseTool):
+    new_tool_class = """class OpenPullRequestTool(BaseTool):
     def __init__(self):
         super().__init__(["description"])
 
@@ -61,8 +64,7 @@ class OpenDiagnosticTool(BaseTool):
         # Implement the logic to open a pull request here
         print(f"Opening pull request with description: {request_data['description']}")
         request_data['content'] = "Pull request opened successfully."
-        return request_data
-"""
+        return request_data"""
 
     append_tool_class(file_path, new_tool_class)
     update_tool_registry(file_path, "OpenPullRequestTool")
