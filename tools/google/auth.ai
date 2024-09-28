@@ -1,0 +1,8 @@
+auth.py|Google authentication and credentials management
+I:os.path;json;typing;google.auth.transport.requests;google.oauth2.credentials;google_auth_oauthlib.flow;googleapiclient.errors;config.settings;tools.models;django.contrib.auth.models
+F:credentials_to_dict():convert Credentials to dict;get_google_auth_url():generate OAuth2 auth URL;handle_oauth2_callback():handle OAuth2 callback and save credentials;get_credentials():retrieve user's Google credentials
+C:
+G:SCOPES;BASE_DIR;DOCUMENT_ID;IS_HEROKU_APP;BASE_URL;SYSTEM_PROMPT
+M:Provide functions to authenticate with Google APIs and manage user credentials
+D:google-auth;google-auth-oauthlib;google-api-python-client;django
+V:3.8+

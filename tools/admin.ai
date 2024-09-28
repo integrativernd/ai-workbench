@@ -1,0 +1,8 @@
+admin.py|Django admin customization for IntegrationCredential model
+I:django.forms;django.contrib.admin;django.utils.html
+F:IntegrationCredentialForm():ModelForm for IntegrationCredential;encrypted_credentials():display encrypted credentials
+C:IntegrationCredentialAdmin:customized ModelAdmin for IntegrationCredential
+G:
+M:Register IntegrationCredential model;customize form fields;override admin methods
+D:
+V:

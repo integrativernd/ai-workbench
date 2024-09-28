@@ -1,0 +1,6 @@
+tests.py|Unit tests for Channel and Message models
+F:ChannelModelTest:test_channel_creation():check instance;test_channel_fields():verify fields;test_channel_id_unique():ensure unique channel ID
+F:MessageModelTest:test_message_creation():check instance;test_message_fields():verify fields;test_message_ordering():check ordering by timestamp;test_message_string_representation():check __str__;test_read_messages_by_channel():filter by channel;test_read_messages_by_channel_ordering():order by timestamp;test_read_messages_by_non_existent_channel():non-existent channel
+C:ChannelModelTest;MessageModelTest
+M:Set up test data>Run tests for model creation, fields, constraints>Clean up
+V:3+

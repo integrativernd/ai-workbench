@@ -1,0 +1,9 @@
+Python Program Summary|AI agent for handling user requests and tool integrations
+
+I:datetime;redis;rq;pytz;json;typing;django_rq;channels.models;llm.analyze;llm.anthropic_integration;config.settings
+F:ping():test;get_background_jobs():summarize running jobs;handle_tool_use():execute tool function;persist_message():save message;respond():process request and respond
+C:
+G:ToolFunction;TOOL_MAP;TOOL_INPUT_MAP;TOOL_DEFINITIONS
+M:Receive request>Analyze>Execute tools>Respond
+D:redis;rq;django_rq
+V:3+

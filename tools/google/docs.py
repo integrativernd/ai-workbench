@@ -5,7 +5,7 @@ from google.oauth2.credentials import Credentials
 import google_auth_oauthlib.flow
 from googleapiclient.discovery import build
 from googleapiclient.errors import HttpError
-from config.settings import BASE_DIR, DOCUMENT_ID, IS_HEROKU_APP, BASE_URL, SYSTEM_PROMPT
+from config.settings import BASE_DIR, DOCUMENT_ID, PRODUCTION, BASE_URL, SYSTEM_PROMPT
 import json
 from llm.anthropic_integration import get_basic_message, anthropic_client
 from tools.models import IntegrationCredential

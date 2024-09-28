@@ -1,0 +1,8 @@
+models.py|Django models for channels and messages
+C:Channel:stores channel name, ID, type;Message:stores message content, timestamp, author, token
+F:__str__():return channel name for Channel;return author and truncated message for Message
+G:None
+I:django.db.models;django.utils.timezone;uuid
+M:Define Channel and Message models with respective fields and methods
+D:Django
+V:N/A

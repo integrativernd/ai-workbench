@@ -1,0 +1,5 @@
+tests.py|Django tests for web app
+F:test_index_page():check index page content;test_db_page():test db page logic
+C:ExampleTest:TestCase subclass
+M:Run tests>Assert expected behavior
+V:3+

@@ -1,0 +1,8 @@
+views.py|Django views for web app
+I:django.shortcuts
+F:index():render index.html;db():render db.html w/ Greeting model objs
+C:
+G:
+M:Define routes/views for index & db
+D:
+V:

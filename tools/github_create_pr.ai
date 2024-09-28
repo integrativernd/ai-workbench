@@ -1,0 +1,7 @@
+github_create_pr.py|Create a Hello World pull request on GitHub
+I:os;requests;base64;datetime
+F:create_hello_world_pr():create new branch, add file, create PR;main():get config, call create_hello_world_pr()
+G:API_URL
+M:Get config from env>Create new branch>Add file>Create PR
+D:requests
+V:3+

@@ -1,0 +1,6 @@
+Python Program Summary
+admin.py|Django admin registration
+
+I:django.contrib
+C:GreetingAdmin:ModelAdmin subclass
+M:Register Greeting model with admin site

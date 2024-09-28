@@ -2,7 +2,7 @@ import os
 from discord.ext import commands, tasks
 import discord
 from llm.respond import respond
-from config.settings import SYSTEM_PROMPT, AI_CHANNEL_ID, IS_HEROKU_APP
+from config.settings import SYSTEM_PROMPT, AI_CHANNEL_ID, PRODUCTION
 import django_rq
 from rq.job import Job
 from channels.models import Channel
@@ -34,7 +34,7 @@ def handle_message(message_data):
         }
     )
 
-    print("{ai_agent.name} my immediate response will be: {immediate_response_content}")
+    print(f"{ai_agent.name} my immediate response will be: {immediate_response_content}")
 
     return {
         "ai_agent_name": ai_agent.name,

@@ -1,0 +1,5 @@
+Python Program Summary
+
+apps.py|Django app config
+C:ToolsConfig:Django app config class;default_auto_field='django.db.models.BigAutoField';name='tools'
+D:django

@@ -1,0 +1,5 @@
+discord_server.py|Discord chatbot manager
+I:os;django;sys
+F:run_chatbot_manager():main entry point
+M:Setup Django env>Run chatbot manager
+V:3+

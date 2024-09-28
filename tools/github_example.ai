@@ -1,0 +1,8 @@
+Python Program Summary
+github_example.py|Fetch GitHub README
+I:os;requests;base64
+F:get_github_readme(owner,repo,token):fetch private repo README
+G:
+M:Call get_github_readme() with args
+D:requests
+V:3+

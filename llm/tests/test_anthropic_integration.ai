@@ -1,0 +1,8 @@
+test_anthropic_integration.py|Test Anthropic LLM integration
+I:os;django.test;json;config.settings;pickle
+F:setUp():create fixtures dir;tearDown():pass;get_or_record_basic_message():get/record message fixture;test_basic_message():test ping response;test_performance():test summarizing search results
+C:AnthropicIntegrationTest:TestCase for Anthropic integration
+G:search_results_fixture;RECORD_FIXTURES
+M:Test Anthropic message generation;Use fixtures for consistent testing
+D:
+V:3+

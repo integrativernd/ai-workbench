@@ -1,0 +1,7 @@
+asgi.py|ASGI config for Django project
+I:os;django.core.asgi
+F:get_asgi_application():returns ASGI app instance
+G:DJANGO_SETTINGS_MODULE=config.settings
+M:Set env var>Get ASGI app
+D:django
+V:3+

@@ -1,0 +1,7 @@
+update_file.py|GitHub file update and pull request creation
+I:os;requests;base64;datetime
+F:update_file_and_create_pr():update file,create PR;main():get config,call update_file_and_create_pr()
+G:API_URL
+M:Get config>Update file>Create PR
+D:requests
+V:3+

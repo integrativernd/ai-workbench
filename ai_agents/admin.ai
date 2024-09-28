@@ -1,0 +1,8 @@
+admin.py|Django admin customization for AIAgent model
+I:django.contrib.admin;django.utils.html;django.utils.safestring
+F:AIAgentAdmin:customized admin class for AIAgent model;display_job_ids():display job IDs as HTML
+C:AIAgentAdmin:customized admin class for AIAgent model
+G:
+M:Register AIAgent model with customized admin class;customize list display;search fields;filters;readonly fields;fieldsets
+D:
+V:

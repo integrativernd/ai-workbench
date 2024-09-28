@@ -1,0 +1,6 @@
+Python Program Summary
+
+apps.py|Django app config
+C:AIAgentsConfig:Django app config class
+G:default_auto_field='django.db.models.BigAutoField'
+V:3+

@@ -4,10 +4,10 @@ from selenium.webdriver.chrome.options import Options
 from selenium.webdriver.support.ui import WebDriverWait
 from selenium.webdriver.support import expected_conditions as EC
 from selenium.webdriver.common.by import By
-from config.settings import IS_HEROKU_APP
+from config.settings import PRODUCTION
 
 def chrome_driver_path():
-    if IS_HEROKU_APP:
+    if PRODUCTION:
         return "/app/.chrome-for-testing/chromedriver-linux64/chromedriver"
     else:
         return "/opt/homebrew/bin/chromedriver"

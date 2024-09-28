@@ -1,0 +1,7 @@
+browse2.py|Web page content scraper
+I:selenium
+F:get_web_page_content():fetch page source and text content
+G:
+M:Set up Chrome driver>Navigate to URL>Wait for page load>Get page source and text>Return content
+D:selenium~=4.9.1;webdriver-manager~=3.8.6
+V:3.6+

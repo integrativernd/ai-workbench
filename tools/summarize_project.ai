@@ -1,0 +1,7 @@
+summarize_project.py|Summarize Python files in a project
+I:os;tools.file_navigation;llm.anthropic_integration
+F:chunk_file():split file into chunks;create_ai_file_path():generate AI file path;summary_for_file():generate summary for file;fetch_summary():process files and generate summaries
+G:
+M:Fetch project files>Chunk files>Generate summaries>Write to AI files
+D:
+V:3+

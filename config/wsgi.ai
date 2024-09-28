@@ -1,0 +1,7 @@
+wsgi.py|Django WSGI configuration
+I:os;django.core.wsgi
+F:get_wsgi_application():returns WSGI app instance
+G:DJANGO_SETTINGS_MODULE=config.settings
+M:Set env var>Get WSGI app>Expose as application
+D:django
+V:3+

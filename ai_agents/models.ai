@@ -1,0 +1,8 @@
+models.py|Django model for AI agents
+I:uuid;django_rq
+F:__str__():return name and version;add_job(job_id):append job ID;remove_job(job_id):remove job ID;get_jobs():fetch jobs from queue;job_count():count jobs;active_job_count():count active jobs
+C:AIAgent:store agent details like name,version,token;manage job IDs
+G:
+M:
+D:
+V:

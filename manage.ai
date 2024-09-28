@@ -1,0 +1,5 @@
+manage.py|Django command-line utility
+I:os;sys
+F:main():Run admin tasks
+M:Set env var>Import execute_from_command_line>Execute command
+V:3+

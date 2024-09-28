@@ -1,0 +1,10 @@
+Python Program Summary
+/Users/jtorreggiani/organizer/work/integrativernd/research/ai-workbench/tools/tests/test_browse.py|Test web scraping functionality
+
+I:django.test;django.conf;unittest.mock;os;json;tools.browse
+F:setUp():create fixtures dir;get_or_record_web_content():get/record web content;test_get_web_page_content():test web scraping
+C:WebScraperTestCase:TestCase for web scraping
+G:RECORD_FIXTURES
+M:Setup>Get/record web content>Test scraping
+D:
+V:3+

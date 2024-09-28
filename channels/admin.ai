@@ -1,0 +1,7 @@
+admin.py|Django admin configuration
+
+I:django.contrib.admin
+F:get_readonly_fields():set read-only fields for existing objects;has_delete_permission():disable delete permission;has_add_permission():allow adding new objects
+C:MessageAdmin:customizes admin interface for Message model
+M:Register Channel and Message models with custom MessageAdmin class
+V:N/A

@@ -12,7 +12,7 @@ from googleapiclient.errors import HttpError
 # from llm.anthropic_integration import get_basic_message, anthropic_client
 
 # Configuration
-from config.settings import BASE_DIR, DOCUMENT_ID, IS_HEROKU_APP, BASE_URL, SYSTEM_PROMPT
+from config.settings import BASE_DIR, DOCUMENT_ID, PRODUCTION, BASE_URL, SYSTEM_PROMPT
 
 # Models
 from tools.models import IntegrationCredential

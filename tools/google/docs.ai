@@ -1,0 +1,9 @@
+docs.py|Google Docs integration
+
+I:os.path;google.auth.transport.requests;typing;google_auth_oauthlib.flow;googleapiclient.discovery;googleapiclient.errors;config.settings;json;llm.anthropic_integration;tools.models;django.contrib.auth.models;tools.google.auth
+F:get_credentials():get Google credentials;GoogleDocsAIAgent:handle Docs operations;insert_text():insert text;delete_content():delete content;replace_text():replace text;create_title():create title;add_section():add section;handle_tool_use():execute tool;process_user_command():interpret commands
+C:GoogleDocsAIAgent:manage Docs interactions
+G:TOOL_DEFINITIONS;TOOL_MAP;TOOL_INPUT_MAP
+M:Define tools>Handle user commands>Execute tools
+D:google-auth;google-auth-oauthlib;google-api-python-client
+V:3+

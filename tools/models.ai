@@ -1,0 +1,8 @@
+models.py|Django model for encrypted user credentials
+I:django.db;django.contrib.auth.models;config.settings;cryptography.fernet
+F:encrypt_credentials():encrypt JSON credentials;decrypt_credentials():decrypt credentials
+C:IntegrationCredential:store encrypted user credentials for providers
+G:
+M:Create IntegrationCredential instance>encrypt credentials on save>decrypt on get_credentials()
+D:
+V:3+

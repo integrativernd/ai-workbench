@@ -1,0 +1,8 @@
+views.py|Google OAuth2 authentication flow
+I:django.shortcuts;django.http;django.conf;django.urls;django.contrib.admin.views.decorators;django.contrib.auth.decorators;tools.google.auth
+F:superuser_required():check user is superuser;start_google_auth():initiate Google auth flow;google_auth_callback():handle OAuth2 callback;check_google_auth():check if Google credentials stored
+C:
+G:
+M:Start auth>Redirect to Google>Callback handles code>Store credentials
+D:
+V:

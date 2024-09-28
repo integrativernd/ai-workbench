@@ -1,0 +1,7 @@
+urls.py|URL configuration for Django project
+I:django.contrib;django.urls;web.views;tools.views
+F:trigger_error():raise exception;
+G:
+M:Define URL patterns for views
+D:
+V:3+

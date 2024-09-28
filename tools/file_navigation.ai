@@ -1,0 +1,7 @@
+file_navigation.py|Find project files
+I:os;fnmatch;config.settings
+F:find_project_files():search files recursively;fetch_project_file_paths():get file paths
+G:BASE_DIR
+M:Define patterns>Exclude dirs>Walk dirs>Filter files>Return paths
+D:
+V:3+

@@ -1,0 +1,7 @@
+models.py|Django model definitions
+I:django.db
+C:Greeting:stores date created
+G:
+M:Defines Greeting model with auto timestamp
+D:
+V:

@@ -1,0 +1,7 @@
+browse.py|Web page content retrieval
+I:selenium
+F:chrome_driver_path():get chromedriver path;get_web_page_content(url):retrieve webpage HTML content
+G:PRODUCTION
+M:Set up Chrome WebDriver>Navigate to URL>Wait for page load>Get HTML content>Close browser
+D:selenium
+V:3+

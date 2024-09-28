@@ -1,0 +1,5 @@
+apps.py|Django app config
+
+C:WebConfig:Django app config class
+G:default_auto_field="django.db.models.BigAutoField"
+I:django.apps

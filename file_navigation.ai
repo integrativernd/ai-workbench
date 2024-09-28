@@ -1,0 +1,5 @@
+file_navigation.py|Fetch project file paths
+I:os;django;sys
+F:fetch_project_file_paths():main logic
+M:Setup Django env>Call fetch_project_file_paths()
+V:3+

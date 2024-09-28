@@ -1,0 +1,7 @@
+search.py|Google search API wrapper
+I:os;requests;json
+F:get_search_data(query):fetch search results from Google API
+G:url
+M:Get query>Call API>Print response
+D:requests
+V:3+
