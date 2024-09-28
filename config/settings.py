@@ -51,7 +51,7 @@ You are an AI Agent optimized to update Google Documents based on the users requ
 # https://devcenter.heroku.com/articles/heroku-ci#immutable-environment-variables
 PRODUCTION = "DYNO" in os.environ and not "CI" in os.environ
 
-IS_HEROKU = PRODUCTION
+IS_HEROKU_APP = PRODUCTION
 
 # SECURITY WARNING: don't run with debug turned on in production!
 if not PRODUCTION:
