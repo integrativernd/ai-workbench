@@ -5,7 +5,7 @@ from datetime import datetime
 
 API_URL = "https://api.github.com"
 
-def create_pull_request(owner, repo, token, base_branch):
+def post_pull_request(owner, repo, token, base_branch):
     headers = {
         "Authorization": f"token {token}",
         "Accept": "application/vnd.github.v3+json"
@@ -30,15 +30,36 @@ def create_pull_request(owner, repo, token, base_branch):
     response.raise_for_status()
 
     # Create the new file in the new branch
-    file_name = "hello_world.txt"
-    file_content = "Hello, World!"
-    file_url = f"{API_URL}/repos/{owner}/{repo}/contents/{file_name}"
-    file_data = {
-        "message": "Add Hello World file",
-        "content": base64.b64encode(file_content.encode()).decode(),
+    # file_name = "hello_world.txt"
+    # file_content = "Hello, World!"
+    # file_url = f"{API_URL}/repos/{owner}/{repo}/contents/{file_name}"
+    # file_data = {
+    #     "message": "Add Hello World file",
+    #     "content": base64.b64encode(file_content.encode()).decode(),
+    #     "branch": new_branch
+    # }
+    # response = requests.put(file_url, headers=headers, json=file_data)
+    # response.raise_for_status()
+
+    # Get the current file content
+    file_path = "CHANGE_LOG.md"
+    file_url = f"{API_URL}/repos/{owner}/{repo}/contents/{file_path}"
+    response = requests.get(file_url, headers=headers, params={"ref": new_branch})
+    response.raise_for_status()
+    file_data = response.json()
+
+    decoded_content = base64.b64decode(file_data['content']).decode("utf-8")
+    updated_content = f"{decoded_content}\nCreating branch {new_branch} at {datetime.now()}"
+
+    # # Update the file
+    update_url = f"{API_URL}/repos/{owner}/{repo}/contents/{file_path}"
+    update_data = {
+        "message": f"Update {file_path}",
+        "content": base64.b64encode(updated_content.encode('utf-8')).decode('utf-8'),
+        "sha": file_data["sha"],
         "branch": new_branch
     }
-    response = requests.put(file_url, headers=headers, json=file_data)
+    response = requests.put(update_url, headers=headers, json=update_data)
     response.raise_for_status()
 
     # Create a pull request
@@ -54,7 +75,8 @@ def create_pull_request(owner, repo, token, base_branch):
 
     return response.json()["html_url"]
 
-def main():
+
+def open_pull_request():
     # Get configuration from environment variables
     owner = os.environ.get("GITHUB_OWNER")
     repo = os.environ.get("GITHUB_REPO")
@@ -65,10 +87,10 @@ def main():
         raise ValueError("Missing required environment variables. Please set GITHUB_OWNER, GITHUB_REPO, and GITHUB_TOKEN.")
 
     try:
-        pr_url = create_pull_request(owner, repo, token, base_branch)
+        pr_url = post_pull_request(owner, repo, token, base_branch)
         print(f"Pull request created successfully. URL: {pr_url}")
     except requests.RequestException as e:
         print(f"Error creating pull request: {e}")
 
-if __name__ == "__main__":
-    main()
+# if __name__ == "__main__":
+#     main()

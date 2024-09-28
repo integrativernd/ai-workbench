@@ -46,7 +46,7 @@ def main():
     repo = os.environ.get("GITHUB_REPO")
     token = os.environ.get("GITHUB_TOKEN")
     pr_number = 3
-    file_path = "README.md"
+    file_path = "CHANGE_LOG.md"
     new_content = "## Updated Content\nThis is an updated content."
 
     if not all([owner, repo, token, pr_number, file_path, new_content]):

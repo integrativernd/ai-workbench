@@ -6,6 +6,7 @@ from config.settings import TOOL_DEFINITIONS, SYSTEM_PROMPT, PRODUCTION, BASE_DI
 from tools.search import get_search_data
 from tools.browse import get_web_page_content
 from tools.google.docs import append_text, read_document
+from tools.github.pull_requests import open_pull_request
 import time
 import pytz
 from datetime import datetime
@@ -103,6 +104,7 @@ class ReadProjectOverviewTool(BaseTool):
         super().__init__(["query"])
 
     def execute(self, request_data):
+        time.sleep(50)
         with open(f'{BASE_DIR}/project_overview.ai', 'r') as file:
             project_overview = file.read()
         prompt = create_system_prompt(
@@ -131,18 +133,15 @@ class UpdateGoogleDocTool(BaseTool):
         request_data['content'] = "Document updated."
         return request_data
 
-class AnalyzeUserInputTool(BaseTool):
-    def __init__(self):
-        super().__init__(["task"])
+# class AnalyzeUserInputTool(BaseTool):
+#     def __init__(self):
+#         super().__init__(["task"])
 
-    def execute(self, request_data):
-        print(f"Analyzing request: {request_data}")
-        time.sleep(20)
-        request_data['content'] = "Background job finished"
-        return request_data
-class BasicResponseTool(BaseTool):
-    def __init__(self):
-        super().__init__(["prompt", "max_tokens"])
+#     def execute(self, request_data):
+#         print(f"Analyzing request: {request_data}")
+#         time.sleep(20)
+#         request_data['content'] = "Background job finished"
+#         return request_data
 
 class OpenPullRequestTool(BaseTool):
     def __init__(self):
@@ -151,8 +150,31 @@ class OpenPullRequestTool(BaseTool):
     def execute(self, request_data):
         # Implement the logic to open a pull request here
         print(f"Opening pull request with description: {request_data['description']}")
-        request_data['content'] = "Pull request opened successfully."
+        try:
+            open_pull_request(request_data['description'])
+            request_data['content'] = "Pull request opened successfully."
+        except Exception as e:
+            print(f"Error opening pull request: {e}")
+            request_data['content'] = "Error opening pull request."
         return request_data
+    
+class BackgroundJobTool(BaseTool):
+    def __init__(self):
+        super().__init__()
+        self.immediate = True
+
+    def execute(self, request_data):
+        print("Getting background jobs")
+        message_queue = django_rq.get_queue("default")
+        job_ids = message_queue.started_job_registry.get_job_ids()
+        if len(job_ids) == 0:
+            return "Not working on anything at the moment."
+        else:
+            summary = f"Task count: {len(job_ids)}\n"
+            jobs = Job.fetch_many(job_ids, connection=message_queue.connection)
+            for job in jobs:
+                summary += job.args[0]['content']
+            return summary
 
 # AI ADD CLASSES HERE
 class ToolRegistry:
@@ -197,28 +219,13 @@ class ToolRegistry:
 tool_registry = ToolRegistry()
 tool_registry.register("get_time", DataTool())
 tool_registry.register("get_runtime_environment", RunTimeEnvironmentTool())
-tool_registry.register("create_background_job", AnalyzeUserInputTool())
 tool_registry.register("get_search_results", SearchTool())
 tool_registry.register("get_web_page_summary", BrowseTool())
 tool_registry.register("update_google_document", UpdateGoogleDocTool())
-tool_registry.register("get_basic_response", BasicResponseTool())
 tool_registry.register("read_google_document", ReadGoogleDocTool())
 tool_registry.register("read_project_overview", ReadProjectOverviewTool())
-tool_registry.register("OpenPullRequestTool", OpenPullRequestTool())
-
-def get_background_jobs():
-    message_queue = django_rq.get_queue("default")
-    job_ids = message_queue.started_job_registry.get_job_ids()
-    if len(job_ids) == 0:
-        return "Nothing"
-    else:
-        summary = ""
-        for job_id in job_ids:
-            job = Job.fetch(job_id, connection=message_queue.connection)
-            summary += f"Job ID: {job.id}, Status: {job.args[0]}"
-    return summary
-
-tool_registry.register("get_background_jobs", BaseTool())
+tool_registry.register("open_pull_request", OpenPullRequestTool())
+tool_registry.register("get_background_jobs", BackgroundJobTool())
 
 def persist_message(channel, request_data):
     try:
@@ -244,6 +251,7 @@ def respond(ai_agent, channel, request_data):
         if content.type == "text":
             full_response += content.text
         elif content.type == "tool_use":
+            print(f"Handling tool use: {content}")
             tool_result = tool_registry.handle_tool_use(ai_agent, content, request_data)
             full_response += tool_result
 
