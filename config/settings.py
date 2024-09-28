@@ -364,9 +364,18 @@ TOOL_DEFINITIONS = [
             "required": ["google_doc_id"]
         }
     },
+    {
+        "name": "read_project_overview",
+        "description": "Read the project overview document to respond to questions about your implementation",
+        "input_schema": {
+            "type": "object",
+            "properties": {},
+            "required": []
+        }
+    },
 ]
 
-if os.getenv('SENTRY_DSN') != '':
+if PRODUCTION and os.getenv('SENTRY_DSN') != '':
     sentry_sdk.init(
         dsn=os.getenv('SENTRY_DSN'),
         # Set traces_sample_rate to 1.0 to capture 100%

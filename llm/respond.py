@@ -14,6 +14,7 @@ from llm.analyze import (
   get_runtime_environment,
   update_google_document,
   read_google_document,
+  read_project_overview,
 )
 from channels.models import Message, Channel
 # from tools.browse import get_web_page_summary
@@ -55,6 +56,7 @@ TOOL_MAP: Dict[str, ToolFunction] = {
     "update_google_document": lambda data: django_rq.enqueue(update_google_document, data),
     "get_basic_response": lambda data: django_rq.enqueue(get_basic_response, data),
     "read_google_document": lambda data: django_rq.enqueue(read_google_document, data),
+    "read_project_overview": lambda data: django_rq.enqueue(read_project_overview, data),
 }
 
 # Mapping of tool names to their input keys
@@ -65,6 +67,7 @@ TOOL_INPUT_MAP: Dict[str, List[str]] = {
     "update_google_document": ["google_doc_id"],
     "get_basic_response": ["prompt", "max_tokens"],
     "read_google_document": ["google_doc_id"],
+    "read_project_overview": ["query"],
 }
 
 def handle_tool_use(ai_agent, tool_call, request_data):
@@ -84,7 +87,11 @@ def handle_tool_use(ai_agent, tool_call, request_data):
         return result
     elif hasattr(result, 'id'):
         ai_agent.add_job(result.id)
-        return f"Starting background process: {result.id}"
+        ai_agent.save()
+        response = ai_agent.respond_to_user(f"""
+            State that you are using the {tool_call.name} in a concise and natural way.
+        """)
+        return f"{response}: {result.id}"
     else:
         return "Processing started"
 

@@ -1,4 +1,4 @@
-from config.settings import SYSTEM_PROMPT, PRODUCTION
+from config.settings import SYSTEM_PROMPT, PRODUCTION, BASE_DIR
 from llm.anthropic_integration import get_basic_message
 from tools.search import get_search_data
 from tools.browse import get_web_page_content
@@ -79,6 +79,29 @@ def read_google_document(request_data):
     )
     return {
         "content": response_content,
+        "channel_id": request_data['channel_id'],
+        "ai_agent_name": request_data['ai_agent_name'],
+    }
+
+def read_project_overview(request_data):
+    with open(f'{BASE_DIR}/project_overview.ai', 'r') as file:
+        project_overview = file.read()
+
+    response_content = document_content_for_user_input(
+        f"""
+        AI AGENT PROMPT
+        {request_data['ai_agent_system_prompt']}
+        BACKGROUND PROCCESSING CONTEXT PROMPT
+        You are at the point in the response cycle where you need to generate the content
+        to address the user's request. Use the project overview file provided by the user
+        to generate the content to be returned. You are in a running background process and
+        you can respond in a single response in the slack thread with a maximum of 2000 characters.
+        """,
+        project_overview,
+    )
+
+    return {
+        "content": response_content[:2000],
         "channel_id": request_data['channel_id'],
         "ai_agent_name": request_data['ai_agent_name'],
     }

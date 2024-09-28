@@ -2,6 +2,7 @@ from django.db import models
 import uuid
 from rq.job import Job
 import django_rq
+from llm.anthropic_integration import get_basic_message
 class AIAgent(models.Model):
     name = models.CharField(max_length=100)
     description = models.TextField()
@@ -13,11 +14,7 @@ class AIAgent(models.Model):
     application_id = models.CharField(max_length=200, null=True)
     bot_token = models.CharField(max_length=200, null=True)
     job_ids = models.JSONField(default=list, blank=True)
-    
-    # You can add more fields as needed, such as:
-    # capabilities = models.JSONField(default=dict)
-    # performance_metrics = models.JSONField(default=dict)
-    
+
     def __str__(self):
         return f"{self.name} (v{self.version})"
 
@@ -34,17 +31,6 @@ class AIAgent(models.Model):
     def get_jobs(self):
         message_queue = django_rq.get_queue('default')
         return Job.fetch_many(self.job_ids, connection=message_queue.connection)
-
-    # def get_jobs(self):
-    #     message_queue = django_rq.get_queue('default')
-    #     jobs = []
-    #     for job_id in self.job_ids:
-    #         try:
-    #             job = Job.fetch(job_id, connection=message_queue.connection)
-    #             jobs.append(job)
-    #         except Exception as e:
-    #             print(f"Error fetching job {job_id}: {str(e)}")
-    #     return jobs
     
     def job_count(self):
         return len(self.job_ids)
@@ -52,3 +38,15 @@ class AIAgent(models.Model):
     def active_job_count(self):
         jobs = self.get_jobs()
         return sum(1 for job in jobs if job.is_started)
+    
+    def respond_to_user(self, user_input):
+        message = get_basic_message(
+            self.description,
+            [
+                {
+                    "role": "user",
+                    "content": user_input,
+                },
+            ],
+        )
+        return message.content[0].text
