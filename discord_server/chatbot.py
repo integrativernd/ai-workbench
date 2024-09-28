@@ -94,7 +94,8 @@ class ChatBot(commands.Bot):
             await self.close()
             return
         else:
-            print(f"{self.ai_agent.name}: I am active.")
+            if not PRODUCTION:
+                print(f"{self.ai_agent.name}: I am active.")
         
         job_ids = self.message_queue.finished_job_registry.get_job_ids()
         print(f"{self.ai_agent.name}: I have {len(job_ids)} tasks to process.")
@@ -132,7 +133,7 @@ class ChatBot(commands.Bot):
     #     await self.add_job(job.id)
 
     async def enqueue_background_process(self, request_data):
-        print(f"Enqueuing background process: {request_data}")
+        # print(f"Enqueuing background process: {request_data}")
         job = self.message_queue.enqueue(handle_message, request_data)
         await self.add_job(job.id)
     
