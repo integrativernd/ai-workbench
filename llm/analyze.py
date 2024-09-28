@@ -1,4 +1,4 @@
-from config.settings import SYSTEM_PROMPT, IS_HEROKU_APP
+from config.settings import SYSTEM_PROMPT, PRODUCTION
 from llm.anthropic_integration import get_basic_message
 from tools.search import get_search_data
 from tools.browse import get_web_page_content
@@ -13,7 +13,7 @@ def get_current_time():
     return est_time.strftime('%B %d, %Y, %I:%M %p')
 
 def get_runtime_environment():
-    if IS_HEROKU_APP:
+    if PRODUCTION:
         return 'PRODUCTION'
     else:
         return 'DEVELOPMENT'
