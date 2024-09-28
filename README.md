@@ -1,39 +1,52 @@
-IyBBSSBXb3JrYmVuY2gKClRoZSBBSSBXb3JrYmVuY2ggaXMgYSBmcmFtZXdv
-cmsgZm9yIGJ1aWxkaW5nIHNlbWktYXV0b25vbW91cyBBSSBhZ2VudHMgdGhh
-dCBjYW4gYmUgdXNlZCB0byBhdXRvbWF0ZSB0YXNrcyBpbiBhIHZhcmlldHkg
-b2YgZG9tYWlucy4gVGhlIEFJIFdvcmtiZW5jaCBpcyBkZXNpZ25lZCB0byBi
-ZSBtb2R1bGFyIGFuZCBleHRlbnNpYmxlLCBhbGxvd2luZyBkZXZlbG9wZXJz
-IHRvIGVhc2lseSBhZGQgbmV3IGNhcGFiaWxpdGllcyB0byB0aGVpciBhZ2Vu
-dHMuCgojIyBJbnRyb2R1Y3Rpb24KClRoZSBBSSBXb3JrYmVuY2ggaXMgYnVp
-bHQgb24gdG9wIG9mIHRoZSBbRGphbmdvXShodHRwczovL3d3dy5kamFuZ29w
-cm9qZWN0LmNvbS8pIHdlYiBmcmFtZXdvcmsgYW5kIHVzZXMgW3JxXShodHRw
-czovL3B5dGhvbi1ycS5vcmcvKSBmb3IgdGFzayBzY2hlZHVsaW5nLiBUaGUg
-QUkgV29ya2JlbmNoIHByb3ZpZGVzIGEgd2ViLWJhc2VkIGludGVyZmFjZSBm
-b3IgbWFuYWdpbmcgYWdlbnRzLCB0YXNrcywgYW5kIGRhdGFzZXRzLCBhcyB3
-ZWxsIGFzIGEgUkVTVCBBUEkgZm9yIGludGVyYWN0aW5nIHdpdGggYWdlbnRz
-IHByb2dyYW1tYXRpY2FsbHkuCgpEamFuZ28gaXMgdXNlZCBmb3IgbWFuYWdp
-bmcgdGhlIERhdGFiYXNlIGFuZCBhZG1pbiBpbnRlcmZhY2UuIHJxIGlzIHVz
-ZWQgZm9yIG1hbmFnaW5nIHRoZSB0YXNrIHF1ZXVlLiBUaGUgQUkgV29ya2Jl
-bmNoIHByb3ZpZGVzIGEgY2hhdC1iYXNlIGludGVyZmFjZSBmb3IgbWFuYWdp
-bmcgYWdlbnRzLCB0YXNrcywgYW5kIGRhdGFzZXRzLCBhcyB3ZWxsIGFzIGEg
-UkVTVCBBUEkgZm9yIGludGVyYWN0aW5nIHdpdGggYWdlbnRzIHByb2dyYW1t
-YXRpY2FsbHkuCgojIyBTeXN0ZW0gUmVxdWlyZW1lbnRzCgotIFB5dGhvbiAz
-LjYrCi0gTWFjT1Mgb3IgTGludXgKLSBSZWRpcwotIFBvc3RncmVzcWwKCiMj
-IFNvZnR3YXJlIEFyY2hpdGVjdHVyZQoKQ29yZSBtb2R1bGVzIGFyZSBpbXBs
-ZW1lbnRlZCBhcyBEamFuZ28gYXBwcy4gRWFjaCBhcHAgaXMgcmVzcG9uc2li
-bGUgZm9yIGEgc3BlY2lmaWMgYXNwZWN0IG9mIHRoZSBzeXN0ZW0sIHN1Y2gg
-YXMgbWFuYWdpbmcgYWdlbnRzLCB0YXNrcywgb3IgZGF0YXNldHMuIFRoZSBj
-b3JlIG1vZHVsZXMgYXJlIGRlc2lnbmVkIHRvIGJlIGV4dGVuc2libGUsIGFs
-bG93aW5nIGRldmVsb3BlcnMgdG8gZWFzaWx5IGFkZCBuZXcgY2FwYWJpbGl0
-aWVzIHRvIHRoZWlyIGFnZW50cy4KCiMjIEdldHRpbmcgU3RhcnRlZAoKQ3Jl
-YXRlIGEgdmlydHVhbCBlbnZpcm9ubWVudAoKYGBgU2hlbGwKcHl0aG9uMyAt
-bSB2ZW52IC0tdXBncmFkZS1kZXBzIC52ZW52CmBgYAoKSW5zdGFsbCBweXRo
-b24gZGVwZW5kZW5jaWVzCgpgYGBTaGVsbApwaXAgaW5zdGFsbCAtciByZXF1
-aXJlbWVudHMudHh0CmBgYAoKaGVyb2t1IGxvY2FsIC0tcG9ydCA1MDAxCgoj
-IyMgQ3JlYXRlIGEgU3VwZXIgVXNlcgoKYGBgYmFzaApweXRob24gbWFuYWdl
-LnB5IGNyZWF0ZXN1cGVydXNlcgpgYGAKCiMjIEhlcm9rdSBBcHAgRGVwZW5k
-ZW5jaWVzCgpoZXJva3UgYnVpbGRwYWNrczphZGQgLWkgMSBoZXJva3UtY29t
-bXVuaXR5L2Nocm9tZS1mb3ItdGVzdGluZwoKIyMgVGVzdGluZwoKYGBgCnB5
-dGhvbiBtYW5hZ2UucHkgdGVzdApgYGAK
+# AI Workbench
 
-This is the updated content of the file.
+The AI Workbench is a framework for building semi-autonomous AI agents that can be used to automate tasks in a variety of domains. The AI Workbench is designed to be modular and extensible, allowing developers to easily add new capabilities to their agents.
+
+## Introduction
+
+The AI Workbench is built on top of the [Django](https://www.djangoproject.com/) web framework and uses [rq](https://python-rq.org/) for task scheduling. The AI Workbench provides a web-based interface for managing agents, tasks, and datasets, as well as a REST API for interacting with agents programmatically.
+
+Django is used for managing the Database and admin interface. rq is used for managing the task queue. The AI Workbench provides a chat-base interface for managing agents, tasks, and datasets, as well as a REST API for interacting with agents programmatically.
+
+## System Requirements
+
+- Python 3.6+
+- MacOS or Linux
+- Redis
+- Postgresql
+
+## Software Architecture
+
+Core modules are implemented as Django apps. Each app is responsible for a specific aspect of the system, such as managing agents, tasks, or datasets. The core modules are designed to be extensible, allowing developers to easily add new capabilities to their agents.
+
+## Getting Started
+
+Create a virtual environment
+
+```Shell
+python3 -m venv --upgrade-deps .venv
+```
+
+Install python dependencies
+
+```Shell
+pip install -r requirements.txt
+```
+
+heroku local --port 5001
+
+### Create a Super User
+
+```bash
+python manage.py createsuperuser
+```
+
+## Heroku App Dependencies
+
+heroku buildpacks:add -i 1 heroku-community/chrome-for-testing
+
+## Testing
+
+```
+python manage.py test
+```
