@@ -7,12 +7,10 @@ from typing import Dict, List, Any, Callable
 from google.auth.transport.requests import Request
 from google.oauth2.credentials import Credentials
 import google_auth_oauthlib.flow
-# from googleapiclient.discovery import build
-from googleapiclient.errors import HttpError
-# from llm.anthropic_integration import get_basic_message, anthropic_client
+# from googleapiclient.errors import HttpError
 
 # Configuration
-from config.settings import BASE_DIR, DOCUMENT_ID, PRODUCTION, BASE_URL, SYSTEM_PROMPT
+from config.settings import BASE_DIR, BASE_URL
 
 # Models
 from tools.models import IntegrationCredential
