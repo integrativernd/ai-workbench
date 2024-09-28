@@ -19,9 +19,8 @@ from channels.models import Message, Channel
 # from tools.browse import get_web_page_summary
 import django_rq
 from llm.anthropic_integration import get_message
-from config.settings import SYSTEM_PROMPT, TOOL_DEFINITIONS, IS_HEROKU_APP, AI_CHANNEL_ID
+from config.settings import TOOL_DEFINITIONS
 import time
-from termcolor import cprint
 
 
 # Define a type for our tool functions
@@ -69,7 +68,7 @@ TOOL_INPUT_MAP: Dict[str, List[str]] = {
 }
 
 def handle_tool_use(ai_agent, tool_call, request_data):
-    cprint(f"Handling tool use: {tool_call.name}", 'cyan')
+    print(f"Handling tool use: {tool_call.name}")
 
     tool_function = TOOL_MAP.get(tool_call.name)
     if not tool_function:

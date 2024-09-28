@@ -8,7 +8,6 @@ from rq.job import Job
 from channels.models import Channel
 from ai_agents.models import AIAgent
 import time
-from termcolor import cprint
 
 def handle_message(message_data):
     """

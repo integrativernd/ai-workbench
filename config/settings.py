@@ -325,20 +325,6 @@ TOOL_DEFINITIONS = [
             "required": ["query"]
         }
     },
-    # {
-    #     "name": "create_background_job",
-    #     "description": "Create a background job to handle a long-running task. Only trigger this job if you require multiple API calls or tool executions to be able to respond correctly.",
-    #     "input_schema": {
-    #         "type": "object",
-    #         "properties": {
-    #             "task": {
-    #                 "type": "string",
-    #                 "description": "The task to be executed in the background"
-    #             }
-    #         },
-    #         "required": ["task"]
-    #     }
-    # },
     {
         "name": "get_background_jobs",
         "description": "Call this tool if the user asks you what you are working on or doing in general. Background jobs are the only thing you could be doing besides responding synchronously in the thread.",
