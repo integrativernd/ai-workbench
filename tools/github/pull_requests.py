@@ -5,7 +5,7 @@ from datetime import datetime
 
 API_URL = "https://api.github.com"
 
-def post_pull_request(owner, repo, token, base_branch):
+def post_pull_request(owner, repo, token, base_branch, title, description):
     headers = {
         "Authorization": f"token {token}",
         "Accept": "application/vnd.github.v3+json"
@@ -51,7 +51,7 @@ def post_pull_request(owner, repo, token, base_branch):
     decoded_content = base64.b64decode(file_data['content']).decode("utf-8")
     updated_content = f"{decoded_content}\nCreating branch {new_branch} at {datetime.now()}"
 
-    # # Update the file
+    # Update the file
     update_url = f"{API_URL}/repos/{owner}/{repo}/contents/{file_path}"
     update_data = {
         "message": f"Update {file_path}",
@@ -65,8 +65,8 @@ def post_pull_request(owner, repo, token, base_branch):
     # Create a pull request
     pr_url = f"{API_URL}/repos/{owner}/{repo}/pulls"
     pr_data = {
-        "title": "Add Hello World file",
-        "body": "This pull request adds a Hello World file to the project.",
+        "title": title,
+        "body": description,
         "head": new_branch,
         "base": base_branch
     }
@@ -76,7 +76,7 @@ def post_pull_request(owner, repo, token, base_branch):
     return response.json()["html_url"]
 
 
-def open_pull_request():
+def open_pull_request(request_data):
     # Get configuration from environment variables
     owner = os.environ.get("GITHUB_OWNER")
     repo = os.environ.get("GITHUB_REPO")
@@ -87,10 +87,22 @@ def open_pull_request():
         raise ValueError("Missing required environment variables. Please set GITHUB_OWNER, GITHUB_REPO, and GITHUB_TOKEN.")
 
     try:
-        pr_url = post_pull_request(owner, repo, token, base_branch)
-        print(f"Pull request created successfully. URL: {pr_url}")
+        pr_url = post_pull_request(
+            owner,
+            repo,
+            token,
+            base_branch,
+            request_data["title"] or "New Feature",
+            request_data["description"] or "This is a new feature."
+        )
+        return (f"Pull request created. {pr_url}")
     except requests.RequestException as e:
         print(f"Error creating pull request: {e}")
 
-# if __name__ == "__main__":
-#     main()
+if __name__ == "__main__":
+    open_pull_request(
+        {
+            "title": "Add feature",
+            "description": "This is a test pull request."
+        }
+    )

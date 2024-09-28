@@ -7,6 +7,7 @@ from tools.search import get_search_data
 from tools.browse import get_web_page_content
 from tools.google.docs import append_text, read_document
 from tools.github.pull_requests import open_pull_request
+from tools.github.issues import create_github_issue
 import time
 import pytz
 from datetime import datetime
@@ -47,6 +48,9 @@ def create_system_prompt(base_prompt, additional_context=""):
     """
 
 # AI: TOOL RESPONDERS
+
+# These classes are used to define the tools that the AI can use to respond to user requests.
+# Each tool is a class that inherits from BaseTool and implements the execute method.
 class BaseTool:
     def __init__(self, input_keys: List[str] = None):
         self.input_keys = input_keys or []
@@ -104,7 +108,6 @@ class ReadProjectOverviewTool(BaseTool):
         super().__init__(["query"])
 
     def execute(self, request_data):
-        time.sleep(50)
         with open(f'{BASE_DIR}/project_overview.ai', 'r') as file:
             project_overview = file.read()
         prompt = create_system_prompt(
@@ -132,27 +135,16 @@ class UpdateGoogleDocTool(BaseTool):
         append_text(request_data['google_doc_id'], message.content[0].text)
         request_data['content'] = "Document updated."
         return request_data
-
-# class AnalyzeUserInputTool(BaseTool):
-#     def __init__(self):
-#         super().__init__(["task"])
-
-#     def execute(self, request_data):
-#         print(f"Analyzing request: {request_data}")
-#         time.sleep(20)
-#         request_data['content'] = "Background job finished"
-#         return request_data
-
 class OpenPullRequestTool(BaseTool):
     def __init__(self):
-        super().__init__(["description"])
+        super().__init__(["title", "description"])
 
     def execute(self, request_data):
         # Implement the logic to open a pull request here
+        print(f"Opening pull request with title: {request_data['title']}")
         print(f"Opening pull request with description: {request_data['description']}")
         try:
-            open_pull_request(request_data['description'])
-            request_data['content'] = "Pull request opened successfully."
+            request_data['content'] =  open_pull_request(request_data)
         except Exception as e:
             print(f"Error opening pull request: {e}")
             request_data['content'] = "Error opening pull request."
@@ -176,6 +168,14 @@ class BackgroundJobTool(BaseTool):
                 summary += job.args[0]['content']
             return summary
 
+
+class CreateGithubIssueTool(BaseTool):
+    def __init__(self):
+        super().__init__(["title", "description"])
+
+    def execute(self, request_data):
+        request_data['content'] = create_github_issue(request_data)
+        return request_data
 # AI ADD CLASSES HERE
 class ToolRegistry:
     def __init__(self):
@@ -226,6 +226,7 @@ tool_registry.register("read_google_document", ReadGoogleDocTool())
 tool_registry.register("read_project_overview", ReadProjectOverviewTool())
 tool_registry.register("open_pull_request", OpenPullRequestTool())
 tool_registry.register("get_background_jobs", BackgroundJobTool())
+tool_registry.register("create_github_issue", CreateGithubIssueTool())
 
 def persist_message(channel, request_data):
     try:

@@ -55,18 +55,16 @@ def update_tool_registry(file_path, tool_name):
 def main():
     file_path = 'llm/respond.py'  # Replace with your actual file path
     
-    new_tool_class = """class OpenPullRequestTool(BaseTool):
+    new_tool_class = """class CreateGithubIssueTool(BaseTool):
     def __init__(self):
-        super().__init__(["description"])
+        super().__init__(["title", "description"])
 
     def execute(self, request_data):
-        # Implement the logic to open a pull request here
-        print(f"Opening pull request with description: {request_data['description']}")
-        request_data['content'] = "Pull request opened successfully."
+        request_data['content'] = create_github_issue(request_data)
         return request_data"""
 
     append_tool_class(file_path, new_tool_class)
-    update_tool_registry(file_path, "OpenPullRequestTool")
+    update_tool_registry(file_path, "CreateGithubIssueTool")
 
     print("Tool class added and registered successfully.")
 

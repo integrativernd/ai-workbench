@@ -383,8 +383,31 @@ TOOL_DEFINITIONS = [
         "description": 'Invoke this tool when asked to make a pull request',
         "input_schema": {
             "type": 'object',
-            "properties": {'description': {'type': 'string', 'description': 'Description of the pull request'}},
-            "required": ['description'],
+            "properties": {
+                'title': {
+                    'type': 'string', 'description': 'A logical title of the pull request'
+                },
+                'description': {
+                    'type': 'string', 'title': 'Logical description based on the request.'
+                }
+            },
+            "required": ['title', 'description'],
+        },
+    },
+    {
+        "name": 'create_github_issue',
+        "description": 'Invoke this tool to log a github issue',
+        "input_schema": {
+            "type": 'object',
+            "properties": {
+                'title': {
+                    'type': 'string', 'description': 'A logic title of the issue'
+                },
+                'description': {
+                    'type': 'string', 'title': 'Logical description of the issue based on the request.'
+                }
+            },
+            "required": ['title', 'description'],
         },
     },
 ]
