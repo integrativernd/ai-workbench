@@ -374,13 +374,15 @@ TOOL_DEFINITIONS = [
         }
     },
     {
-        "name": 'new_tool',
-        "description": 'Description of the new tool',
-        "input_schema": {
-            "type": 'object',
-            "properties": {'param1': {'type': 'string', 'description': 'Description of param1'}},
-            "required": ['param1'],
+        "name": 'add_tool',
+        "description": 'Invoke tool when asked to create a new tool for AI Workbench',
+        "properties": {
+            "tool_requirements": {
+                "type": "string",
+                "description": f"The stated requirements for the new tool to be created."
+            }
         },
+        "required": ["tool_requirements"]
     },
 ]
 
