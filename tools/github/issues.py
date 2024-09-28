@@ -47,10 +47,35 @@ def create_github_issue(request_data):
         print(f"Error creating issue: {e}")
         return f"Error creating issue: {str(e)}"
 
-if __name__ == "__main__":
-    result = create_github_issue({
-        "title": "Test Issue",
-        "body": "This is a test issue created at " + datetime.now().strftime("%Y-%m-%d %H:%M:%S"),
-        "labels": ["test", "automated"]
-    })
-    print(result)
+def read_github_issue(owner, repo, token, issue_number):
+    headers = {
+        'Authorization': f'token {token}',
+        'Accept': 'application/vnd.github.v3+json'
+    }
+
+    issue_url = f'{API_URL}/repos/{owner}/{repo}/issues/{issue_number}'
+    response = requests.get(issue_url, headers=headers)
+    response.raise_for_status()
+
+    issue_data = response.json()
+    title = issue_data['title']
+    body = issue_data['body']
+
+    return title, body
+
+
+
+
+
+
+
+
+
+
+# if __name__ == "__main__":
+#     result = create_github_issue({
+#         "title": "Test Issue",
+#         "body": "This is a test issue created at " + datetime.now().strftime("%Y-%m-%d %H:%M:%S"),
+#         "labels": ["test", "automated"]
+#     })
+#     print(result)

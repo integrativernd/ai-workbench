@@ -168,7 +168,6 @@ class BackgroundJobTool(BaseTool):
                 summary += job.args[0]['content']
             return summary
 
-
 class CreateGithubIssueTool(BaseTool):
     def __init__(self):
         super().__init__(["title", "description"])
@@ -176,6 +175,7 @@ class CreateGithubIssueTool(BaseTool):
     def execute(self, request_data):
         request_data['content'] = create_github_issue(request_data)
         return request_data
+    
 # AI ADD CLASSES HERE
 class ToolRegistry:
     def __init__(self):

@@ -410,6 +410,22 @@ TOOL_DEFINITIONS = [
             "required": ['title', 'description'],
         },
     },
+    {
+        "name": 'address_github_issue',
+        "description": 'Invoke this tool when asked to address a github issue.',
+        "input_schema": {
+            "type": 'object',
+            "properties": {
+                'title': {
+                    'type': 'string', 'description': 'A logic title of the request'
+                },
+                'description': {
+                    'type': 'string', 'title': 'Details of the user request.'
+                }
+            },
+            "required": ['title', 'description'],
+        },
+    },
 ]
 
 if PRODUCTION and os.getenv('SENTRY_DSN') != '':
