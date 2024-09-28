@@ -5,14 +5,14 @@ from datetime import datetime
 
 API_URL = "https://api.github.com"
 
-def create_hello_world_pr(owner, repo, token, base_branch):
+def create_pull_request(owner, repo, token, base_branch):
     headers = {
         "Authorization": f"token {token}",
         "Accept": "application/vnd.github.v3+json"
     }
 
     # Generate branch name
-    new_branch = f"add-hello-world-{datetime.now().strftime('%Y%m%d-%H%M%S')}"
+    new_branch = f"add-feature-{datetime.now().strftime('%Y%m%d-%H%M%S')}"
 
     # Get the SHA of the latest commit on the base branch
     base_branch_url = f"{API_URL}/repos/{owner}/{repo}/git/refs/heads/{base_branch}"
@@ -65,7 +65,7 @@ def main():
         raise ValueError("Missing required environment variables. Please set GITHUB_OWNER, GITHUB_REPO, and GITHUB_TOKEN.")
 
     try:
-        pr_url = create_hello_world_pr(owner, repo, token, base_branch)
+        pr_url = create_pull_request(owner, repo, token, base_branch)
         print(f"Pull request created successfully. URL: {pr_url}")
     except requests.RequestException as e:
         print(f"Error creating pull request: {e}")
