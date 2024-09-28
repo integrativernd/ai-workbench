@@ -96,6 +96,8 @@ def read_project_overview(request_data):
         to address the user's request. Use the project overview file provided by the user
         to generate the content to be returned. You are in a running background process and
         you can respond in a single response in the slack thread with a maximum of 2000 characters.
+
+        This is what the user requested {request_data['query']}
         """,
         project_overview,
     )
@@ -150,6 +152,13 @@ def get_basic_response(request_data):
     response_text = message.content[0].text
     return {
         "content": response_text[:2000],
+        "channel_id": request_data['channel_id'],
+        "ai_agent_name": request_data['ai_agent_name'],
+    }
+
+def example_tool(request_data):
+    return {
+        "content": 'Example tool response',
         "channel_id": request_data['channel_id'],
         "ai_agent_name": request_data['ai_agent_name'],
     }

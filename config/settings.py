@@ -369,20 +369,14 @@ TOOL_DEFINITIONS = [
         "description": "Read the project overview document to respond to questions about your implementation",
         "input_schema": {
             "type": "object",
-            "properties": {},
-            "required": []
+            "properties": {
+                "query": {
+                    "type": "string",
+                    "description": f"What the user requested to know about the project."
+                }
+            },
+            "required": ["query"]
         }
-    },
-    {
-        "name": 'add_tool',
-        "description": 'Invoke tool when asked to create a new tool for AI Workbench',
-        "properties": {
-            "tool_requirements": {
-                "type": "string",
-                "description": f"The stated requirements for the new tool to be created."
-            }
-        },
-        "required": ["tool_requirements"]
     },
 ]
 
