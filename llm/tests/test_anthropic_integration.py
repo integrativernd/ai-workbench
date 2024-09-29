@@ -160,23 +160,6 @@ class AnthropicIntegrationTest(TestCase):
             record_fixtures=False,
         )
 
-        # print(message.content[0].text)
         self.assertEqual(len(message.content), 2)
         self.assertEqual(message.content[0].name, 'read_system_architecture')
         self.assertEqual(message.content[1].name, 'update_google_document')
-    
-    # def test_time_bound_requests(self):
-    #     message = self.get_or_record_tool_message(
-    #         SYSTEM_PROMPT,
-    #         [
-    #             {
-    #                 "role": "user",
-    #                 "content": "Home many days are from today to the next ",
-    #             }
-    #         ],
-    #         "read_systems_architecture_and_update_google_document"
-    #     )
-
-    #     self.assertEqual(len(message.content), 2)
-    #     self.assertEqual(message.content[0].name, 'read_system_architecture')
-    #     self.assertEqual(message.content[1].name, 'update_google_document')
