@@ -123,19 +123,24 @@ class ReadGoogleDocumentTool(BaseTool):
 class ReadSystemArchitectureTool(BaseTool):
     def __init__(self):
         super().__init__(["query"])
+        # self.immediate = True
 
     def execute(self, request_data):
+        print('Reading system architecture')
+        print(f"Considering user's request {request_data['query']}")
         with open(f'{BASE_DIR}/project_overview.ai', 'r') as file:
             project_overview = file.read()
-        prompt = create_system_prompt(
-            request_data['ai_agent_system_prompt'],
-            f"This is what the user requested {request_data['query']}"
-        )
         message = get_basic_message(
-            prompt,
+            request_data['query'],
             [{ "role": "user", "content": project_overview }]
         )
-        request_data['content'] = message.content[0].text
+        tool_sequence = request_data['tool_sequence']
+        new_tool_sequence = [t for t in tool_sequence if t.name != "read_system_architecture"]
+        request_data['tool_sequence'] = new_tool_sequence
+        if len(request_data['tool_sequence']) > 0:
+            request_data['content'] = message.content[0].text
+        else:
+            request_data['content'] = message.content[0].text[:2000]
         return request_data
 
 class UpdateGoogleDocumentTool(BaseTool):
@@ -158,7 +163,6 @@ class UpdateGoogleDocumentTool(BaseTool):
             }
         ])
         response_text = message.content[0].text
-        
         try:
             print(f"Updating document with text: google_doc_id ")
             append_text(request_data['google_doc_id'], response_text)
@@ -168,12 +172,12 @@ class UpdateGoogleDocumentTool(BaseTool):
 
         request_data['content'] = "Document updated."
         return request_data
+
 class OpenPullRequestTool(BaseTool):
     def __init__(self):
         super().__init__(["title", "description"])
 
     def execute(self, request_data):
-        # Implement the logic to open a pull request here
         print(f"Opening pull request with title: {request_data['title']}")
         print(f"Opening pull request with description: {request_data['description']}")
         try:
@@ -273,34 +277,56 @@ class ToolRegistry:
             else:
                 print(f"Warning: No matching class found for tool '{tool_name}'")
 
-    def handle_tool_use(self, ai_agent, tool_call, request_data):
-        print(f"Handling tool use: {tool_call.name}")
+    def handle_tool_use(self, ai_agent, request_data):
+        tool_call = request_data['tool']
         tool = self.get(tool_call.name)
         if not tool:
             return f"Unknown tool: {tool_call.name}"
-        
+
         for key in tool.input_keys:
             if key in tool_call.input:
                 request_data[key] = tool_call.input[key]
 
+        print(f"Executing tool: {tool_call.name}")
         if tool.immediate:
+            print("Executing tool immediately")
             return tool.execute(request_data)
-        
-        result = django_rq.enqueue(tool.execute, request_data)
-        print(f"Background job started: {result.id}")
-        if isinstance(result, str):
-            return result
-        elif hasattr(result, 'id'):
-            ai_agent.add_job(result.id)
+
+        enqueue_result = django_rq.enqueue(tool.execute, request_data)
+        if isinstance(enqueue_result, str):
+            return enqueue_result
+        elif hasattr(enqueue_result, 'id'):
+            ai_agent.add_job(enqueue_result.id)
             ai_agent.save()
-            response = ai_agent.respond_to_user(f"State that you are using the {tool_call.name} in a concise and natural way.")
-            return f"{response}\nJOB ID: {result.id}"
+            response_text = f"""
+            State that you are using the {tool_call.name} in a concise and natural way.
+            """
+            response = ai_agent.respond_to_user(response_text)
+            return f"{response}\nJOB ID: {enqueue_result.id}"
         else:
             return "Processing started"
 
 # Initialize the tool registry
 tool_registry = ToolRegistry()
 tool_registry.auto_register_tools()
+
+def generate_immediate_response(ai_agent, tool_blocks, request_data):
+    tool_names = ", ".join([tool.name for tool in tool_blocks])
+    tool_summary_message = get_basic_message(
+        f"""
+        {ai_agent.description}
+        
+        Acknowledge the user's request {request_data['content']} and
+        indicate that you are using the tool names provided. Your response
+        should sound natural and concise and not mention the tool names explicitly.
+        It should convey they you will be working on this and it may take some time.
+        """,
+        [
+            { "role": "user", "content": tool_names }
+        ]
+    )
+    return tool_summary_message.content[0].text
+
 
 def persist_message(channel, request_data):
     try:
@@ -313,31 +339,36 @@ def persist_message(channel, request_data):
         print(f"Error saving message: {e}")
 
 def respond(ai_agent, channel, request_data):
+    response_text = ""
+
     response_message = get_message(
         ai_agent.description,
         TOOL_DEFINITIONS,
         [{ "role": "user", "content": request_data['content'] }],
     )
 
-    print(f"Responding with message: {response_message}")
-
-    text_content_blocks = []
-    tool_blocks = []
+    text_contents = []
+    tool_contents = []
+    tool_sequence = []
 
     for content in response_message.content:
         if content.type == "text":
-            text_content_blocks.append(content.text)
+            text_contents.append(content.text)
         elif content.type == "tool_use":
-            tool_blocks.append(content)
-            text_content_blocks.append(content.name)
+            tool_contents.append(content)
 
-    # full_response = ""
-    # for content in response_message.content:
-    #     if content.type == "text":
-    #         full_response += content.text
-    #     elif content.type == "tool_use":
-    #         print(f"Handling tool use: {content}")
-    #         request_data['tool_response_data'] = full_response
-    #         tool_result = tool_registry.handle_tool_use(ai_agent, content, request_data)
-    #         full_response += tool_result
-    return "\n".join(text_content_blocks)
+    if len(tool_contents) > 0:
+        try:
+            request_data["tool"] = tool_contents[0]
+            request_data["tool_sequence"] = tool_contents[1:]
+            tool_result = tool_registry.handle_tool_use(ai_agent, request_data)
+            text_contents.append(tool_result)
+        except Exception as e:
+            print(f"Error processing tool: {e}")
+            text_contents.append("Error processing tool")
+  
+    for content in text_contents:
+        print(content)
+    
+    return "\n".join(text_contents)
+

@@ -1,6 +1,6 @@
 from discord.ext import commands, tasks
 import discord
-from llm.respond import respond
+from llm.respond import respond, tool_registry
 from config.settings import PRODUCTION
 import django_rq
 from rq.job import Job
@@ -96,6 +96,10 @@ class ChatBot(commands.Bot):
         """
         await channel.purge(limit=1000)
 
+    @sync_to_async
+    def handle_tool_use(self, result_data):
+        return tool_registry.handle_tool_use(self.ai_agent, result_data)
+
     @tasks.loop(seconds=2)
     async def background_loop(self):
         """
@@ -109,7 +113,6 @@ class ChatBot(commands.Bot):
         # else:
         #     if not PRODUCTION:
         #         print(f"{self.ai_agent.name}: I am active.")
-        
         job_ids = self.message_queue.finished_job_registry.get_job_ids()
         # print(f"{self.ai_agent.name}: I have {len(job_ids)} tasks to process.")
 
@@ -124,7 +127,19 @@ class ChatBot(commands.Bot):
                 is_same_agent = self.ai_agent.name == result_data['ai_agent_name']
                 if channel and is_same_agent:
                     self.message_queue.finished_job_registry.remove(job.id)
-                    await channel.send(result_data['content'])
+                    if len(result_data['tool_sequence']) > 0:
+                        await channel.send("Finished task. Working on next task.")
+                        try:
+                            result_data['tool'] = result_data['tool_sequence'].pop(0)
+                            print(f"Processing tool: {result_data['tool']}")
+                            print(f"Tool sequence: {result_data['tool_sequence']}")
+                            tool_result = await self.handle_tool_use(result_data)
+                            await channel.send(tool_result)
+                        except Exception as e:
+                            print(f"Error processing tool: {e}")
+                            await channel.send(f"Error processing tool: {str(e)}")
+                    else:
+                        await channel.send(result_data['content'])
             except Exception as e:
                 self.message_queue.finished_job_registry.remove(job.id)
                 print(f"Error processing job: {job.id}")
@@ -173,8 +188,6 @@ class ChatBot(commands.Bot):
                 print('Asking for history')
                 await self.list_messages(message.channel)
                 return
-            
-            await message.channel.send('Ok.')
 
             response_text = await handle_message({
                 "ai_agent_name": self.ai_agent.name,
