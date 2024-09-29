@@ -34,10 +34,10 @@ def approximate_token_count(text):
     return int(len(text.split()) / 0.75)
 
 
-def summarize_content(content):
+def summarize_content(system_prompt, content):
     message = get_basic_message(
-        SYSTEM_PROMPT,
-        [{"role": "user", "content": f"Summarize all content from the user as a short list of bullets.\n{content}"}]
+        system_prompt,
+        [{"role": "user", "content": content}]
     )
     return message.content[0].text
 
@@ -71,7 +71,7 @@ class GetTimeTool(BaseTool):
         self.immediate = True
 
     def execute(self, _):
-        return get_current_time()
+        return f"current time: {get_current_time()}"
 
 class GetRuntimeEnvironmentTool(BaseTool):
     def __init__(self):
@@ -86,7 +86,14 @@ class GetSearchResultsTool(BaseTool):
         super().__init__(["query"])
 
     def execute(self, request_data):
-        request_data['content'] = summarize_content(get_search_data(request_data['query']))
+        request_data['content'] = summarize_content(
+            f"""
+            Respond to the user's query {request_data['query']} concisely and accurately.
+            Based on the search results provided in the message. Limit your response
+            to a maximum of 2000 characters.
+            """,
+            get_search_data(request_data['query'])
+        )
         return request_data
 
 class GetWebPageSummaryTool(BaseTool):
@@ -94,7 +101,10 @@ class GetWebPageSummaryTool(BaseTool):
         super().__init__(["url"])
 
     def execute(self, request_data):
-        request_data['content'] = summarize_content(get_web_page_content(request_data['url']))
+        request_data['content'] = summarize_content(
+            request_data['ai_agent_system_prompt'],
+            get_web_page_content(request_data['url'])
+        )
         return request_data
 
 class ReadGoogleDocumentTool(BaseTool):
@@ -110,7 +120,7 @@ class ReadGoogleDocumentTool(BaseTool):
         request_data['content'] = message.content[0].text
         return request_data
 
-class ReadProjectOverviewTool(BaseTool):
+class ReadSystemArchitectureTool(BaseTool):
     def __init__(self):
         super().__init__(["query"])
 
@@ -133,13 +143,29 @@ class UpdateGoogleDocumentTool(BaseTool):
         super().__init__(["google_doc_id", "content"])
 
     def execute(self, request_data):
-        document_content_data = read_document(request_data['google_doc_id'])
-        prompt = create_system_prompt(
-            request_data['ai_agent_system_prompt'],
-            f"CURRENT DOCUMENT CONTENT JSON DATA\n{document_content_data}"
-        )
-        message = get_basic_message(prompt, request_data['content'])
-        append_text(request_data['google_doc_id'], message.content[0].text)
+        document_content_object = read_document(request_data['google_doc_id'])
+        print(f"Document content object: {document_content_object}")
+        system_prompt = f"""
+        AI AGENT SYSTEM PROMPT: {request_data['ai_agent_system_prompt']}
+        CURRENT_DOCUMENT_CONTENT: {document_content_object}
+        Respond to the user's request to update the Google document with just the 
+        new content and no other information. Limit your response to a maximum of 2000 characters.
+        """
+        message = get_basic_message(system_prompt, [
+            {
+                "role": "user",
+                "content": request_data['content']
+            }
+        ])
+        response_text = message.content[0].text
+        
+        try:
+            print(f"Updating document with text: google_doc_id ")
+            append_text(request_data['google_doc_id'], response_text)
+        except Exception as e:
+            print(f"Error updating document: {e}")
+            request_data['content'] = "Error updating document."
+
         request_data['content'] = "Document updated."
         return request_data
 class OpenPullRequestTool(BaseTool):
@@ -239,8 +265,6 @@ class ToolRegistry:
         for tool_def in TOOL_DEFINITIONS:
             tool_name = tool_def['name']
             class_name = ''.join(word.capitalize() for word in tool_name.split('_')) + 'Tool'
-
-            print(class_name)
             
             if class_name in tool_classes:
                 tool_class = tool_classes[class_name]
@@ -270,7 +294,7 @@ class ToolRegistry:
             ai_agent.add_job(result.id)
             ai_agent.save()
             response = ai_agent.respond_to_user(f"State that you are using the {tool_call.name} in a concise and natural way.")
-            return f"{response}: {result.id}"
+            return f"{response}\nJOB ID: {result.id}"
         else:
             return "Processing started"
 
@@ -294,14 +318,26 @@ def respond(ai_agent, channel, request_data):
         TOOL_DEFINITIONS,
         [{ "role": "user", "content": request_data['content'] }],
     )
-    
-    full_response = ""
+
+    print(f"Responding with message: {response_message}")
+
+    text_content_blocks = []
+    tool_blocks = []
+
     for content in response_message.content:
         if content.type == "text":
-            full_response += content.text
+            text_content_blocks.append(content.text)
         elif content.type == "tool_use":
-            print(f"Handling tool use: {content}")
-            tool_result = tool_registry.handle_tool_use(ai_agent, content, request_data)
-            full_response += tool_result
+            tool_blocks.append(content)
+            text_content_blocks.append(content.name)
 
-    return full_response
+    # full_response = ""
+    # for content in response_message.content:
+    #     if content.type == "text":
+    #         full_response += content.text
+    #     elif content.type == "tool_use":
+    #         print(f"Handling tool use: {content}")
+    #         request_data['tool_response_data'] = full_response
+    #         tool_result = tool_registry.handle_tool_use(ai_agent, content, request_data)
+    #         full_response += tool_result
+    return "\n".join(text_content_blocks)

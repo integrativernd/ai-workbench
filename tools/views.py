@@ -20,6 +20,8 @@ def google_auth_callback(request):
     code = request.GET.get('code')
     stored_state = request.session.get('google_auth_state')
 
+    print(f"request: {request}")
+
     if state != stored_state:
         return HttpResponse('Invalid state parameter. Authorization failed.', status=400)
     

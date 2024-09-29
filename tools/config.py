@@ -46,7 +46,7 @@ TOOL_DEFINITIONS = [
             "properties": {
                 "query": {
                     "type": "string",
-                    "description": "The search query to be used"
+                    "description": "The exact query the user requested to search for."
                 }
             },
             "required": ["query"]
@@ -90,14 +90,14 @@ TOOL_DEFINITIONS = [
         }
     },
     {
-        "name": "read_project_overview",
-        "description": "Read the project overview document to respond to questions about your implementation",
+        "name": "read_system_architecture",
+        "description": "Read the system architecture document when asked about the technical details of your implementation or next context about your systems when performing another task.",
         "input_schema": {
             "type": "object",
             "properties": {
                 "query": {
                     "type": "string",
-                    "description": "What the user requested to know about the project."
+                    "description": "The specific query the user is asking about the system architecture."
                 }
             },
             "required": ["query"]

@@ -75,6 +75,27 @@ class ChatBot(commands.Bot):
         """
         self.ai_agent.add_job(job_id)
 
+    async def list_messages(self, channel):
+        """
+        List all messages in the message queue.
+        """
+        try:
+            channel_messages = []
+            async for message in channel.history(limit=10):
+                channel_messages.append(f"{message.author}: {message.content}")
+            summary = "\n".join(channel_messages)
+            print(summary)
+            await channel.send(summary)
+        except Exception as e:
+            print(f"Error listing messages: {e}")
+            return
+        
+    async def clear_channel(self, channel):
+        """
+        Clear the message queue.
+        """
+        await channel.purge(limit=1000)
+
     @tasks.loop(seconds=2)
     async def background_loop(self):
         """
@@ -85,12 +106,12 @@ class ChatBot(commands.Bot):
         if not self.is_active:
             await self.close()
             return
-        else:
-            if not PRODUCTION:
-                print(f"{self.ai_agent.name}: I am active.")
+        # else:
+        #     if not PRODUCTION:
+        #         print(f"{self.ai_agent.name}: I am active.")
         
         job_ids = self.message_queue.finished_job_registry.get_job_ids()
-        print(f"{self.ai_agent.name}: I have {len(job_ids)} tasks to process.")
+        # print(f"{self.ai_agent.name}: I have {len(job_ids)} tasks to process.")
 
         if len(job_ids) == 0:
             return
@@ -122,11 +143,6 @@ class ChatBot(commands.Bot):
         We use the bot's name as a handle to trigger commands.
         """
         return f"@{self.ai_agent.name.lower()}"
-
-    async def enqueue_background_process(self, request_data):
-        # print(f"Enqueuing background process: {request_data}")
-        job = self.message_queue.enqueue(handle_message, request_data)
-        await self.add_job(job.id)
     
     async def on_message(self, message):
         """
@@ -148,7 +164,16 @@ class ChatBot(commands.Bot):
             if message.content == f"{self.discord_handle} ping":
                 await message.channel.send('pong')
                 return
+            
+            if message.content == f"{self.discord_handle} clear":
+                await self.clear_channel(message.channel)
+                return
 
+            if message.content == f"{self.discord_handle} history":
+                print('Asking for history')
+                await self.list_messages(message.channel)
+                return
+            
             await message.channel.send('Ok.')
 
             response_text = await handle_message({

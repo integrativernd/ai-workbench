@@ -4,6 +4,7 @@ from config.settings import SYSTEM_PROMPT
 import json
 from llm.anthropic_integration import get_basic_message, anthropic_client
 from tools.google.auth import get_credentials
+from googleapiclient.errors import HttpError
 
 ToolFunction = Callable[[Dict[str, Any]], Any]
 
@@ -87,42 +88,42 @@ class GoogleDocsAIAgent:
                     })
         return structure
 
-    def insert_text(self, data):
-        text = data.get('text', '')
-        index = data.get('index', self.get_document_end_index())
-        print(f"Inserting text: {text} at index: {index}")
-        request = [{"insertText": {"location": {"index": 1}, "text": text}}]
-        self.docs_service.documents().batchUpdate(documentId=self.document_id, body={'requests': request}).execute()
-        return f"Inserted text at index {index}"
+    # def insert_text(self, data):
+    #     text = data.get('text', '')
+    #     index = data.get('index', self.get_document_end_index())
+    #     print(f"Inserting text: {text} at index: {index}")
+    #     request = [{"insertText": {"location": {"index": 1}, "text": text}}]
+    #     self.docs_service.documents().batchUpdate(documentId=self.document_id, body={'requests': request}).execute()
+    #     return f"Inserted text at index {index}"
 
-    def delete_content(self, data):
-        start_index = data.get('start_index', 1)
-        end_index = data.get('end_index', self.get_document_end_index())
-        request = [{"deleteContentRange": {"range": {"startIndex": start_index, "endIndex": end_index}}}]
-        self.docs_service.documents().batchUpdate(documentId=self.document_id, body={'requests': request}).execute()
-        return f"Deleted content from index {start_index} to {end_index}"
+    # def delete_content(self, data):
+    #     start_index = data.get('start_index', 1)
+    #     end_index = data.get('end_index', self.get_document_end_index())
+    #     request = [{"deleteContentRange": {"range": {"startIndex": start_index, "endIndex": end_index}}}]
+    #     self.docs_service.documents().batchUpdate(documentId=self.document_id, body={'requests': request}).execute()
+    #     return f"Deleted content from index {start_index} to {end_index}"
 
-    def replace_text(self, data):
-        old_text = data.get('old_text', '')
-        new_text = data.get('new_text', '')
-        request = [{"replaceAllText": {"containsText": {"text": old_text}, "replaceText": new_text}}]
-        self.docs_service.documents().batchUpdate(documentId=self.document_id, body={'requests': request}).execute()
-        return f"Replaced all instances of '{old_text}' with '{new_text}'"
+    # def replace_text(self, data):
+    #     old_text = data.get('old_text', '')
+    #     new_text = data.get('new_text', '')
+    #     request = [{"replaceAllText": {"containsText": {"text": old_text}, "replaceText": new_text}}]
+    #     self.docs_service.documents().batchUpdate(documentId=self.document_id, body={'requests': request}).execute()
+    #     return f"Replaced all instances of '{old_text}' with '{new_text}'"
 
-    def create_title(self, data):
-        title = data.get('title', '')
-        # index = data.get('index', 1)
-        index = 1
-        request = [
-            {"insertText": {"location": {"index": index}, "text": title + "\n"}},
-            {"updateParagraphStyle": {
-                "range": {"startIndex": index, "endIndex": index + len(title)},
-                "paragraphStyle": {"namedStyleType": "HEADING_1"},
-                "fields": "namedStyleType"
-            }}
-        ]
-        self.docs_service.documents().batchUpdate(documentId=self.document_id, body={'requests': request}).execute()
-        return f"Created title '{title}' at index {index}"
+    # def create_title(self, data):
+    #     title = data.get('title', '')
+    #     # index = data.get('index', 1)
+    #     index = 1
+    #     request = [
+    #         {"insertText": {"location": {"index": index}, "text": title + "\n"}},
+    #         {"updateParagraphStyle": {
+    #             "range": {"startIndex": index, "endIndex": index + len(title)},
+    #             "paragraphStyle": {"namedStyleType": "HEADING_1"},
+    #             "fields": "namedStyleType"
+    #         }}
+    #     ]
+    #     self.docs_service.documents().batchUpdate(documentId=self.document_id, body={'requests': request}).execute()
+    #     return f"Created title '{title}' at index {index}"
 
     def add_section(self, data):
         title = data.get('title', '')
@@ -147,22 +148,81 @@ class GoogleDocsAIAgent:
         ]
         self.docs_service.documents().batchUpdate(documentId=self.document_id, body={'requests': request}).execute()
         return f"Added section '{title}' under '{under_title}'"
+    
+    def delete_section(self, header_text, header_level):
+        try:
+            # 1. Get the document content
+            document = self.docs_service.documents().get(documentId=self.document_id).execute()
+            
+            # 2. Find the start index of the header
+            start_index = None
+            end_index = None
+            content = document.get('body').get('content')
+            
+            for element in content:
+                if 'paragraph' in element:
+                    paragraph = element.get('paragraph')
+                    print(paragraph.get('paragraphStyle', {}).get('namedStyleType'))
+                    if paragraph.get('paragraphStyle', {}).get('namedStyleType') == f'HEADING_{header_level}':
+                        for run in paragraph.get('elements', []):
+                            if run.get('textRun', {}).get('content', '').strip() == header_text:
+                                start_index = element.get('startIndex')
+                                break
+            
+            if start_index is None:
+                print(f"Header '{header_text}' not found.")
+                return
+            
+            # 3. Find the end index (next header of the same level or document end)
+            for element in content:
+                if 'paragraph' in element and element.get('startIndex') > start_index:
+                    paragraph = element.get('paragraph')
+                    if paragraph.get('paragraphStyle', {}).get('namedStyleType') == f'HEADING_{header_level}':
+                        end_index = element.get('startIndex')
+                        break
+            
+            if end_index is None:
+                end_index = document.get('body').get('content')[-1].get('endIndex')
+            
+            # 4. Create the delete request
+            requests = [
+                {
+                    'deleteContentRange': {
+                        'range': {
+                            'startIndex': start_index,
+                            'endIndex': end_index
+                        }
+                    }
+                }
+            ]
+            
+            # 5. Execute the request
+            result = self.docs_service.documents().batchUpdate(
+                documentId=self.document_id, body={'requests': requests}).execute()
+            
+            print(f"Deleted content from index {start_index} to {end_index}")
+            return result
+        
+        except HttpError as error:
+            print(f"An error occurred: {error}")
+            return None
 
-    TOOL_MAP: Dict[str, ToolFunction] = {
-        "insert_text": insert_text,
-        "delete_content": delete_content,
-        "replace_text": replace_text,
-        "create_title": create_title,
-        "add_section": add_section,
-    }
 
-    TOOL_INPUT_MAP: Dict[str, List[str]] = {
-        "insert_text": ["text", "index"],
-        "delete_content": ["start_index", "end_index"],
-        "replace_text": ["old_text", "new_text"],
-        "create_title": ["title", "index"],
-        "add_section": ["title", "content", "under_title"],
-    }
+    # TOOL_MAP: Dict[str, ToolFunction] = {
+    #     "insert_text": insert_text,
+    #     "delete_content": delete_content,
+    #     "replace_text": replace_text,
+    #     "create_title": create_title,
+    #     "add_section": add_section,
+    # }
+
+    # TOOL_INPUT_MAP: Dict[str, List[str]] = {
+    #     "insert_text": ["text", "index"],
+    #     "delete_content": ["start_index", "end_index"],
+    #     "replace_text": ["old_text", "new_text"],
+    #     "create_title": ["title", "index"],
+    #     "add_section": ["title", "content", "under_title"],
+    # }
 
     def handle_tool_use(self, tool_call):
         print(f"Handling tool use: {tool_call.name}")
@@ -181,34 +241,32 @@ class GoogleDocsAIAgent:
         return result
     
     def process_user_command(self, user_command):
-        prompt = f"""
-        You are an AI assistant that interprets natural language commands for Google Docs and translates them into specific API actions. Given the following command, use the appropriate tool to execute the action.
-
-        User command: {user_command}
-
-        Use the tools provided to execute the command. If no tool is appropriate, respond with a helpful message.
-        """
-
-        response = anthropic_client.messages.create(
-            model="claude-3-sonnet-20240229",
-            max_tokens=4000,
-            temperature=0,
-            system=prompt,
-            messages=[{
-                "role": "user",
-                "content": user_command,
-            }],
-            tools=TOOL_DEFINITIONS,
-        )
-
-        full_response = ""
-        for content in response.content:
-            if content.type == "text":
-                full_response += content.text
-            elif content.type == "tool_use":
-                tool_result = self.handle_tool_use(content)
-                full_response += tool_result
-        return full_response
+        # return self.delete_section("About Delete", 2)
+        return self.add_section({
+            "title": "Test Section",
+            "content": user_command,
+            "under_title": "Test Title"
+        })
+        # response = anthropic_client.messages.create(
+        #     model="claude-3-sonnet-20240229",
+        #     max_tokens=4000,
+        #     temperature=0,
+        #     system=prompt,
+        #     messages=[{
+        #         "role": "user",
+        #         "content": user_command,
+        #     }],
+        #     tools=TOOL_DEFINITIONS,
+        # )
+        # full_response = ""
+        # for content in response.content:
+        #     if content.type == "text":
+        #         full_response += content.text
+        #     elif content.type == "tool_use":
+        #         tool_result = self.handle_tool_use(content)
+        #         full_response += tool_result
+        # return full_response
+        
 
 def append_text(document_id, content):
     creds = get_credentials()
@@ -220,8 +278,7 @@ def read_document(document_id):
     creds = get_credentials()
     service = build("docs", "v1", credentials=creds)
     document = service.documents().get(documentId=document_id).execute()
-    print(f"The title of the document is: {document.get('title')}")
-    doc_content = service.documents().get(documentId=document_id).execute().get('body').get('content')
+    doc_content = document.get('body').get('content')
     return json.dumps(doc_content)
 
 def update_doc_with_anthropic(document_id, instructions):
