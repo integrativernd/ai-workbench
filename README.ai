@@ -1,9 +1,0 @@
-README.md|AI Workbench framework
-
-I:django;rq
-F:
-C:
-G:
-M:Built on Django web framework;Uses rq for task scheduling;Provides web interface and REST API for managing agents, tasks, datasets;Modular and extensible design
-D:Python 3.6+;MacOS/Linux;Redis;Postgresql  
-V:3.6+
