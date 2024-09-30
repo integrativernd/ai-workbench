@@ -7,6 +7,7 @@ from channels.models import Channel
 from asgiref.sync import sync_to_async
 from llm.anthropic_integration import anthropic_client, stream_to_discord
 from llm.response_types import get_response_type_for_message, ResponseType
+from temporal_app.run_workflow import run_workflow
 
 # @sync_to_async
 # def get_ai_agent_response(ai_agent, message):
@@ -194,6 +195,8 @@ class ChatBot(commands.Bot):
 
             if message.content == f"{self.discord_handle} temporal":
                 print('TODO: Implement temporal check.')
+                result = await run_workflow()
+                await message.channel.send(f"Result: {result}")
                 return
 
             response = get_response_type_for_message(self.ai_agent, message.content)
