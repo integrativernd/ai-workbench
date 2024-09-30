@@ -3,37 +3,36 @@ import discord
 from llm.respond import respond, tool_registry
 import django_rq
 from rq.job import Job
+from channels.models import Channel
 from asgiref.sync import sync_to_async
 
-@sync_to_async
-def handle_message(message, ai_agent):
-    """
-    Handle a message by generating a response using an AI model.
+# @sync_to_async
+# def get_ai_agent_response(ai_agent, message):
+#     """
+#     Handle a message by generating a response using an AI model.
 
-    :param message_data: A dictionary containing message details
-    :return: A dictionary with the response details
-    """
-    # channel = Channel.objects.get(channel_name=message_data['channel_name'])
-    # ai_agent = AIAgent.objects.get(name=message_data['ai_agent_name'])
+#     :param message_data: A dictionary containing message details
+#     :return: A dictionary with the response details
+#     """
+#     # channel = Channel.objects.get(channel_name=str(message.channel))
+#     # channel_id = channel_object.channel_id
+#     # ai_agent = AIAgent.objects.get(name=message_data['ai_agent_name'])
 
-                #     {
-                # "ai_agent_name": self.ai_agent.name,
-                # "channel_name": str(message.channel),
-                # "content": message.content,
-                # "author": str(message.author),
-                # "channel": str(message.channel),
+#                 #     {
+#                 # "ai_agent_name": self.ai_agent.name,
+#                 # "channel_name": str(message.channel),
+#                 # "content": message.content,
+#                 # "author": str(message.author),
+#                 # "channel": str(message.channel),
 
-    return respond(
-        ai_agent,
-        message,
-        # {
-        #     "ai_agent_name": ai_agent.name,
-        #     "channel_id": channel.channel_id,
-        #     "content": message_data['content'],
-        #     "author": message_data['author'],
-        #     "ai_agent_system_prompt": ai_agent.description,
-        # }
-    )
+#     # {
+#     #     "ai_agent_name": ai_agent.name,
+#     #     "channel_id": channel.channel_id,
+#     #     "content": message_data['content'],
+#     #     "author": message_data['author'],
+#     #     "ai_agent_system_prompt": ai_agent.description,
+#     # }
+#     return respond(ai_agent, message, channel)
 
 class ChatBot(commands.Bot):
     """
@@ -82,8 +81,8 @@ class ChatBot(commands.Bot):
         """
         try:
             channel_messages = []
-            async for message in channel.history(limit=10):
-                channel_messages.append(f"{message.author}: {message.content}")
+            async for message in channel.history(limit=3):
+                channel_messages.append(f"{message.author}: {message.content} {message.id}")
             summary = "\n".join(channel_messages)
             print(summary)
             await channel.send(summary)
@@ -101,6 +100,18 @@ class ChatBot(commands.Bot):
     def handle_tool_use(self, result_data):
         return tool_registry.handle_tool_use(self.ai_agent, result_data)
 
+    async def handle_background_process(self, result_data, channel):
+        try:
+            # if result_data['tool_sequence'] > 0:
+            #     result_data['tool'] = result_data['tool_sequence'].pop()
+            # print(f"Processing tool: {result_data['tool']}")
+            # print(f"Tool sequence: {result_data['tool_sequence']}")
+            tool_result = await self.handle_tool_use(result_data)
+            await channel.send(tool_result)
+        except Exception as e:
+            print(f"Error processing tool: {e}")
+            await channel.send(f"Error processing tool: {str(e)}")
+    
     @tasks.loop(seconds=2)
     async def background_loop(self):
         """
@@ -114,28 +125,17 @@ class ChatBot(commands.Bot):
         job_ids = self.message_queue.finished_job_registry.get_job_ids()
         if len(job_ids) == 0:
             return
-        
+
+        # TODO: Query by AIAgent#job_ids
         jobs = Job.fetch_many(job_ids, connection=self.message_queue.connection)
         for job in jobs:
             try:
+                print(f"Processing job: {job.id}")
                 result_data = job.latest_result().return_value
                 channel = self.get_channel(int(result_data['channel_id']))
-                is_same_agent = self.ai_agent.name == result_data['ai_agent_name']
-                if channel and is_same_agent:
-                    self.message_queue.finished_job_registry.remove(job.id)
-                    if len(result_data['tool_sequence']) > 0:
-                        await channel.send("Finished task. Working on next task.")
-                        try:
-                            result_data['tool'] = result_data['tool_sequence'].pop(0)
-                            print(f"Processing tool: {result_data['tool']}")
-                            print(f"Tool sequence: {result_data['tool_sequence']}")
-                            tool_result = await self.handle_tool_use(result_data)
-                            await channel.send(tool_result)
-                        except Exception as e:
-                            print(f"Error processing tool: {e}")
-                            await channel.send(f"Error processing tool: {str(e)}")
-                    else:
-                        await channel.send(result_data['content'])
+                if channel and self.ai_agent.id == result_data['ai_agent_id']:
+                    await channel.send(result_data['content'])
+                self.message_queue.finished_job_registry.remove(job.id)
             except Exception as e:
                 self.message_queue.finished_job_registry.remove(job.id)
                 print(f"Error processing job: {job.id}")
@@ -173,6 +173,7 @@ class ChatBot(commands.Bot):
 
         if message.content.startswith(self.discord_handle):
             if message.content == f"{self.discord_handle} ping":
+                print(message.channel.id)
                 await message.channel.send('pong')
                 return
             
@@ -185,6 +186,6 @@ class ChatBot(commands.Bot):
                 await self.list_messages(message.channel)
                 return
 
-            response_text = await handle_message(message, self.ai_agent)
+            response_text = await respond(self.ai_agent, message)
 
             await message.channel.send(response_text)

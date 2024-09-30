@@ -18,6 +18,7 @@ from tools.google.docs import append_text, read_document
 from tools.github.pull_requests import open_pull_request
 from tools.github.issues import create_github_issue, read_github_issue
 
+from asgiref.sync import sync_to_async
 
 
 def get_current_time():
@@ -353,23 +354,7 @@ class ToolRegistry:
 tool_registry = ToolRegistry()
 tool_registry.auto_register_tools()
 
-def generate_immediate_response(ai_agent, tool_blocks, request_data):
-    tool_names = ", ".join([tool.name for tool in tool_blocks])
-    tool_summary_message = get_basic_message(
-        f"""
-        {ai_agent.description}
-        
-        Acknowledge the user's request {request_data['content']} and
-        indicate that you are using the tool names provided. Your response
-        should sound natural and concise and not mention the tool names explicitly.
-        It should convey they you will be working on this and it may take some time.
-        """,
-        [
-            { "role": "user", "content": tool_names }
-        ]
-    )
-    return tool_summary_message.content[0].text
-
+# AI: RESPONSE HANDLING
 
 def persist_message(channel, request_data):
     try:
@@ -381,35 +366,51 @@ def persist_message(channel, request_data):
     except Exception as e:
         print(f"Error saving message: {e}")
 
-def respond(ai_agent, channel, request_data):
+def handle_tool_contents(ai_agent, user_message, tool_contents):
+    if len(tool_contents) == 0:
+        return
+
+    try:
+        return tool_registry.handle_tool_use(ai_agent, {
+            "ai_agent_system_prompt": ai_agent.description,
+            "ai_agent_id": ai_agent.id,
+            "channel_id": user_message.channel.id,
+            "content": user_message.content,
+            "tool": tool_contents[0],
+            "tool_sequence": tool_contents[1:],
+        })
+    except Exception as e:
+        return f"Error processing tool: {e}"
+
+
+@sync_to_async
+def respond(ai_agent, user_message):
     response_message = get_message(
         ai_agent.description,
         TOOL_DEFINITIONS,
-        [{ "role": "user", "content": request_data['content'] }],
+        [
+            {
+                "role": "user",
+                "content": user_message.content
+            }
+        ],
     )
 
+    # Collective text contents and tool contents
     text_contents = []
     tool_contents = []
-
     for content in response_message.content:
         if content.type == "text":
             text_contents.append(content.text)
         elif content.type == "tool_use":
             tool_contents.append(content)
 
-    if len(tool_contents) > 0:
-        try:
-            # TODO: Refactor into persisted model.
-            request_data["tool"] = tool_contents[0]
-            request_data["tool_sequence"] = tool_contents[1:]
-            tool_result = tool_registry.handle_tool_use(ai_agent, request_data)
-            text_contents.append(tool_result)
-        except Exception as e:
-            print(f"Error processing tool: {e}")
-            text_contents.append("Error processing tool")
-  
-    for content in text_contents:
-        print(content)
+    # Perform tool actions
+    tool_result_text = handle_tool_contents(ai_agent, user_message, tool_contents)
     
+    # If there is a tool result, add it to the text contents
+    # if tool_result_text:
+    #     text_contents.append(tool_result_text)
+   
+    # Return the combined text contents
     return "\n".join(text_contents)
-
