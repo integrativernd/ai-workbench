@@ -13,3 +13,5 @@ db.sqlite3
 .env
 google-credentials.json
 credentials.json
+
+.certs
