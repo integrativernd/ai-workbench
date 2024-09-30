@@ -168,18 +168,18 @@ TOOL_DEFINITIONS = [
             "required": ['request'],
         },
     },
-    {
-        "name": 'review_previous_messages',
-        "description": 'Invoke this tool if the user asks you something that requires knowledge of previous messages.',
-        "input_schema": {
-            "type": 'object',
-            "properties": {
-                'request': {
-                    'type': 'string',
-                    'description': "The request from the user that requires knowledge of previous messages."
-                },
-            },
-            "required": ['request'],
-        },
-    },
+    # {
+    #     "name": 'review_previous_messages',
+    #     "description": 'Invoke this tool if the user asks you something that requires knowledge of previous messages.',
+    #     "input_schema": {
+    #         "type": 'object',
+    #         "properties": {
+    #             'request': {
+    #                 'type': 'string',
+    #                 'description': "The request from the user that requires knowledge of previous messages."
+    #             },
+    #         },
+    #         "required": ['request'],
+    #     },
+    # },
 ]

@@ -1,0 +1,3 @@
+#!/bin/zsh
+
+temporal server start-dev --ui-port 8080

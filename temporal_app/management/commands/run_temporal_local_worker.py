@@ -20,6 +20,7 @@ class Command(BaseCommand):
 
     def handle(self, *args, **options):
         try:
+           print('Running worker')
            asyncio.run(run_worker())
         except Exception as e:
             raise CommandError('An error occurred: %s' % str(e))
