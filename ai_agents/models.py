@@ -3,7 +3,7 @@ import uuid
 from rq.job import Job
 import django_rq
 from llm.anthropic_integration import get_basic_message
-from django.contrib.postgres.fields import JSONField
+from channels.models import Channel, Message
 
 
 class AIAgent(models.Model):
@@ -64,10 +64,10 @@ class AIAgentTask(models.Model):
     ]
 
     ai_agent = models.ForeignKey(AIAgent, on_delete=models.CASCADE, related_name='tasks')
-    message = models.TextField()
+    message = models.ForeignKey(Message, on_delete=models.CASCADE, related_name='tasks')
     channel = models.ForeignKey(Channel, on_delete=models.CASCADE, related_name='tasks')
     status = models.CharField(max_length=20, choices=STATUS_CHOICES, default='PENDING')
-    result = JSONField(null=True, blank=True)
+    result = models.JSONField(null=True, blank=True)
     parent_task = models.ForeignKey('self', null=True, blank=True, on_delete=models.CASCADE, related_name='subtasks')
     order = models.PositiveIntegerField(default=0)
     

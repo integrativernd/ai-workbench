@@ -5,6 +5,8 @@ import django_rq
 from rq.job import Job
 from channels.models import Channel
 from asgiref.sync import sync_to_async
+from llm.anthropic_integration import anthropic_client, stream_to_discord
+from llm.response_types import get_response_type_for_message, ResponseType
 
 # @sync_to_async
 # def get_ai_agent_response(ai_agent, message):
@@ -186,6 +188,9 @@ class ChatBot(commands.Bot):
                 await self.list_messages(message.channel)
                 return
 
-            response_text = await respond(self.ai_agent, message)
-
-            await message.channel.send(response_text)
+            response = get_response_type_for_message(self.ai_agent, message.content)
+            if response.type == ResponseType.MESSAGE:
+                await stream_to_discord(self.ai_agent, message)
+            elif response.type == ResponseType.TOOL:
+                response_text = await respond(self.ai_agent, message)
+                await message.channel.send(response_text)
