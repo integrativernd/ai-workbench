@@ -192,6 +192,10 @@ class ChatBot(commands.Bot):
                 await self.list_messages(message.channel)
                 return
 
+            if message.content == f"{self.discord_handle} temporal":
+                print('TODO: Implement temporal check.')
+                return
+
             response = get_response_type_for_message(self.ai_agent, message.content)
             if response.type == ResponseType.MESSAGE:
                 await stream_to_discord(self.ai_agent, message)
