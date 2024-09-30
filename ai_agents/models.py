@@ -3,6 +3,9 @@ import uuid
 from rq.job import Job
 import django_rq
 from llm.anthropic_integration import get_basic_message
+from channels.models import Channel, Message
+
+
 class AIAgent(models.Model):
     name = models.CharField(max_length=100)
     description = models.TextField()
@@ -50,3 +53,41 @@ class AIAgent(models.Model):
             ],
         )
         return message.content[0].text
+
+
+class AIAgentTask(models.Model):
+    STATUS_CHOICES = [
+        ('PENDING', 'Pending'),
+        ('IN_PROGRESS', 'In Progress'),
+        ('COMPLETED', 'Completed'),
+        ('FAILED', 'Failed'),
+    ]
+
+    ai_agent = models.ForeignKey(AIAgent, on_delete=models.CASCADE, related_name='tasks')
+    message = models.ForeignKey(Message, on_delete=models.CASCADE, related_name='tasks')
+    channel = models.ForeignKey(Channel, on_delete=models.CASCADE, related_name='tasks')
+    status = models.CharField(max_length=20, choices=STATUS_CHOICES, default='PENDING')
+    result = models.JSONField(null=True, blank=True)
+    parent_task = models.ForeignKey('self', null=True, blank=True, on_delete=models.CASCADE, related_name='subtasks')
+    order = models.PositiveIntegerField(default=0)
+    
+    class Meta:
+        ordering = ['order']
+
+    def start_subtasks(self):
+        for subtask in self.subtasks.all().order_by('order'):
+            subtask.status = 'IN_PROGRESS'
+            subtask.save()
+            # Add any additional logic for starting subtasks
+
+    @property
+    def previous_task(self):
+        if self.parent_task:
+            return self.parent_task.subtasks.filter(order__lt=self.order).last()
+        return None
+
+    @property
+    def next_task(self):
+        if self.parent_task:
+            return self.parent_task.subtasks.filter(order__gt=self.order).first()
+        return None

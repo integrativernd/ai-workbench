@@ -38,3 +38,5 @@ google-auth==2.35.0
 cryptography==43.0.1
 
 ruff==0.6.8
+
+temporalio==1.7.1

@@ -1,5 +1,5 @@
 from django.core.management.base import BaseCommand, CommandError
-from tools.file_navigation import list_changed_files
+from tools.code.file_navigation import list_changed_files
 
 class Command(BaseCommand):
     help = 'List changes filed'

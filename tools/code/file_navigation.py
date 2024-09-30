@@ -18,9 +18,9 @@ def find_project_files(root_dir, file_patterns, exclude_dirs):
 
     return project_files
 
-def fetch_project_file_paths():
+def list_files():
     # root_directory = '.'  # Current directory, change if needed
-    file_patterns = ['*.py', '*.md']  # Python and Markdown files
+    file_patterns = ['*.py', '*.md', '*.yml']  # Python and Markdown files
     exclude_directories = [
         '__pycache__', 
         'venv', 

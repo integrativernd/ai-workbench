@@ -25,9 +25,9 @@ def post_github_issue(owner, repo, token, title, body, labels=None):
 
 def create_github_issue(request_data):
     # Get configuration from environment variables
-    owner = os.environ.get("GITHUB_OWNER")
-    repo = os.environ.get("GITHUB_REPO")
-    token = os.environ.get("GITHUB_TOKEN")
+    owner = os.getenv("GITHUB_OWNER")
+    repo = os.getenv("GITHUB_REPO")
+    token = os.getenv("GITHUB_TOKEN")
 
     if not all([owner, repo, token]):
         raise ValueError("Missing required environment variables. Please set GITHUB_OWNER, GITHUB_REPO, and GITHUB_TOKEN.")
@@ -64,9 +64,9 @@ def read_default_github_issue(owner, repo, token, issue_number):
 
 def read_github_issue(request_data):
     # Get configuration from environment variables
-    owner = os.environ.get("GITHUB_OWNER")
-    repo = os.environ.get("GITHUB_REPO")
-    token = os.environ.get("GITHUB_TOKEN")
+    owner = os.getenv("GITHUB_OWNER")
+    repo = os.getenv("GITHUB_REPO")
+    token = os.getenv("GITHUB_TOKEN")
 
     if not all([owner, repo, token]):
         raise ValueError("Missing required environment variables. Please set GITHUB_OWNER, GITHUB_REPO, and GITHUB_TOKEN.")
