@@ -13,3 +13,5 @@ release: ./manage.py migrate --no-input
 worker: python manage.py rqworker default low
 
 discord: python discord_server.py
+
+temporal: python manage.py run_temporal_cloud_worker
