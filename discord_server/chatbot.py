@@ -104,12 +104,12 @@ class ChatBot(commands.Bot):
 
     async def handle_background_process(self, result_data, channel):
         try:
-            # if result_data['tool_sequence'] > 0:
-            #     result_data['tool'] = result_data['tool_sequence'].pop()
+            result_data['tool'] = result_data['tool_sequence'][0]
+            result_data['tool_sequence'] = result_data['tool_sequence'][1:]
             # print(f"Processing tool: {result_data['tool']}")
             # print(f"Tool sequence: {result_data['tool_sequence']}")
-            tool_result = await self.handle_tool_use(result_data)
-            await channel.send(tool_result)
+            await self.handle_tool_use(result_data)
+            # await channel.send(tool_result)
         except Exception as e:
             print(f"Error processing tool: {e}")
             await channel.send(f"Error processing tool: {str(e)}")
@@ -136,7 +136,11 @@ class ChatBot(commands.Bot):
                 result_data = job.latest_result().return_value
                 channel = self.get_channel(int(result_data['channel_id']))
                 if channel and self.ai_agent.id == result_data['ai_agent_id']:
-                    await channel.send(result_data['content'])
+                    if len(result_data['tool_sequence']) > 0:
+                        await channel.send(result_data['tool_sequence'][0].name)
+                        await self.handle_background_process(result_data, channel)
+                    else:
+                        await channel.send(result_data['content'])
                 self.message_queue.finished_job_registry.remove(job.id)
             except Exception as e:
                 self.message_queue.finished_job_registry.remove(job.id)

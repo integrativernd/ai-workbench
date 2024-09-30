@@ -10,6 +10,7 @@ AI Workbench is framework for building semi-autonomous AI agents.
 - Redis
 - Selenium
 - Heroku
+- Anthropic
 
 ### Features
 
@@ -18,3 +19,8 @@ AI Workbench is framework for building semi-autonomous AI agents.
 - Redis Queue for background tasks
 - Google Search
 - Web Browsing
+
+### Core Innovations
+
+AI workbench relies heavily on Anthropic's tool API and the instructor library to help
+AI agents make decisions.

@@ -129,7 +129,7 @@ class ReadSystemArchitectureTool(BaseTool):
     def execute(self, request_data):
         print('Reading system architecture')
         print(f"Considering user's request {request_data['query']}")
-        with open(f'{BASE_DIR}/project_overview.ai', 'r') as file:
+        with open(f'{BASE_DIR}/system_architecture.txt', 'r') as file:
             project_overview = file.read()
         message = get_basic_message(
             request_data['query'],
