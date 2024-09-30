@@ -1,11 +1,9 @@
 import asyncio
-
-# from temporalio import activity, workflow
 from temporalio.client import Client
-
-
 from temporal_app.workflows import SayHello
-from temporalio.client import Client
+from django.core.management.base import BaseCommand, CommandError
+
+
 
 async def run_workflow():
     # Create client connected to server at the given address
@@ -17,10 +15,6 @@ async def run_workflow():
     )
 
     print(f"Result: {result}")
-
-
-from django.core.management.base import BaseCommand, CommandError
-from llm.response_types import get_response_type_for_message
 
 class Command(BaseCommand):
     help = 'Test response types'

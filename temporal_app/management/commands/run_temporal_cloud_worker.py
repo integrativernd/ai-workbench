@@ -1,13 +1,12 @@
 import os
 import asyncio
 
-from temporalio import activity, workflow
 from temporalio.client import Client
 from temporalio.worker import Worker
 
 from temporal_app.activities import say_hello
 from temporal_app.workflows import SayHello
-from temporalio.client import Client, TLSConfig
+from temporalio.client import TLSConfig
 
 from django.core.management.base import BaseCommand, CommandError
 # from llm.response_types import get_response_type_for_message

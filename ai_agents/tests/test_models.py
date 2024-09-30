@@ -57,6 +57,3 @@ class AIAgentTaskTestCase(TestCase):
         self.assertEqual(subtasks[0].next_task, subtasks[1])
         self.assertEqual(subtasks[1].next_task, subtasks[2])
         self.assertIsNone(subtasks[2].next_task)
-
-if __name__ == '__main__':
-    unittest.main()

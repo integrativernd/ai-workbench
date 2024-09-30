@@ -2,7 +2,7 @@ import os
 import asyncio
 from temporalio.client import Client
 from temporal_app.workflows import SayHello
-from temporalio.client import Client, TLSConfig
+from temporalio.client import TLSConfig
 from django.core.management.base import BaseCommand, CommandError
 
 async def run_workflow():

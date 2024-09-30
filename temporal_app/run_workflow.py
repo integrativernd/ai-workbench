@@ -1,7 +1,7 @@
 import os
 from temporalio.client import Client
 from temporal_app.workflows import SayHello
-from temporalio.client import Client, TLSConfig
+from temporalio.client import TLSConfig
 
 
 

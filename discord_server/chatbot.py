@@ -3,9 +3,8 @@ import discord
 from llm.respond import respond, tool_registry
 import django_rq
 from rq.job import Job
-from channels.models import Channel
 from asgiref.sync import sync_to_async
-from llm.anthropic_integration import anthropic_client, stream_to_discord
+from llm.anthropic_integration import stream_to_discord
 from llm.response_types import get_response_type_for_message, ResponseType
 from temporal_app.run_workflow import run_workflow
 

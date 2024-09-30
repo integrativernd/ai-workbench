@@ -236,28 +236,6 @@ class AskClarifyingQuestionTool(BaseTool):
         request_data['content'] = message.content[0].text
         return request_data
 
-class AskClarifyingQuestionTool(BaseTool):
-    def __init__(self):
-        super().__init__(["request"])
-
-    def execute(self, request_data):
-        message = get_basic_message(
-            f"""
-            {request_data['ai_agent_system_prompt']}
-            Acknowledge the user's request to address the issue and ask one or more
-            clarifying questions to better understand the issue. Limit your response
-            to a maximum of 2000 characters.
-            """,
-            [
-                {
-                    "role": "user",
-                    "content": request_data['request'],
-                }
-            ]
-        )
-        request_data['content'] = message.content[0].text
-        return request_data
-
 class AnalyzeGithubIssueTool(BaseTool):
     def __init__(self):
         super().__init__(["issue_number", "issue_url", "description"])
@@ -406,11 +384,9 @@ def respond(ai_agent, user_message):
             tool_contents.append(content)
 
     # Perform tool actions
-    tool_result_text = handle_tool_contents(ai_agent, user_message, tool_contents)
-    
+    handle_tool_contents(ai_agent, user_message, tool_contents)
     # If there is a tool result, add it to the text contents
     # if tool_result_text:
     #     text_contents.append(tool_result_text)
-   
     # Return the combined text contents
     return "\n".join(text_contents)
