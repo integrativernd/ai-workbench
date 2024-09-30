@@ -194,7 +194,7 @@ class ChatBot(commands.Bot):
                 return
 
             if message.content == f"{self.discord_handle} temporal":
-                print('TODO: Implement temporal check.')
+                print('test')
                 result = await run_workflow()
                 await message.channel.send(f"Result: {result}")
                 return
