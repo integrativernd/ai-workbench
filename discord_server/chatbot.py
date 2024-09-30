@@ -9,29 +9,33 @@ from ai_agents.models import AIAgent
 from asgiref.sync import sync_to_async
 
 @sync_to_async
-def handle_message(message_data):
+def handle_message(message, ai_agent):
     """
     Handle a message by generating a response using an AI model.
 
     :param message_data: A dictionary containing message details
     :return: A dictionary with the response details
     """
-    channel = Channel.objects.get(channel_name=message_data['channel_name'])
-    ai_agent = AIAgent.objects.get(name=message_data['ai_agent_name'])
+    # channel = Channel.objects.get(channel_name=message_data['channel_name'])
+    # ai_agent = AIAgent.objects.get(name=message_data['ai_agent_name'])
 
-    print(f"Handling message: {message_data['content']} in channel {channel}")
-    print(f"{ai_agent.name} is processing...")
+                #     {
+                # "ai_agent_name": self.ai_agent.name,
+                # "channel_name": str(message.channel),
+                # "content": message.content,
+                # "author": str(message.author),
+                # "channel": str(message.channel),
 
     return respond(
         ai_agent,
-        channel,
-        {
-            "ai_agent_name": ai_agent.name,
-            "channel_id": channel.channel_id,
-            "content": message_data['content'],
-            "author": message_data['author'],
-            "ai_agent_system_prompt": ai_agent.description,
-        }
+        message,
+        # {
+        #     "ai_agent_name": ai_agent.name,
+        #     "channel_id": channel.channel_id,
+        #     "content": message_data['content'],
+        #     "author": message_data['author'],
+        #     "ai_agent_system_prompt": ai_agent.description,
+        # }
     )
 
 class ChatBot(commands.Bot):
@@ -106,18 +110,12 @@ class ChatBot(commands.Bot):
         A background task that runs every 5 seconds.
         It processes finished jobs from the message queue and sends the results to the appropriate Discord channel.
         """
-
         if not self.is_active:
             await self.close()
             return
-        # else:
-        #     if not PRODUCTION:
-        #         print(f"{self.ai_agent.name}: I am active.")
-        job_ids = self.message_queue.finished_job_registry.get_job_ids()
-        # print(f"{self.ai_agent.name}: I have {len(job_ids)} tasks to process.")
 
-        if len(job_ids) == 0:
-            return
+        job_ids = self.message_queue.finished_job_registry.get_job_ids()
+        if len(job_ids) == 0: return
         
         jobs = Job.fetch_many(job_ids, connection=self.message_queue.connection)
         for job in jobs:
@@ -189,12 +187,6 @@ class ChatBot(commands.Bot):
                 await self.list_messages(message.channel)
                 return
 
-            response_text = await handle_message({
-                "ai_agent_name": self.ai_agent.name,
-                "channel_name": str(message.channel),
-                "content": message.content,
-                "author": str(message.author),
-                "channel": str(message.channel),
-            })
+            response_text = await handle_message(message, self.ai_agent)
 
             await message.channel.send(response_text)

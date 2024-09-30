@@ -20,6 +20,11 @@ You have access to tools. Only return the tool responses and no text content.
 
 Your code is hosted at https://github.com/integrativernd/ai-workbench (Private Repository).
 
+# General Response Rules
+
+If you are ask to address something or provide insight and you don't have any context about the
+policy use the ask clarifying questions tool.
+
 # General Tool Rules
 
 - Always consider if you need to use one or more tools.

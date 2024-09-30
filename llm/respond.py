@@ -213,6 +213,49 @@ class CreateGithubIssueTool(BaseTool):
         request_data['content'] = create_github_issue(request_data)
         return request_data
     
+class AskClarifyingQuestionTool(BaseTool):
+    def __init__(self):
+        super().__init__(["request"])
+
+    def execute(self, request_data):
+        message = get_basic_message(
+            f"""
+            {request_data['ai_agent_system_prompt']}
+            Acknowledge the user's request to address the issue and ask one or more
+            clarifying questions to better understand the issue. Limit your response
+            to a maximum of 2000 characters.
+            """,
+            [
+                {
+                    "role": "user",
+                    "content": request_data['request'],
+                }
+            ]
+        )
+        request_data['content'] = message.content[0].text
+        return request_data
+
+class AskClarifyingQuestionTool(BaseTool):
+    def __init__(self):
+        super().__init__(["request"])
+
+    def execute(self, request_data):
+        message = get_basic_message(
+            f"""
+            {request_data['ai_agent_system_prompt']}
+            Acknowledge the user's request to address the issue and ask one or more
+            clarifying questions to better understand the issue. Limit your response
+            to a maximum of 2000 characters.
+            """,
+            [
+                {
+                    "role": "user",
+                    "content": request_data['request'],
+                }
+            ]
+        )
+        request_data['content'] = message.content[0].text
+        return request_data
 
 class AnalyzeGithubIssueTool(BaseTool):
     def __init__(self):
@@ -339,8 +382,6 @@ def persist_message(channel, request_data):
         print(f"Error saving message: {e}")
 
 def respond(ai_agent, channel, request_data):
-    response_text = ""
-
     response_message = get_message(
         ai_agent.description,
         TOOL_DEFINITIONS,
@@ -349,7 +390,6 @@ def respond(ai_agent, channel, request_data):
 
     text_contents = []
     tool_contents = []
-    tool_sequence = []
 
     for content in response_message.content:
         if content.type == "text":
@@ -359,6 +399,7 @@ def respond(ai_agent, channel, request_data):
 
     if len(tool_contents) > 0:
         try:
+            # TODO: Refactor into persisted model.
             request_data["tool"] = tool_contents[0]
             request_data["tool_sequence"] = tool_contents[1:]
             tool_result = tool_registry.handle_tool_use(ai_agent, request_data)

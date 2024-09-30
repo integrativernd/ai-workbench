@@ -154,4 +154,32 @@ TOOL_DEFINITIONS = [
             "required": ['issue_url', 'issue_number', 'description'],
         },
     },
+    {
+        "name": 'ask_clarifying_question',
+        "description": 'Invoke this tool when you are asked something that is not clear and you need to ask a clarifying question.',
+        "input_schema": {
+            "type": 'object',
+            "properties": {
+                'request': {
+                    'type': 'string',
+                    'description': "The request from the user that is not clear."
+                },
+            },
+            "required": ['request'],
+        },
+    },
+    {
+        "name": 'review_previous_messages',
+        "description": 'Invoke this tool if the user asks you something that requires knowledge of previous messages.',
+        "input_schema": {
+            "type": 'object',
+            "properties": {
+                'request': {
+                    'type': 'string',
+                    'description': "The request from the user that requires knowledge of previous messages."
+                },
+            },
+            "required": ['request'],
+        },
+    },
 ]

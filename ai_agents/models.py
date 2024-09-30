@@ -3,6 +3,8 @@ import uuid
 from rq.job import Job
 import django_rq
 from llm.anthropic_integration import get_basic_message
+
+
 class AIAgent(models.Model):
     name = models.CharField(max_length=100)
     description = models.TextField()
