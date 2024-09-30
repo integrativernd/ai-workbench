@@ -1,5 +1,4 @@
 from django.core.management.base import BaseCommand, CommandError
-from tools.google.auth import get_google_auth_url
 from tools.google.docs import append_text
 from config.settings import DOCUMENT_ID
 

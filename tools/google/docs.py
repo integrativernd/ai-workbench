@@ -1,8 +1,8 @@
-from typing import Dict, List, Any, Callable
+from typing import Dict, Any, Callable
 from googleapiclient.discovery import build
 from config.settings import SYSTEM_PROMPT
 import json
-from llm.anthropic_integration import get_basic_message, anthropic_client
+from llm.anthropic_integration import get_basic_message
 from tools.google.auth import get_credentials
 from googleapiclient.errors import HttpError
 

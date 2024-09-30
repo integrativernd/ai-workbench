@@ -1,4 +1,4 @@
-from typing import Dict, List, Any, Type
+from typing import Dict, List, Any
 from abc import ABC, abstractmethod
 import django_rq
 from channels.models import Message
@@ -7,7 +7,7 @@ from datetime import datetime
 from rq.job import Job
 import inspect
 
-from config.settings import SYSTEM_PROMPT, PRODUCTION, BASE_DIR
+from config.settings import PRODUCTION, BASE_DIR
 
 from llm.anthropic_integration import get_message, get_basic_message
 
@@ -164,7 +164,7 @@ class UpdateGoogleDocumentTool(BaseTool):
         ])
         response_text = message.content[0].text
         try:
-            print(f"Updating document with text: google_doc_id ")
+            print("Updating document with text: google_doc_id ")
             append_text(request_data['google_doc_id'], response_text)
         except Exception as e:
             print(f"Error updating document: {e}")

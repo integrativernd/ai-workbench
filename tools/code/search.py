@@ -1,7 +1,5 @@
-import os
 from tools.code.file_navigation import list_files
 from llm.anthropic_integration import get_basic_message
-from config.settings import BASE_DIR
 
 def summary_for_file(file_path, file_content):
     if not file_content or len(file_content) == 0:

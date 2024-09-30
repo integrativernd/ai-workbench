@@ -89,7 +89,7 @@ class AnthropicIntegrationTest(TestCase):
         )
         self.assertEqual(message.content[0].text, "Waldo")
 
-    def test_simple_tool_message(self):
+    def test_get_time_tool_message(self):
         message = self.get_or_record_tool_message(
             SYSTEM_PROMPT,
             [
@@ -103,7 +103,7 @@ class AnthropicIntegrationTest(TestCase):
         )
         self.assertEqual(message.content[0].name, 'get_time')
 
-    def test_simple_tool_message(self):
+    def test_get_runtime_environment_tool_message(self):
         message = self.get_or_record_tool_message(
             SYSTEM_PROMPT,
             [

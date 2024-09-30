@@ -1,11 +1,8 @@
 from discord.ext import commands, tasks
 import discord
 from llm.respond import respond, tool_registry
-from config.settings import PRODUCTION
 import django_rq
 from rq.job import Job
-from channels.models import Channel
-from ai_agents.models import AIAgent
 from asgiref.sync import sync_to_async
 
 @sync_to_async
@@ -115,7 +112,8 @@ class ChatBot(commands.Bot):
             return
 
         job_ids = self.message_queue.finished_job_registry.get_job_ids()
-        if len(job_ids) == 0: return
+        if len(job_ids) == 0:
+            return
         
         jobs = Job.fetch_many(job_ids, connection=self.message_queue.connection)
         for job in jobs:
