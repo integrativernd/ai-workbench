@@ -91,7 +91,8 @@ INSTALLED_APPS = [
     "tools",
     "channels",
     "ai_agents",
-    "discord_server"
+    "discord_server",
+    "temporal_app",
 ]
 
 MIDDLEWARE = [
