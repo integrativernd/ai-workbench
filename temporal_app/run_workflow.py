@@ -4,6 +4,7 @@ from temporal_app.workflows import SayHello
 from temporalio.client import TLSConfig
 import logging
 from config.settings import PRODUCTION
+from uuid import uuid4
 
 
 
@@ -29,21 +30,23 @@ async def run_production_workflow():
     )
 
 
-async def run_local_workflow():
+async def run_local_workflow(message):
     # Uncomment the lines below to see logging output
     # import logging
     logging.basicConfig(level=logging.INFO)
 
-    # Start client
     client = await Client.connect("localhost:7233")
-
-    return await client.execute_workflow(
-        SayHello.run, "Temporal", id="hello-workflow", task_queue="hello-task-queue"
+    await client.start_workflow(
+        SayHello.run,
+        message,
+        id=f"hello-workflow-{uuid4()}",
+        task_queue="hello-task-queue",
     )
+    return "Workflow started"
 
 
-async def run_workflow():
+async def run_workflow(message):
     if PRODUCTION:
-        return await run_production_workflow()
+        return await run_production_workflow(message)
     else:
-        return await run_local_workflow()
+        return await run_local_workflow(message)

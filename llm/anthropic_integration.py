@@ -30,28 +30,6 @@ def get_basic_message(system_prompt, messages):
         messages=messages,
     )
 
-def get_response_type(messages):
-    return anthropic_client.messages.create(
-        model="claude-3-sonnet-20240229",
-        max_tokens=4000,
-        temperature=0,
-        system="""
-        You are an AI agent designed to determine if you should
-        a single message, stream a list of messages, or use one ore more tools.
-
-        If you can respond to the user correctly with a single message return SINGLE_MESSAGE.
-        If you can respond to the user correctly with a stream of messages return STREAM_MESSAGES.
-        If you can respond to the user correctly with a tool return TOOL.
-
-        Single messages and streams of messages should be reserved for clear tasks that can be completed in a single response
-        or require multiple streamed messages to complete. Any tasks that clearly need
-        follow up questions or require the use of a tool like search or summarization of external resources should be marked as TOOL.
-        
-        If a task can be answered with only a call to Anthropic API with no tools, but requires more than 2000 characters to respond then it must be a STREAM_MESSAGES response.
-        """,
-        messages=messages,
-    )
-
 async def send_chunked_message(channel, content):
     chunk = ""
     for line in content.split('\n'):

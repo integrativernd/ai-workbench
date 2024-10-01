@@ -4,7 +4,7 @@ from llm.respond import respond, tool_registry
 import django_rq
 from rq.job import Job
 from asgiref.sync import sync_to_async
-from llm.anthropic_integration import stream_to_discord
+from llm.anthropic_integration import stream_to_discord, get_basic_message
 from llm.response_types import get_response_type_for_message, ResponseType
 from temporal_app.run_workflow import run_workflow
 
@@ -192,15 +192,43 @@ class ChatBot(commands.Bot):
                 await self.list_messages(message.channel)
                 return
 
-            if message.content == f"{self.discord_handle} temporal":
+            if message.content.startswith(f"{self.discord_handle} temporal"):
                 print('Test for deploy')
-                result = await run_workflow()
+                result = await run_workflow(message.content)
                 await message.channel.send(f"Result: {result}")
                 return
+            
+            # try:
+            #     response = get_basic_message(self.ai_agent.description, [
+            #         {
+            #             "role": 'user',
+            #             "content": message.content,
+            #         }
+            #     ])
+            #     response_text = response.content[0].text
+            #     await message.channel.send(response_text)
+            #     # if response:
+            #     #     await stream_to_discord(self.ai_agent, message)
+            # except Exception as e:
+            #     print(f"Error processing message: {e}")
+            #     await message.channel.send(f"Error processing message: {str(e)}")
 
-            response = get_response_type_for_message(self.ai_agent, message.content)
-            if response.type == ResponseType.MESSAGE:
-                await stream_to_discord(self.ai_agent, message)
-            elif response.type == ResponseType.TOOL:
+            response = None
+            try:
+                response = get_response_type_for_message(self.ai_agent, message.content)
+            except Exception as e:
+                print(f"Error processing message: {e}")
+                await message.channel.send(f"Error processing message: {str(e)}")
+                return
+
+            if response and response.type == ResponseType.MESSAGE:
+                try:
+                    await stream_to_discord(self.ai_agent, message)
+                except Exception as e:
+                    print(f"Error streaming to Discord: {e}")
+                    await message.channel.send(f"Error streaming to Discord: {str(e)}")
+                return
+
+            if response and response.type == ResponseType.TOOL:
                 response_text = await respond(self.ai_agent, message)
                 await message.channel.send(response_text)
