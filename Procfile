@@ -14,4 +14,4 @@ worker: python manage.py rqworker default low
 
 discord: python discord_server.py
 
-temporal: python manage.py run_temporal_cloud_worker
+temporal: python manage.py run_temporal_worker
