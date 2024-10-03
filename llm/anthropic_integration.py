@@ -15,9 +15,9 @@ def get_message(system_prompt, tools, messages):
     return anthropic_client.messages.create(
         model="claude-3-sonnet-20240229",
         max_tokens=4000,
-        temperature=0,
-        system=system_prompt,
         messages=messages,
+        system=system_prompt,
+        temperature=0,
         tools=tools,
     )
 

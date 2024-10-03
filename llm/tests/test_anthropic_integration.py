@@ -161,5 +161,7 @@ class AnthropicIntegrationTest(TestCase):
         )
 
         self.assertEqual(len(message.content), 2)
+        print(message.content[0].input)
+        print(message.content[1].input)
         self.assertEqual(message.content[0].name, 'read_system_architecture')
         self.assertEqual(message.content[1].name, 'update_google_document')

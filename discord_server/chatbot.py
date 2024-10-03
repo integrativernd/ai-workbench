@@ -6,35 +6,9 @@ from rq.job import Job
 from asgiref.sync import sync_to_async
 from llm.anthropic_integration import stream_to_discord, get_basic_message
 from llm.response_types import get_response_type_for_message, ResponseType
-from temporal_app.run_workflow import run_workflow
+from temporal_app.run_workflow import run_workflow, get_temporal_client
+from temporalio.client import WorkflowExecutionStatus
 
-# @sync_to_async
-# def get_ai_agent_response(ai_agent, message):
-#     """
-#     Handle a message by generating a response using an AI model.
-
-#     :param message_data: A dictionary containing message details
-#     :return: A dictionary with the response details
-#     """
-#     # channel = Channel.objects.get(channel_name=str(message.channel))
-#     # channel_id = channel_object.channel_id
-#     # ai_agent = AIAgent.objects.get(name=message_data['ai_agent_name'])
-
-#                 #     {
-#                 # "ai_agent_name": self.ai_agent.name,
-#                 # "channel_name": str(message.channel),
-#                 # "content": message.content,
-#                 # "author": str(message.author),
-#                 # "channel": str(message.channel),
-
-#     # {
-#     #     "ai_agent_name": ai_agent.name,
-#     #     "channel_id": channel.channel_id,
-#     #     "content": message_data['content'],
-#     #     "author": message_data['author'],
-#     #     "ai_agent_system_prompt": ai_agent.description,
-#     # }
-#     return respond(ai_agent, message, channel)
 
 class ChatBot(commands.Bot):
     """
@@ -101,6 +75,24 @@ class ChatBot(commands.Bot):
     @sync_to_async
     def handle_tool_use(self, result_data):
         return tool_registry.handle_tool_use(self.ai_agent, result_data)
+    
+    @sync_to_async
+    def save_workflow_result(self, result):
+        if not result:
+            return
+
+        self.ai_agent.add_job(result.id)
+        print(f"Saving result id: {result.id}")
+        return result
+
+    @sync_to_async
+    def remove_job(self, job_id):
+        if not job_id:
+            return
+
+        self.ai_agent.remove_job(job_id)
+        print(f"Saving result id: {job_id}")
+        return job_id
 
     async def handle_background_process(self, result_data, channel):
         try:
@@ -114,7 +106,12 @@ class ChatBot(commands.Bot):
             print(f"Error processing tool: {e}")
             await channel.send(f"Error processing tool: {str(e)}")
     
-    @tasks.loop(seconds=2)
+    
+    @sync_to_async
+    def refresh_ai_agent(self):
+        self.ai_agent.refresh_from_db()
+    
+    @tasks.loop(seconds=3)
     async def background_loop(self):
         """
         A background task that runs every 5 seconds.
@@ -124,28 +121,60 @@ class ChatBot(commands.Bot):
             await self.close()
             return
 
-        job_ids = self.message_queue.finished_job_registry.get_job_ids()
-        if len(job_ids) == 0:
+        channel = self.get_channel(1286417414669602878)
+        if not channel:
             return
 
-        # TODO: Query by AIAgent#job_ids
-        jobs = Job.fetch_many(job_ids, connection=self.message_queue.connection)
-        for job in jobs:
+        await self.refresh_ai_agent()
+
+        job_ids = self.ai_agent.job_ids
+        if len(job_ids) == 0:
+            return
+        
+        print(f"I have jobs to process: {job_ids}")
+        temporal_client = await get_temporal_client()
+
+        for job_id in job_ids:
+            print(f"Processing workflow: {job_id}")
+            workflow = None
+            result = None
             try:
-                print(f"Processing job: {job.id}")
-                result_data = job.latest_result().return_value
-                channel = self.get_channel(int(result_data['channel_id']))
-                if channel and self.ai_agent.id == result_data['ai_agent_id']:
-                    if len(result_data['tool_sequence']) > 0:
-                        await channel.send(result_data['tool_sequence'][0].name)
-                        await self.handle_background_process(result_data, channel)
-                    else:
-                        await channel.send(result_data['content'])
-                self.message_queue.finished_job_registry.remove(job.id)
+                workflow = temporal_client.get_workflow_handle(job_id)
+                print(f"Workflow: {workflow}")
+                description = await workflow.describe()
+                if description.status == WorkflowExecutionStatus.COMPLETED:
+                    result = await workflow.result()
+                    print(f"Workflow result: {result}")
+                    await channel.send(str(result))
+                    await self.remove_job(job_id)
+                elif description.status == WorkflowExecutionStatus.TERMINATED:
+                    print(f"Workflow terminated: {job_id}")
+                    await self.remove_job(job_id)
+                elif description.status == WorkflowExecutionStatus.FAILED:
+                    print(f"Workflow failed: {job_id}")
+                    await self.remove_job(job_id)
             except Exception as e:
-                self.message_queue.finished_job_registry.remove(job.id)
-                print(f"Error processing job: {job.id}")
-                print(e)
+                print(f"Error getting workflow result: {job_id}")
+                await self.remove_job(job_id)
+               
+            # Check if the workflow is still running
+            # if workflow:
+            #     description = await workflow.describe()
+            #     print(f"Workflow description: {description}")
+            #     print(f"Workflow: {workflow}")
+            #     try:
+            #         result = await workflow.result()
+            #         print(f"Workflow result: {result}")
+            #     except Exception as e:
+            #         print(f"Error getting workflow result: {e}")
+            # # Check if the workflow has finished
+            # if result:
+            #     print(f"Result: {result}")
+            #     # print(f"Channel: {channel}")
+            #     await channel.send(result)
+            #     # Remove the job from the queue
+            #     await self.remove_job(job_id)
+            print("\n")
     
     async def on_ready(self):
         """
@@ -174,7 +203,7 @@ class ChatBot(commands.Bot):
         if message.author.bot:
             return
 
-        print(f'channel: {message.channel}')
+        print(f'channel: {message.channel} - {message.channel.id}')
         print(f'{message.author}> {message.content}')
 
         if message.content.startswith(self.discord_handle):
@@ -192,27 +221,6 @@ class ChatBot(commands.Bot):
                 await self.list_messages(message.channel)
                 return
 
-            if message.content.startswith(f"{self.discord_handle} temporal"):
-                print('Test for deploy')
-                result = await run_workflow(message.content)
-                await message.channel.send(f"Result: {result}")
-                return
-            
-            # try:
-            #     response = get_basic_message(self.ai_agent.description, [
-            #         {
-            #             "role": 'user',
-            #             "content": message.content,
-            #         }
-            #     ])
-            #     response_text = response.content[0].text
-            #     await message.channel.send(response_text)
-            #     # if response:
-            #     #     await stream_to_discord(self.ai_agent, message)
-            # except Exception as e:
-            #     print(f"Error processing message: {e}")
-            #     await message.channel.send(f"Error processing message: {str(e)}")
-
             response = None
             try:
                 response = get_response_type_for_message(self.ai_agent, message.content)
@@ -221,14 +229,19 @@ class ChatBot(commands.Bot):
                 await message.channel.send(f"Error processing message: {str(e)}")
                 return
 
+            if not response:
+                # NOTE: This really would only happen if the base LLM provider is
+                # is having an issue. We should log this and alert the user.
+                await message.channel.send(f"Sorry, I don't understand that command.")
+                return
+            
             if response and response.type == ResponseType.MESSAGE:
-                try:
-                    await stream_to_discord(self.ai_agent, message)
-                except Exception as e:
-                    print(f"Error streaming to Discord: {e}")
-                    await message.channel.send(f"Error streaming to Discord: {str(e)}")
+                await message.channel.send('DEBUG: STREAM FROM BASE LLM')
+                await stream_to_discord(self.ai_agent, message)
                 return
 
             if response and response.type == ResponseType.TOOL:
+                await message.channel.send('DEBUG: USE TOOL')
                 response_text = await respond(self.ai_agent, message)
                 await message.channel.send(response_text)
+                return

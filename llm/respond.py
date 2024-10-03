@@ -1,24 +1,23 @@
-from typing import Dict, List, Any
 from abc import ABC, abstractmethod
-import django_rq
+from asgiref.sync import sync_to_async
 from channels.models import Message
-import pytz
 from datetime import datetime
 from rq.job import Job
+from typing import Dict, List, Any
+import django_rq
 import inspect
+import pytz
 
 from config.settings import PRODUCTION, BASE_DIR
-
 from llm.anthropic_integration import get_message, get_basic_message
-
 from tools.config import TOOL_DEFINITIONS
 from tools.search import get_search_data
 from tools.browse import get_web_page_content
 from tools.google.docs import append_text, read_document
 from tools.github.pull_requests import open_pull_request
 from tools.github.issues import create_github_issue, read_github_issue
+from temporal_app.run_workflow import run_workflow, get_temporal_client
 
-from asgiref.sync import sync_to_async
 
 
 def get_current_time():
@@ -285,13 +284,13 @@ class ToolRegistry:
 
     def auto_register_tools(self):
         # Get all classes in the current module that inherit from BaseTool
-        tool_classes = {name: cls for name, cls in globals().items() 
-                        if inspect.isclass(cls) and issubclass(cls, BaseTool) and cls != BaseTool}
-        
+        tool_classes = {
+            name: cls for name, cls in globals().items()
+                if inspect.isclass(cls) and issubclass(cls, BaseTool) and cls != BaseTool
+        }        
         for tool_def in TOOL_DEFINITIONS:
             tool_name = tool_def['name']
             class_name = ''.join(word.capitalize() for word in tool_name.split('_')) + 'Tool'
-            
             if class_name in tool_classes:
                 tool_class = tool_classes[class_name]
                 tool_instance = tool_class()
@@ -302,35 +301,36 @@ class ToolRegistry:
     def handle_tool_use(self, ai_agent, request_data):
         tool_call = request_data['tool']
         tool = self.get(tool_call.name)
+        
         if not tool:
             return f"Unknown tool: {tool_call.name}"
-
+        # Collect the input data for the tool
         for key in tool.input_keys:
             if key in tool_call.input:
                 request_data[key] = tool_call.input[key]
-
         print(f"Executing tool: {tool_call.name}")
         if tool.immediate:
             print("Executing tool immediately")
             return tool.execute(request_data)
 
-        enqueue_result = django_rq.enqueue(tool.execute, request_data)
-        if isinstance(enqueue_result, str):
-            return enqueue_result
-        elif hasattr(enqueue_result, 'id'):
-            ai_agent.add_job(enqueue_result.id)
-            ai_agent.save()
-            response_text = f"""
-            State that you are using the {tool_call.name} in a concise and natural way.
-            """
-            response = ai_agent.respond_to_user(response_text)
-            return f"{response}\nJOB ID: {enqueue_result.id}"
-        else:
-            return "Processing started"
+        # enqueue_result = django_rq.enqueue(tool.execute, request_data)
+
+        # if isinstance(enqueue_result, str):
+        #     return enqueue_result
+        # elif hasattr(enqueue_result, 'id'):
+        #     ai_agent.add_job(enqueue_result.id)
+        #     ai_agent.save()
+        #     response_text = f"""
+        #     State that you are using the {tool_call.name} in a concise and natural way.
+        #     """
+        #     response = ai_agent.respond_to_user(response_text)
+        #     return f"{response}\nJOB ID: {enqueue_result.id}"
+        # else:
+        return "Processing started"
 
 # Initialize the tool registry
 tool_registry = ToolRegistry()
-tool_registry.auto_register_tools()
+# tool_registry.auto_register_tools()
 
 # AI: RESPONSE HANDLING
 
@@ -344,7 +344,16 @@ def persist_message(channel, request_data):
     except Exception as e:
         print(f"Error saving message: {e}")
 
-def handle_tool_contents(ai_agent, user_message, tool_contents):
+
+@sync_to_async
+def save_ai_agent_workflow(ai_agent, workflow):
+    if not ai_agent or not workflow:
+        return
+
+    ai_agent.add_job(workflow.id)
+    return workflow.id
+
+async def handle_tool_contents(ai_agent, user_message, tool_contents):
     if len(tool_contents) == 0:
         return
 
@@ -361,32 +370,15 @@ def handle_tool_contents(ai_agent, user_message, tool_contents):
         return f"Error processing tool: {e}"
 
 
-@sync_to_async
-def respond(ai_agent, user_message):
-    response_message = get_message(
-        ai_agent.description,
-        TOOL_DEFINITIONS,
-        [
-            {
-                "role": "user",
-                "content": user_message.content
-            }
-        ],
-    )
-
-    # Collective text contents and tool contents
-    text_contents = []
-    tool_contents = []
-    for content in response_message.content:
-        if content.type == "text":
-            text_contents.append(content.text)
-        elif content.type == "tool_use":
-            tool_contents.append(content)
-
+async def respond(ai_agent, user_message):
     # Perform tool actions
-    handle_tool_contents(ai_agent, user_message, tool_contents)
-    # If there is a tool result, add it to the text contents
-    # if tool_result_text:
-    #     text_contents.append(tool_result_text)
-    # Return the combined text contents
-    return "\n".join(text_contents)
+    try:
+        workflow = await run_workflow(
+            ai_agent,
+            user_message
+        )
+        if workflow:
+            await save_ai_agent_workflow(ai_agent, workflow)
+        return "Workflow started"
+    except:
+        return "Workflow failed to start"

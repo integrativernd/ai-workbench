@@ -4,10 +4,13 @@ import json
 
 url = 'https://google.serper.dev/search'
 
-def get_search_data(query):
+def get_search_data(request_data):
+    query = request_data['query']
+
     payload = json.dumps({
       'q': query
     })
+
     headers = {
       'X-API-KEY': os.getenv('SERPER_API_KEY'),
       'Content-Type': 'application/json'
