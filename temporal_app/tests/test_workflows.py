@@ -7,7 +7,6 @@ from temporalio import activity
 from temporalio.worker import Worker
 from temporalio.testing import WorkflowEnvironment
 
-from temporal_app.activities import AIAgentActivityManager
 from temporal_app.workflows import AIAgentWorkflow, AIAgentWorkflowInput
 
 from django.test import TestCase
@@ -46,7 +45,7 @@ class TestTemporalWorkflows(TestCase):
     async def test_execute_workflow(self):
         task_queue_name = str(uuid.uuid4())
         async with await WorkflowEnvironment.start_time_skipping() as env:
-            activity_manager = AIAgentActivityManager(env.client)
+            # activity_manager = AIAgentActivityManager(env.client)
             async with Worker(
                 env.client,
                 task_queue=task_queue_name,

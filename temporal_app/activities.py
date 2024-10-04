@@ -9,7 +9,6 @@ from ai_agents.models import AIAgent
 from tools.config import TOOL_DEFINITIONS, TOOL_MAP
 from config.settings import SYSTEM_PROMPT
 import json
-from tools.search import get_search_data
 
 
 @sync_to_async

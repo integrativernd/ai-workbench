@@ -13,15 +13,14 @@ class Command(BaseCommand):
               name='beta',
               description=SYSTEM_PROMPT,
               is_active=True,
-              application_id=os.getenv('DISCORD_APP_ID'),
-              bot_token=os.getenv('BOT_RUN_TOKEN_2'),
+              application_id=os.getenv('DISCORD_APP_ID_FOR_BETA'),
+              bot_token=os.getenv('BOT_RUN_TOKEN_FOR_BETA'),
           )
-          channel = Channel.objects.create(
+          Channel.objects.create(
               channel_name='Beta REPL',
               channel_type='Terminal',
               channel_id='beta_repl',
           )
-          
           self.stdout.write(self.style.SUCCESS('AI Agent created'))
         except Exception as e:
             raise CommandError('An error occurred: %s' % str(e))

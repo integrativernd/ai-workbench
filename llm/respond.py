@@ -380,5 +380,6 @@ async def respond(ai_agent, user_message):
         if workflow:
             await save_ai_agent_workflow(ai_agent, workflow)
         return "Workflow started"
-    except:
+    except Exception as e:
+        print(e)
         return "Workflow failed to start"
