@@ -1,4 +1,3 @@
-import os
 from llama_index.llms.anthropic import Anthropic
 from llama_index.core import Settings
 
@@ -10,11 +9,9 @@ from llama_index.core.retrievers import VectorIndexRetriever
 from llama_index.core.query_engine import RetrieverQueryEngine
 
 
-from django.core.management.base import BaseCommand, CommandError
-from llm.response_types import get_response_type_for_message
+from django.core.management.base import BaseCommand
 from llama_index.core import (
   get_response_synthesizer,
-  VectorStoreIndex,
   SimpleDirectoryReader,
   load_index_from_storage,
   StorageContext

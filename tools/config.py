@@ -1,7 +1,7 @@
 # This format comes from Anthropic's Tool Use API
 # https://docs.anthropic.com/en/docs/build-with-claude/tool-use
-from config.settings import DOCUMENT_ID
-from llm.anthropic_integration import get_message, get_basic_message
+from llm.anthropic_integration import get_basic_message
+from tools.search import get_search_data
 import datetime
 import pytz
 
@@ -9,9 +9,7 @@ est = pytz.timezone('US/Eastern')
 
 knowledge_context = {}
 
-
-
-
+# The default input schema for tools
 DEFAULT_INPUT_SCHEMA = {
     "type": "object",
     "properties": {
@@ -23,15 +21,26 @@ DEFAULT_INPUT_SCHEMA = {
     "required": ["prompt"]
 }
 
+def google_search(input, system_prompt, _messages):
+    search_data = get_search_data({ 'query': input["prompt"] })
+    message = get_basic_message(system_prompt, [
+        {
+            "role": "user",
+            "content": f"""
+            TASK: Use the search data to provide an accurate and concise response to the user's query.
+            SEARCH QUERY {input['prompt']}"
+            SEARCH DATA {search_data}
+            """
+        }
+    ])
+    return message.content[0].text
+
 def remove_key_from_list(original_list, key_to_remove):
     return [{k: v for k, v in item.items() if k != key_to_remove} for item in original_list]
 
 def execute_basic_response(input, system_prompt, messages):
     message = get_basic_message(system_prompt, messages)
     return message.content[0].text
-
-def google_search(input, system_prompt, messages):
-    return f"Perform google search {input['prompt']}"
 
 def perform_ask_question(input, system_prompt, messages):
     return f"Perform ask question {input['prompt']}"
@@ -56,17 +65,23 @@ def evaluate_information(input, system_prompt, messages):
 
 TOOLS = [
     {
-        "name": "ask_question",
-        "description": "Use this tool to ask a question.",
+        "name": "google_search",
+        "description": "Invoke this tool to perform a Google Search when asked a question that requires up-to-date information about the world.",
         "input_schema": DEFAULT_INPUT_SCHEMA,
-        "execute": execute_basic_response,
+        "execute": google_search,
     },
-    {
-        "name": "evaluate_information",
-        "description": "Use this tool to evaluate information you are provided.",
-        "input_schema": DEFAULT_INPUT_SCHEMA,
-        "execute": execute_basic_response,
-    },
+    # {
+    #     "name": "ask_question",
+    #     "description": "Use this tool to ask a question.",
+    #     "input_schema": DEFAULT_INPUT_SCHEMA,
+    #     "execute": execute_basic_response,
+    # },
+    # {
+    #     "name": "evaluate_information",
+    #     "description": "Use this tool to evaluate information you are provided.",
+    #     "input_schema": DEFAULT_INPUT_SCHEMA,
+    #     "execute": execute_basic_response,
+    # },
     # {
     #     "name": "remember_information_about_user",
     #     "description": "Invoke this tool when the user states something about themselves that should be remembered.",
@@ -134,7 +149,7 @@ TOOLS = [
 
 TOOL_DEFINITIONS = remove_key_from_list(TOOLS, "execute")
 
-TOOLS_MAP = {tool["name"]: tool for tool in TOOLS}
+TOOL_MAP = {tool["name"]: tool for tool in TOOLS}
 
 
     # {

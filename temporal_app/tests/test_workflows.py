@@ -1,21 +1,18 @@
 import uuid
 
 import pytest
-from unittest import skip
 import json
 
 from temporalio import activity
-from temporalio.client import Client
 from temporalio.worker import Worker
 from temporalio.testing import WorkflowEnvironment
 
-from temporal_app.activities import AIAgentActivityManager, AIAgentActivityInput
+from temporal_app.activities import AIAgentActivityManager
 from temporal_app.workflows import AIAgentWorkflow, AIAgentWorkflowInput
 
 from django.test import TestCase
 from ai_agents.models import AIAgent
 from config.settings import SYSTEM_PROMPT
-import uuid
 
 
 

@@ -1,21 +1,16 @@
 import asyncio
 from dataclasses import dataclass
-from datetime import timedelta
 from asgiref.sync import sync_to_async
 
-from temporalio import activity, workflow
+from temporalio import activity
 from temporalio.client import Client
-from temporalio.worker import Worker
-import django_rq
-from llm.anthropic_integration import get_basic_message, get_message
+from llm.anthropic_integration import get_message
 from ai_agents.models import AIAgent
-from tools.config import TOOL_DEFINITIONS
+from tools.config import TOOL_DEFINITIONS, TOOL_MAP
+from config.settings import SYSTEM_PROMPT
 import json
 from tools.search import get_search_data
 
-TOOL_MAP = {
-    "get_search_results": get_search_data,
-}
 
 @sync_to_async
 def get_ai_agent_by_token(token):
@@ -26,6 +21,11 @@ class AIAgentActivityInput:
     message_content: str
     message_author: str
     message_channel_id: str
+
+@dataclass
+class AIAgentToolInput:
+    tool_name: str
+    tool_input: dict
 
 class AIAgentActivityManager:
     def __init__(self, client: Client) -> None:
@@ -80,6 +80,18 @@ class AIAgentActivityManager:
                     tool_data['input'][key] = content.input[key]
                 tool_contents.append(tool_data)
         return json.dumps(tool_contents)
+    
+    @activity.defn
+    async def call_tool(self, input: AIAgentToolInput) -> str:
+        tool_definition = TOOL_MAP[input.tool_name]
+        if tool_definition.get('execute'):
+            return tool_definition.get('execute')(
+                input.tool_input,
+                SYSTEM_PROMPT,
+                [],
+            )
+        else:
+            return "No tool definition found"
 
     async def handle_request(self, task_token: bytes, input: AIAgentActivityInput) -> None:
         handle = self.client.get_async_activity_handle(task_token=task_token)

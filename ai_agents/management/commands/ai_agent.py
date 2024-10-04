@@ -1,9 +1,7 @@
 import os
 from django.core.management.base import BaseCommand, CommandError
-from ai_agents.models import AIAgent, AIAgentTask
-from channels.models import Channel, Message
 from config.settings import SYSTEM_PROMPT
-from llm.anthropic_integration import get_message, get_basic_message, anthropic_client
+from llm.anthropic_integration import anthropic_client
 import json
 
 CURRENT_FILE_PATH = os.path.abspath(os.path.dirname(__file__))

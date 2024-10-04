@@ -1,10 +1,9 @@
-import os
 from django.core.management.base import BaseCommand, CommandError
-from ai_agents.models import AIAgent, AIAgentTask
+from ai_agents.models import AIAgent
 from channels.models import Channel, Message
 from config.settings import SYSTEM_PROMPT
-from tools.config import TOOL_DEFINITIONS, TOOLS_MAP
-from llm.anthropic_integration import get_message, get_basic_message
+from tools.config import TOOL_DEFINITIONS
+from llm.anthropic_integration import get_message
 
 
 class Command(BaseCommand):

@@ -1,6 +1,5 @@
 import asyncio
 
-from temporalio.client import Client
 from temporalio.worker import Worker
 
 from temporal_app.activities import AIAgentActivityManager
@@ -18,6 +17,7 @@ async def main():
         activities=[
             activity_manager.perform_activity,
             activity_manager.get_tools,
+            activity_manager.call_tool,
         ],
     )
     await worker.run()

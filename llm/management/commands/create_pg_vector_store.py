@@ -1,32 +1,19 @@
-import os
-import re
 
-from config.settings import SYSTEM_PROMPT, EMBEDDING_MODEL_DIMENSIONS
 from llama_index.llms.anthropic import Anthropic
-from llama_index.embeddings.huggingface import HuggingFaceEmbedding
 from llama_index.core.retrievers import VectorIndexRetriever
 from llama_index.core.query_engine import RetrieverQueryEngine
 from llama_index.vector_stores.postgres import PGVectorStore
-from llama_index.core.node_parser import TokenTextSplitter
-from llama_index.core.schema import TextNode
 from llama_index.core import (
   Settings,
-  Document,
   get_response_synthesizer,
   VectorStoreIndex,
   SimpleDirectoryReader,
-  load_index_from_storage,
   StorageContext,
-  set_global_tokenizer,
 )
-from llama_index.core.ingestion import IngestionPipeline
-from llama_index.core.node_parser import TokenTextSplitter
 
-from django.core.management.base import BaseCommand, CommandError
-from transformers import AutoTokenizer
+from django.core.management.base import BaseCommand
 
-from llm.response_types import get_response_type_for_message
-from ai_agents.models import CodeRepository, CodeFile
+from ai_agents.models import CodeRepository
 
 
 tokenizer = Anthropic().tokenizer

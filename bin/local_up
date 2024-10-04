@@ -1,0 +1,103 @@
+#!.venv/bin/python
+
+import subprocess
+import time
+import signal
+import sys
+import os
+import uuid
+
+def run_command_in_iterm(command):
+    # Generate a unique identifier for this command
+    cmd_id = str(uuid.uuid4())
+    
+    # Modify the command to write its PID to a temporary file
+    wrapped_command = f"echo $$ > /tmp/{cmd_id}.pid && {command}"
+    
+    apple_script = f'''
+    tell application "iTerm2"
+        tell current window
+            create tab with default profile
+            tell current session
+                write text "{wrapped_command}"
+            end tell
+        end tell
+    end tell
+    '''
+    subprocess.run(['osascript', '-e', apple_script])
+    
+    # Wait for the PID file to be created (with timeout)
+    pid_file = f"/tmp/{cmd_id}.pid"
+    timeout = 10
+    while timeout > 0 and not os.path.exists(pid_file):
+        time.sleep(0.5)
+        timeout -= 0.5
+    
+    if os.path.exists(pid_file):
+        with open(pid_file, 'r') as f:
+            pid = int(f.read().strip())
+        os.remove(pid_file)  # Clean up the temporary file
+        return pid
+    else:
+        print(f"Warning: Could not get PID for command: {command}")
+        return None
+
+# List of commands to run in different tabs
+commands = [
+    "temporal server start-dev --ui-port 8080",
+    "source .venv/bin/activate && python manage.py runserver",
+    "source .venv/bin/activate && python manage.py discord_server",
+    "source .venv/bin/activate && python manage.py run_temporal_worker",
+]
+
+# Dictionary to store processes
+processes = {}
+
+def cleanup():
+    print("\nCleaning up and terminating processes...")
+    for cmd, pid in processes.items():
+        if pid is not None:
+            try:
+                os.kill(pid, signal.SIGTERM)
+                print(f"Sent SIGTERM to process {pid} ({cmd})")
+            except ProcessLookupError:
+                print(f"Process {pid} ({cmd}) not found")
+    
+    # Wait for processes to terminate
+    time.sleep(2)
+    
+    # Force kill any remaining processes
+    for cmd, pid in processes.items():
+        if pid is not None:
+            try:
+                os.kill(pid, signal.SIGKILL)
+                print(f"Sent SIGKILL to process {pid} ({cmd})")
+            except ProcessLookupError:
+                pass
+
+def signal_handler(sig, frame):
+    cleanup()
+    sys.exit(0)
+
+signal.signal(signal.SIGINT, signal_handler)
+
+# Start each process in a new tab
+for cmd in commands:
+    print(f"Running command in iTerm2 tab: {cmd}")
+    pid = run_command_in_iterm(cmd)
+    processes[cmd] = pid
+    if pid:
+        print(f"Started process with PID: {pid}")
+    else:
+        print("Failed to get PID for this process")
+    time.sleep(1)  # Small delay to ensure tabs open in order
+
+print("All processes started in separate iTerm2 tabs.")
+print("Press Ctrl+C to stop all processes and close tabs.")
+
+try:
+    # Keep the script running
+    while True:
+        time.sleep(1)
+except KeyboardInterrupt:
+    cleanup()

@@ -2,9 +2,8 @@ from discord.ext import commands, tasks
 import discord
 from llm.respond import respond, tool_registry
 import django_rq
-from rq.job import Job
 from asgiref.sync import sync_to_async
-from llm.anthropic_integration import stream_to_discord, get_basic_message
+from llm.anthropic_integration import stream_to_discord
 from llm.response_types import get_response_type_for_message, ResponseType
 from temporal_app.run_workflow import get_temporal_client
 from temporalio.client import WorkflowExecutionStatus
@@ -153,7 +152,7 @@ class ChatBot(commands.Bot):
                 elif description.status == WorkflowExecutionStatus.FAILED:
                     print(f"Workflow failed: {job_id}")
                     await self.remove_job(job_id)
-            except Exception as e:
+            except Exception:
                 print(f"Error getting workflow result: {job_id}")
                 await self.remove_job(job_id)
                
@@ -232,16 +231,16 @@ class ChatBot(commands.Bot):
             if not response:
                 # NOTE: This really would only happen if the base LLM provider is
                 # is having an issue. We should log this and alert the user.
-                await message.channel.send(f"Sorry, I don't understand that command.")
+                await message.channel.send("Sorry, I don't understand that command.")
                 return
             
             if response and response.type == ResponseType.MESSAGE:
-                await message.channel.send('DEBUG: STREAM FROM BASE LLM')
+                await message.channel.send('DEBUG: MESSAGE')
                 await stream_to_discord(self.ai_agent, message)
                 return
 
             if response and response.type == ResponseType.TOOL:
-                await message.channel.send('DEBUG: USE TOOL')
+                await message.channel.send('DEBUG: TOOL')
                 response_text = await respond(self.ai_agent, message)
                 await message.channel.send(response_text)
                 return

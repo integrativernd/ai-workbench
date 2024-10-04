@@ -9,14 +9,14 @@ import inspect
 import pytz
 
 from config.settings import PRODUCTION, BASE_DIR
-from llm.anthropic_integration import get_message, get_basic_message
+from llm.anthropic_integration import get_basic_message
 from tools.config import TOOL_DEFINITIONS
 from tools.search import get_search_data
 from tools.browse import get_web_page_content
 from tools.google.docs import append_text, read_document
 from tools.github.pull_requests import open_pull_request
 from tools.github.issues import create_github_issue, read_github_issue
-from temporal_app.run_workflow import run_workflow, get_temporal_client
+from temporal_app.run_workflow import run_workflow
 
 
 

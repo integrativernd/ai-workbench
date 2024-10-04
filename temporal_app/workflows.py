@@ -1,18 +1,16 @@
 from datetime import timedelta
 from temporalio import workflow
 from dataclasses import dataclass
-from concurrent.futures import ThreadPoolExecutor
-
-# Import activity, passing it through the sandbox without reloading the module
+import json
 with workflow.unsafe.imports_passed_through():
-    from temporal_app.activities import AIAgentActivityManager, AIAgentActivityInput
-    from tools.search import get_search_data
-    import json
-
-
-TOOL_MAP = {
-    "get_search_results": get_search_data,
-}
+    from temporal_app.activities import (
+        AIAgentActivityManager,
+        AIAgentActivityInput,
+        AIAgentToolInput
+    )
+    from tools.search import get_search_data    
+    from tools.config import TOOL_MAP
+    from config.settings import SYSTEM_PROMPT
 
 @dataclass
 class AIAgentWorkflowInput:
@@ -38,9 +36,26 @@ class AIAgentWorkflow:
         )
         workflow_tools_data = json.loads(workflow_tools_result)
 
-        return workflow_tools_result
+        tool_results = []
+        for tool_instance in workflow_tools_data:
+            tool_result = await workflow.execute_activity(
+                AIAgentActivityManager.call_tool,
+                AIAgentToolInput(
+                    tool_instance['name'],
+                    tool_instance['input'],
+                ),
+                start_to_close_timeout=timedelta(seconds=120),
+            )
+            tool_results.append(tool_result)
 
+        if len(tool_results) > 0:
+            return ' '.join(tool_results)
+        else:
+            return workflow_tools_result
+            
+            
 
+# NOTES
         
 # workflow_data = {
 #     'tools': {},
