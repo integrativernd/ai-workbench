@@ -45,3 +45,9 @@ instructor==1.5.0
 
 
 pytest==8.3.3
+
+llama-index==0.11.15
+
+llama-index-vector-stores-postgres==0.2.6
+
+llama-index-llms-anthropic==0.3.4

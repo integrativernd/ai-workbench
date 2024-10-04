@@ -6,7 +6,7 @@ from rq.job import Job
 from asgiref.sync import sync_to_async
 from llm.anthropic_integration import stream_to_discord, get_basic_message
 from llm.response_types import get_response_type_for_message, ResponseType
-from temporal_app.run_workflow import run_workflow, get_temporal_client
+from temporal_app.run_workflow import get_temporal_client
 from temporalio.client import WorkflowExecutionStatus
 
 

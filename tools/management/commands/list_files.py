@@ -7,6 +7,9 @@ class Command(BaseCommand):
     def handle(self, *args, **options):
         # Your command logic goes here
         try:
+            files = list_files()
+            print(f"Files count: {len(files)}")
+
             for file_path in list_files():
                 print(file_path)
             self.stdout.write(self.style.SUCCESS('Command completed successfully'))

@@ -5,7 +5,6 @@ from pydantic import BaseModel
 from enum import Enum
 
 
-
 class ResponseType(Enum):
     MESSAGE = "message"
     TOOL = "tool"

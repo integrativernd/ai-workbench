@@ -12,10 +12,11 @@ class Channel(models.Model):
         return self.channel_name
 
 class Message(models.Model):
-    channel = models.ForeignKey(Channel, on_delete=models.CASCADE, related_name='messages')
+    channel = models.ForeignKey(Channel, on_delete=models.DO_NOTHING, related_name='messages')
     content = models.TextField()
     timestamp = models.DateTimeField(default=timezone.now)
     author = models.CharField(max_length=100)
+    role=models.CharField(max_length=100, null=True)
     token = models.UUIDField(default=uuid.uuid4, editable=False, unique=True)
 
     def __str__(self):

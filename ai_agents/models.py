@@ -1,10 +1,11 @@
+from config.settings import EMBEDDING_MODEL_DIMENSIONS
 from django.db import models
 import uuid
 from rq.job import Job
 import django_rq
 from llm.anthropic_integration import get_basic_message
 from channels.models import Channel, Message
-
+from pgvector.django import VectorField
 
 class AIAgent(models.Model):
     name = models.CharField(max_length=100)
@@ -91,3 +92,14 @@ class AIAgentTask(models.Model):
         if self.parent_task:
             return self.parent_task.subtasks.filter(order__gt=self.order).first()
         return None
+    
+class CodeRepository(models.Model):
+    title = models.CharField(max_length=255)
+    url = models.URLField()
+
+class CodeFile(models.Model):
+    file_path = models.CharField(max_length=500, null=True)
+    repository = models.ForeignKey(CodeRepository, on_delete=models.CASCADE, related_name='files', null=True)
+    content = models.TextField()
+    embedding = VectorField(dimensions=EMBEDDING_MODEL_DIMENSIONS, null=True)
+    last_updated = models.DateTimeField(auto_now=True)
