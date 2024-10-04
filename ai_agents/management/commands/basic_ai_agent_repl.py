@@ -4,11 +4,9 @@ from config.settings import SYSTEM_PROMPT
 from llm.anthropic_integration import anthropic_client
 import json
 
-CURRENT_FILE_PATH = os.path.abspath(os.path.dirname(__file__))
-
-with open(os.path.join(CURRENT_FILE_PATH, 'ai_agent.py'), 'r') as f:
-    SOURCE_CODE = f.read()
-
+# CURRENT_FILE_PATH = os.path.abspath(os.path.dirname(__file__))
+# with open(os.path.join(CURRENT_FILE_PATH, 'ai_agent.py'), 'r') as f:
+#     SOURCE_CODE = f.read()
 
 def get_message_history():
     with open('ai_agents/management/commands/message_history.json', 'r') as f:
@@ -46,6 +44,7 @@ class Command(BaseCommand):
                     for text in stream.text_stream:
                         print(text, end="", flush=True)
                         text_contents.append(text)
+                print('\n')
                 assistant_content = "".join(text_contents).strip()
                 messages.append({"role": "assistant", "content": assistant_content})
                 save_message_history(messages)
