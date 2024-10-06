@@ -7,8 +7,6 @@ from llama_index.core import (
   Settings,
   get_response_synthesizer,
   VectorStoreIndex,
-  SimpleDirectoryReader,
-  StorageContext,
 )
 
 from django.core.management.base import BaseCommand
