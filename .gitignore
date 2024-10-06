@@ -15,3 +15,7 @@ google-credentials.json
 credentials.json
 
 .certs
+
+.ruff_cache
+
+.pytest_cache
