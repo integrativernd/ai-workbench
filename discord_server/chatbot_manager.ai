@@ -1,8 +1,0 @@
-chatbot_manager.py|Manage multiple Discord chatbots
-I:asyncio;signal;contextlib;asgiref.sync;discord_server.chatbot;discord.ext.commands;config.settings;ai_agents.models
-F:__init__():init BotManager;start_bot(ai_agent):start bot for agent;stop_bot(agent_id):stop bot for agent;stop_all_bots():stop all bots;get_ai_agent(agent_id):get AIAgent obj;get_ai_agent_by_name(agent_name):get AIAgent by name;check_bot_status():check bot status periodically;manage_bot_lifecycle():ctx mgr for bot lifecycle;start_manage_bot_lifecycle():main coroutine;run_chatbot_manager():entry point
-C:ChatBotManager:manage multiple bots
-G:IS_HEROKU_APP
-M:Init mgr>Start bots>Monitor status>Graceful shutdown
-D:discord_server.chatbot;discord.ext.commands;ai_agents.models
-V:3.8+
