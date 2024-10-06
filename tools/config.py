@@ -1,7 +1,10 @@
 # This format comes from Anthropic's Tool Use API
 # https://docs.anthropic.com/en/docs/build-with-claude/tool-use
 from llm.anthropic_integration import get_basic_message
+
 from tools.search import get_search_data
+from tools.browse import get_web_page_content
+
 import datetime
 import pytz
 
@@ -21,8 +24,8 @@ DEFAULT_INPUT_SCHEMA = {
     "required": ["prompt"]
 }
 
-def google_search(input, system_prompt, _messages):
-    search_data = get_search_data({ 'query': input["prompt"] })
+def execute_google_search(input, system_prompt, _messages):
+    search_data = get_search_data(input["prompt"])
     message = get_basic_message(system_prompt, [
         {
             "role": "user",
@@ -31,6 +34,20 @@ def google_search(input, system_prompt, _messages):
             SEARCH QUERY {input['prompt']}"
             SEARCH DATA {search_data}
             """
+        }
+    ])
+    return message.content[0].text
+
+def execute_review_web_page(input, system_prompt, _messages):
+    web_page_content = get_web_page_content(input["url"])
+    message = get_basic_message(system_prompt, [
+        {
+            "role": "user",
+            "content": f"""
+            TASK: Review the web page content and provide an accurate and concise response to the user's query.
+            USER QUERY: {input['prompt']}
+            WEB PAGE CONTENT: {web_page_content}
+            """,
         }
     ])
     return message.content[0].text
@@ -68,7 +85,26 @@ TOOLS = [
         "name": "google_search",
         "description": "Invoke this tool to perform a Google Search when asked a question that requires up-to-date information about the world.",
         "input_schema": DEFAULT_INPUT_SCHEMA,
-        "execute": google_search,
+        "execute": execute_google_search,
+    },
+    {
+        "name": "review_web_page",
+        "description": "Invoke this tool when asked to review a website and provided a url.",
+        "input_schema": {
+            "type": "object",
+            "properties": {
+                "url": {
+                    "type": "string",
+                    "description": "URL of the website to review"
+                },
+                "prompt": {
+                    "type": "string",
+                    "description": "Any instructions provided with the URL about how to review the web page."
+                }
+            },
+            "required": ["url", "prompt"]
+        },
+        "execute": execute_review_web_page,
     },
     # {
     #     "name": "ask_question",

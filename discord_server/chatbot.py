@@ -79,7 +79,6 @@ class ChatBot(commands.Bot):
     def save_workflow_result(self, result):
         if not result:
             return
-
         self.ai_agent.add_job(result.id)
         print(f"Saving result id: {result.id}")
         return result
@@ -88,23 +87,9 @@ class ChatBot(commands.Bot):
     def remove_job(self, job_id):
         if not job_id:
             return
-
         self.ai_agent.remove_job(job_id)
         print(f"Saving result id: {job_id}")
         return job_id
-
-    async def handle_background_process(self, result_data, channel):
-        try:
-            result_data['tool'] = result_data['tool_sequence'][0]
-            result_data['tool_sequence'] = result_data['tool_sequence'][1:]
-            # print(f"Processing tool: {result_data['tool']}")
-            # print(f"Tool sequence: {result_data['tool_sequence']}")
-            await self.handle_tool_use(result_data)
-            # await channel.send(tool_result)
-        except Exception as e:
-            print(f"Error processing tool: {e}")
-            await channel.send(f"Error processing tool: {str(e)}")
-    
     
     @sync_to_async
     def refresh_ai_agent(self):
@@ -155,24 +140,7 @@ class ChatBot(commands.Bot):
             except Exception:
                 print(f"Error getting workflow result: {job_id}")
                 await self.remove_job(job_id)
-               
-            # Check if the workflow is still running
-            # if workflow:
-            #     description = await workflow.describe()
-            #     print(f"Workflow description: {description}")
-            #     print(f"Workflow: {workflow}")
-            #     try:
-            #         result = await workflow.result()
-            #         print(f"Workflow result: {result}")
-            #     except Exception as e:
-            #         print(f"Error getting workflow result: {e}")
-            # # Check if the workflow has finished
-            # if result:
-            #     print(f"Result: {result}")
-            #     # print(f"Channel: {channel}")
-            #     await channel.send(result)
-            #     # Remove the job from the queue
-            #     await self.remove_job(job_id)
+            
             print("\n")
     
     async def on_ready(self):

@@ -23,24 +23,14 @@ Settings.llm = Anthropic(
     # system_prompt=SYSTEM_PROMPT,
 )
 
-# EMBED_MODEL = HuggingFaceEmbedding(
-#     model_name="WhereIsAI/UAE-Large-V1",
-#     embed_batch_size=10, # 24 # open-source embedding model
-# )
-
-# Settings.embed_model = EMBED_MODEL
-
 class Command(BaseCommand):
     help = 'Test response types'
 
     def add_arguments(self, parser):
-        parser.add_argument('message', type=str, help='Description of the changes')
-        # parser.add_argument('--reindex', type=str, help='Reindex the documents')
+        parser.add_argument('message', type=str, help='The message you want to send')
 
     def handle(self, *args, **options):
         message = options['message'] or "Describe your source code."
-        # reindex = options['reindex']
-        repository = CodeRepository.objects.get(title="ai-workbench")
 
         vector_store = PGVectorStore.from_params(
             database="vector_db",
@@ -72,4 +62,5 @@ class Command(BaseCommand):
 
         streaming_response = query_engine.query(message)
         streaming_response.print_response_stream()
+
         print(streaming_response)

@@ -38,9 +38,7 @@ class Command(BaseCommand):
 
     def handle(self, *args, **options):
         repository = CodeRepository.objects.get(title="ai-workbench")
-
         print(repository.title)
-
         documents = SimpleDirectoryReader(
             input_dir=".",
             recursive=True,
@@ -58,9 +56,7 @@ class Command(BaseCommand):
                 "__init__.py"
             ],
         ).load_data()
-
         print(f"Found {len(documents)} documents")
-
         for document in documents:
             print(document.metadata['file_path'])
 

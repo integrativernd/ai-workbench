@@ -1,7 +1,6 @@
 import asyncio
 from dataclasses import dataclass
 from asgiref.sync import sync_to_async
-
 from temporalio import activity
 from temporalio.client import Client
 from llm.anthropic_integration import get_message
@@ -11,9 +10,6 @@ from config.settings import SYSTEM_PROMPT
 import json
 
 
-@sync_to_async
-def get_ai_agent_by_token(token):
-    return AIAgent.objects.get(token=token)
 @dataclass
 class AIAgentActivityInput:
     ai_agent_token: str
@@ -25,6 +21,11 @@ class AIAgentActivityInput:
 class AIAgentToolInput:
     tool_name: str
     tool_input: dict
+
+
+@sync_to_async
+def get_ai_agent_by_token(token):
+    return AIAgent.objects.get(token=token)
 
 class AIAgentActivityManager:
     def __init__(self, client: Client) -> None:

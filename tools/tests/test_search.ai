@@ -1,8 +1,0 @@
-test_search.py|Test search tool functionality
-I:os;json;pickle;django.test;unittest.mock;requests
-F:setUp():set up test env;get_or_record_search_data():get/record fixture data;test_get_search_data():test search result structure;test_get_search_data_missing_api_key():test missing API key;test_get_search_data_api_error():test API error handling
-C:SearchToolTestCase:test case for search tool
-G:RECORD_FIXTURES
-M:Set up test case>Run tests for search data, missing API key, API error
-D:requests
-V:3+
