@@ -55,11 +55,10 @@ class SearchToolTestCase(TestCase):
         # query = "What is the capital of France?"
         
         with self.assertRaises(EnvironmentError):
-            SearchToolTestCase().setUp()  # This will raise the EnvironmentError
+            SearchToolTestCase().setUp() # This will raise the EnvironmentError
 
     def test_get_search_data_api_error(self):
         query = "What is the capital of France?"
-
         # Patch the requests.request to simulate an API error
         with patch('tools.search.requests.request') as mock_request:
             mock_request.side_effect = requests.RequestException("API Error")

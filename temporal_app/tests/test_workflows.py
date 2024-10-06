@@ -26,6 +26,10 @@ async def get_tools_mocked(input: AIAgentWorkflowInput) -> str:
         },
     ])
 
+@activity.defn(name="call_tool")
+async def get_tool_call_mocked(input: AIAgentWorkflowInput) -> str:
+    return "Tool called"
+
 
 class TestTemporalWorkflows(TestCase):
     """
@@ -45,14 +49,16 @@ class TestTemporalWorkflows(TestCase):
     async def test_execute_workflow(self):
         task_queue_name = str(uuid.uuid4())
         async with await WorkflowEnvironment.start_time_skipping() as env:
+            # TODO: Implement test that calls the actual activity manager.
             # activity_manager = AIAgentActivityManager(env.client)
             async with Worker(
                 env.client,
                 task_queue=task_queue_name,
                 workflows=[AIAgentWorkflow],
                 activities=[
-                    # activity_manager.get_tools,
                     get_tools_mocked,
+                    get_tool_call_mocked,
+                    # activity_manager.get_tools,
                 ],
             ):
                 workflow_result = await env.client.execute_workflow(
@@ -67,7 +73,6 @@ class TestTemporalWorkflows(TestCase):
                     task_queue=task_queue_name,
                 )
                 workflow_result_data = json.loads(workflow_result)
-
                 assert workflow_result_data == [
                     {
                         'name': 'get_search_results',

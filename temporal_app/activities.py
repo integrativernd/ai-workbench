@@ -54,7 +54,6 @@ class AIAgentActivityManager:
     @activity.defn
     async def get_ai_agent_name(self, input: AIAgentActivityInput) -> str:
         ai_agent = await get_ai_agent_by_token(input.ai_agent_token)
-
         return ai_agent.name
 
     @activity.defn

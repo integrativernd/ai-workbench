@@ -53,19 +53,19 @@ class AnthropicIntegrationTest(TestCase):
             else:
                 raise FileNotFoundError(f"Fixture {fixture_path} not found. Run tests with RECORD_FIXTURES=true to generate it.")
     
-    # def test_basic_message(self):
-    #     message = self.get_or_record_basic_message(
-    #         "If you receive ping respond with only Pong and nothing else",
-    #         [
-    #             {
-    #                 "role": "user",
-    #                 "content": "Ping",
-    #             }
-    #         ],
-    #         "basic_message_test",
-    #         record_fixtures=False,
-    #     )
-    #     self.assertEqual(message.content[0].text, "Pong")
+    def test_basic_message(self):
+        message = self.get_or_record_basic_message(
+            "If you receive ping respond with only Pong and nothing else",
+            [
+                {
+                    "role": "user",
+                    "content": "Ping",
+                }
+            ],
+            "basic_message_test",
+            record_fixtures=False,
+        )
+        self.assertEqual(message.content[0].text, "Pong")
 
     # def test_performance(self):
     #     message = self.get_or_record_basic_message(
@@ -89,22 +89,22 @@ class AnthropicIntegrationTest(TestCase):
     #     )
     #     self.assertEqual(message.content[0].text, "Waldo")
 
-    def test_get_time_tool_message(self):
-        message = self.get_or_record_tool_message(
-            SYSTEM_PROMPT,
-            [
-                {
-                    "role": "user",
-                    "content": "Please help me plan a business based on your capabilities",
-                }
-            ],
-            "simple_tool_message",
-            record_fixtures=True,
-        ) 
+    # def test_get_time_tool_message(self):
+    #     message = self.get_or_record_tool_message(
+    #         SYSTEM_PROMPT,
+    #         [
+    #             {
+    #                 "role": "user",
+    #                 "content": "Please help me plan a business based on your capabilities",
+    #             }
+    #         ],
+    #         "simple_tool_message",
+    #         record_fixtures=True,
+    #     )
 
-        # print(message.content[0].text)
-        self.assertEqual(len(message.content), 2)
-        self.assertEqual(message.content[1].name, 'conduct_swot_analysis')
+    #     # print(message.content[0].text)
+    #     self.assertEqual(len(message.content), 2)
+    #     self.assertEqual(message.content[1].name, 'conduct_swot_analysis')
     
     # def test_get_time_tool_message(self):
     #     message = self.get_or_record_tool_message(
