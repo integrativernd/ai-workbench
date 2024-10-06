@@ -22,6 +22,7 @@ class ToolConfigTest(TestCase):
         self.assertTrue(isinstance(TOOL_MAP, dict))
         self.assertEqual(list(TOOL_MAP.keys()), [
             'google_search',
+            'review_web_page',
         ])
         # Assert the search execute function is defined and
         # is a callable function

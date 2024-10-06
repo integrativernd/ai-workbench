@@ -8,6 +8,7 @@ from temporalio.worker import Worker
 from temporalio.testing import WorkflowEnvironment
 
 from temporal_app.workflows import AIAgentWorkflow, AIAgentWorkflowInput
+from temporal_app.activities import AIAgentToolInput
 
 from django.test import TestCase
 from ai_agents.models import AIAgent
@@ -27,8 +28,8 @@ async def get_tools_mocked(input: AIAgentWorkflowInput) -> str:
     ])
 
 @activity.defn(name="call_tool")
-async def get_tool_call_mocked(input: AIAgentWorkflowInput) -> str:
-    return "Tool called"
+async def get_tool_call_mocked(input: AIAgentToolInput) -> str:
+    return "The current price of bitcoin is $62,000"
 
 
 class TestTemporalWorkflows(TestCase):
@@ -72,12 +73,4 @@ class TestTemporalWorkflows(TestCase):
                     id=str(uuid.uuid4()),
                     task_queue=task_queue_name,
                 )
-                workflow_result_data = json.loads(workflow_result)
-                assert workflow_result_data == [
-                    {
-                        'name': 'get_search_results',
-                        'input': {
-                            'query': 'bitcoin price',
-                        },
-                    },
-                ]
+                assert workflow_result == "The current price of bitcoin is $62,000"
