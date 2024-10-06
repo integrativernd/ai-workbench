@@ -1,11 +1,8 @@
 
 from llama_index.llms.anthropic import Anthropic
-from llama_index.core.retrievers import VectorIndexRetriever
-from llama_index.core.query_engine import RetrieverQueryEngine
 from llama_index.vector_stores.postgres import PGVectorStore
 from llama_index.core import (
   Settings,
-  get_response_synthesizer,
   VectorStoreIndex,
   SimpleDirectoryReader,
   StorageContext,
@@ -35,13 +32,11 @@ Settings.llm = Anthropic(
 class Command(BaseCommand):
     help = 'Test response types'
 
-    def add_arguments(self, parser):
-        parser.add_argument('message', type=str, help='Description of the changes')
-        parser.add_argument('--reindex', type=str, help='Reindex the documents')
+    # def add_arguments(self, parser):
+    #     parser.add_argument('message', type=str, help='Description of the changes')
+    #     parser.add_argument('--reindex', type=str, help='Reindex the documents')
 
     def handle(self, *args, **options):
-        message = options['message'] or "Describe your source code."
-        reindex = options['reindex']
         repository = CodeRepository.objects.get(title="ai-workbench")
 
         print(repository.title)
@@ -56,12 +51,18 @@ class Command(BaseCommand):
                 ".venv",
                 ".certs",
                 ".pytest_cache",
-                ".git", ".idea",
+                ".git",
+                ".idea",
                 ".vscode",
                 "__pycache__",
                 "__init__.py"
             ],
         ).load_data()
+
+        print(f"Found {len(documents)} documents")
+
+        for document in documents:
+            print(document.metadata['file_path'])
 
         vector_store = PGVectorStore.from_params(
             database="vector_db",
@@ -70,38 +71,14 @@ class Command(BaseCommand):
             port=5432,
             user="postgres",
             table_name="ai_workbench_vector_store",
-            embed_dim=1536  # openai embedding dimension
+            # openai embedding dimension
+            embed_dim=1536
         )
 
-        if reindex:
-            storage_context = StorageContext.from_defaults(vector_store=vector_store)
-            vector_store_index = VectorStoreIndex.from_documents(
-                documents,
-                storage_context,
-                show_progress=True,
-            )
-        else:
-             vector_store_index = VectorStoreIndex.from_vector_store(vector_store=vector_store)
-
-        retriever = VectorIndexRetriever(
-            index=vector_store_index,
-            similarity_top_k=100,
-        )
+        storage_context = StorageContext.from_defaults(vector_store=vector_store)
         
-        response_synthesizer = get_response_synthesizer(
-            llm=Anthropic(model="claude-3-opus-20240229"),
-            # response_mode="refine",
-            streaming=True,
+        VectorStoreIndex.from_documents(
+            documents,
+            storage_context,
+            show_progress=True,
         )
-
-        query_engine = RetrieverQueryEngine(
-            retriever=retriever,
-            response_synthesizer=response_synthesizer,
-        )
-
-        streaming_response = query_engine.query(message)
-        streaming_response.print_response_stream()
-        print(streaming_response)
-
-# References:
-# https://christophergs.com/blog/production-rag-with-postgres-vector-store-open-source-models

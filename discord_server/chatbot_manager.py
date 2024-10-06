@@ -149,8 +149,7 @@ async def start_manage_bot_lifecycle():
 
 def run_chatbot_manager():
     """
-    The entry point of the script. It sets up Heroku-specific configurations if necessary
-    and runs the main coroutine.
+    The entry point of the script.
     """
     try:
         asyncio.run(start_manage_bot_lifecycle())
