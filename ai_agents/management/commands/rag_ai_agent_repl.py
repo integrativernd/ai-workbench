@@ -1,19 +1,13 @@
 
 from llama_index.llms.anthropic import Anthropic
-from llama_index.core.retrievers import VectorIndexRetriever
-from llama_index.core.query_engine import RetrieverQueryEngine
 from llama_index.vector_stores.postgres import PGVectorStore
 from llama_index.core import (
   Settings,
-  get_response_synthesizer,
   VectorStoreIndex,
-  SimpleDirectoryReader,
-  StorageContext,
 )
 
 from django.core.management.base import BaseCommand
 
-from ai_agents.models import CodeRepository
 
 
 tokenizer = Anthropic().tokenizer

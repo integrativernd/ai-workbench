@@ -1,4 +1,3 @@
-import os
 from django.core.management.base import BaseCommand, CommandError
 from config.settings import SYSTEM_PROMPT
 from llm.anthropic_integration import anthropic_client
