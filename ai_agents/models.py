@@ -18,6 +18,7 @@ class AIAgent(models.Model):
     application_id = models.CharField(max_length=200, null=True)
     bot_token = models.CharField(max_length=200, null=True)
     job_ids = models.JSONField(default=list, blank=True)
+    nickname = models.CharField(max_length=100, null=True)
 
     def __str__(self):
         return f"{self.name} (v{self.version})"

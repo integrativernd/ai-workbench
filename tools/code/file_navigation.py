@@ -26,7 +26,6 @@ def list_files():
         'venv', 
         '.venv', 
         'env',
-        'migrations',
         'staticfiles',
         'static',
         'media',

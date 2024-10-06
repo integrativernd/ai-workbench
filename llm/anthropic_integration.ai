@@ -1,9 +1,0 @@
-Python Program Summary|Anthropic API integration
-
-I:os;anthropic
-F:get_message():get response from Anthropic API with tools;get_basic_message():get response without tools;get_message_stream():stream response (commented out)
-C:
-G:anthropic_client:Anthropic client instance
-M:Initialize Anthropic client>Call API methods
-D:anthropic
-V:3+

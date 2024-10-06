@@ -20,7 +20,7 @@ class AIAgentAdmin(admin.ModelAdmin):
 
     fieldsets = (
         (None, {
-            'fields': ('name', 'description', 'version', 'is_active', 'token', 'application_id', 'bot_token')
+            'fields': ('name', 'nickname', 'description', 'version', 'is_active', 'token', 'application_id', 'bot_token')
         }),
         ('Jobs', {
             'fields': ('display_job_ids',),

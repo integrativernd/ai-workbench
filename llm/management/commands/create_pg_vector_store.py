@@ -85,7 +85,7 @@ class Command(BaseCommand):
 
         retriever = VectorIndexRetriever(
             index=vector_store_index,
-            similarity_top_k=3,
+            similarity_top_k=100,
         )
         
         response_synthesizer = get_response_synthesizer(
