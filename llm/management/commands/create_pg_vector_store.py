@@ -1,4 +1,3 @@
-
 from llama_index.llms.anthropic import Anthropic
 from llama_index.vector_stores.postgres import PGVectorStore
 from llama_index.core import (
@@ -7,9 +6,7 @@ from llama_index.core import (
   SimpleDirectoryReader,
   StorageContext,
 )
-
 from django.core.management.base import BaseCommand
-
 from ai_agents.models import CodeRepository
 
 
@@ -22,19 +19,8 @@ Settings.llm = Anthropic(
     # system_prompt=SYSTEM_PROMPT,
 )
 
-# EMBED_MODEL = HuggingFaceEmbedding(
-#     model_name="WhereIsAI/UAE-Large-V1",
-#     embed_batch_size=10, # 24 # open-source embedding model
-# )
-
-# Settings.embed_model = EMBED_MODEL
-
 class Command(BaseCommand):
-    help = 'Test response types'
-
-    # def add_arguments(self, parser):
-    #     parser.add_argument('message', type=str, help='Description of the changes')
-    #     parser.add_argument('--reindex', type=str, help='Reindex the documents')
+    help = 'Create Llama Index PostgreSQL vector store'
 
     def handle(self, *args, **options):
         repository = CodeRepository.objects.get(title="ai-workbench")
@@ -43,7 +29,7 @@ class Command(BaseCommand):
             input_dir=".",
             recursive=True,
             filename_as_id=True,
-            required_exts=[".py"],
+            required_exts=[".py", '.pdf'],
             exclude=[
                 ".env",
                 ".venv",
@@ -53,10 +39,13 @@ class Command(BaseCommand):
                 ".idea",
                 ".vscode",
                 "__pycache__",
-                "__init__.py"
+                "__init__.py",
+                "credentials,json"
             ],
         ).load_data()
+        
         print(f"Found {len(documents)} documents")
+
         for document in documents:
             print(document.metadata['file_path'])
 

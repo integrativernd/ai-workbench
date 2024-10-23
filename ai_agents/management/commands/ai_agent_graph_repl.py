@@ -1,0 +1,122 @@
+from django.core.management.base import BaseCommand, CommandError
+from config.settings import SYSTEM_PROMPT
+from llm.anthropic_integration import anthropic_client
+import json
+
+from typing import Annotated
+from typing_extensions import TypedDict
+
+from langgraph.graph import StateGraph, START, END
+from langgraph.graph.message import add_messages
+from langgraph.prebuilt import ToolNode, tools_condition
+from langgraph.checkpoint.memory import MemorySaver
+
+from langchain_anthropic import ChatAnthropic
+from IPython.display import Image, display
+from langchain_community.tools.tavily_search import TavilySearchResults
+from PIL import Image
+import io
+
+
+
+memory = MemorySaver()
+search_tool = TavilySearchResults(max_results=2)
+llm = ChatAnthropic(model="claude-3-5-sonnet-20240620")
+llm_with_tools = llm.bind_tools([search_tool])
+
+GRAPH_CONFIG = {
+    "configurable": {
+        "thread_id": "1"
+    }
+}
+
+class State(TypedDict):
+    # Messages have the type "list". The `add_messages` function
+    # in the annotation defines how this state key should be updated
+    # (in this case, it appends messages to the list, rather than overwriting them)
+    messages: Annotated[list, add_messages]
+
+
+# The chatbot function takes a state and returns a new state
+def chatbot(state: State):
+    return {"messages": [llm_with_tools.invoke(state["messages"])]}
+
+
+graph_builder = StateGraph(State)
+
+graph_builder.add_node("chatbot", chatbot)
+
+tool_node = ToolNode(tools=[search_tool])
+
+graph_builder.add_node("tools", tool_node)
+
+graph_builder.add_conditional_edges(
+    "chatbot",
+    tools_condition
+)
+
+graph_builder.add_edge("tools", "chatbot")
+
+# graph_builder.add_edge("chat")
+
+graph_builder.set_entry_point("chatbot")
+
+graph = graph_builder.compile(checkpointer=memory)
+
+
+def display_graph():
+  try:
+      # Get the PNG data as bytes
+      png_data = graph.get_graph().draw_mermaid_png()
+      
+      # Save the PNG data to a file
+      with open("mermaid_diagram.png", "wb") as f:
+          f.write(png_data)
+      
+      print("Mermaid diagram saved as 'mermaid_diagram.png'")
+      
+      # Open and display the image using PIL
+      img = Image.open(io.BytesIO(png_data))
+      img.show()
+      
+      print("The image should now open in your default image viewer.")
+  except Exception as e:
+      print(f"Error saving or displaying the diagram: {e}")
+
+
+def stream_graph_updates(user_input: str):
+    events = graph.stream(
+        {"messages": [("user", user_input)]},
+        GRAPH_CONFIG,
+        stream_mode="values",
+    )
+    for event in events:
+        for event in events:
+            event["messages"][-1].pretty_print()
+        # for value in event.values():
+        #     print("Assistant:", value["messages"][-1].content)
+
+# This command starts a basic AI agent REPL. It uses
+# the anthropic_client to interact with the AI model and a JSON file
+# to store the message history.
+class Command(BaseCommand):
+    help = 'AI Agent Graph REPL'
+    
+    def handle(self, *args, **options):       
+        while True:
+          try:
+              user_input = input("User: ")
+              if user_input.lower() in ["quit", "exit", "q"]:
+                  print("Goodbye!")
+                  break
+              if user_input.lower() in ["graph", "g"]:
+                  display_graph()
+                  continue
+
+              stream_graph_updates(user_input)
+          except:
+              # fallback if input() is not available
+              user_input = "What do you know about LangGraph?"
+              print("User: " + user_input)
+              stream_graph_updates(user_input)
+              break
