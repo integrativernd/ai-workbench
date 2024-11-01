@@ -13,7 +13,7 @@ psycopg[c]; sys_platform == "linux"
 psycopg[binary]; sys_platform != "linux"
 
 redis==5.0.8
-rq==1.16.2
+rq==2.0.0
 
 discord.py==2.4.0
 anthropic==0.34.2
